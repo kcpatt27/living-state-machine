@@ -1,0 +1,15 @@
+name: recall_pref_v1_naive_rag
+task:
+  name: recall_pref_v1
+  num_items: 20
+  distractor_turns: 30
+system:
+  kind: naive_rag
+  backend: ollama
+  model: qwen2.5:14b-instruct-q4_K_M
+  top_k: 5
+embedder:
+  kind: fastembed
+  model: BAAI/bge-small-en-v1.5
+run:
+  seeds: [0, 1, 2]

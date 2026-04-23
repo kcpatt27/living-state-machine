@@ -1,0 +1,11 @@
+{
+  "include": ["lsm", "tests"],
+  "exclude": ["**/__pycache__", ".venv", "models", "data", "experiments", "state", "memory_store"],
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": "warning",
+  "reportMissingTypeStubs": false,
+  "reportUnknownMemberType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownVariableType": "none"
+}

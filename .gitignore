@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# uv
+.python-version
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project artefacts
+models/
+data/
+experiments/*/
+!experiments/.gitkeep
+*.sqlite
+*.sqlite3
+*.db
+*.lance/
+state/
+logs/
+*.log
+wandb/
+.env
+*.ckpt
+*.pt
+*.safetensors
+
+# Encrypted user memory (never check in)
+memory_store/

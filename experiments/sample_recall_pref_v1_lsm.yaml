@@ -1,0 +1,32 @@
+name: recall_pref_v1_lsm
+task:
+  name: recall_pref_v1
+  num_items: 20
+  distractor_turns: 30
+system:
+  kind: lsm
+  backend: ollama
+  model: qwen2.5:14b-instruct-q4_K_M
+  top_k: 4
+  min_score: 0.15
+  recent_context_window: 8
+  memory:
+    kind: memory   # per-item in-memory; use 'lancedb' for persistent
+  habituation:
+    tau_seconds: 3600.0
+    eta: 1.0
+    damping_strength: 0.35
+  association:
+    eta: 0.25
+    lambda_per_second: 1.0e-5
+    boost_strength: 0.35
+ablation:
+  state_enabled: true
+  memory_enabled: true
+  habituation_enabled: true
+  association_enabled: true
+embedder:
+  kind: fastembed
+  model: BAAI/bge-small-en-v1.5
+run:
+  seeds: [0, 1, 2]

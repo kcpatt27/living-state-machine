@@ -21,18 +21,17 @@ import time
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 
 from lsm.config import Settings, get_settings
-from lsm.core.embeddings import get_default_embedder
 from lsm.core.episodic import EpisodicLog, TurnRecord
-from lsm.core.memory import MemoryStore, build_store
-from lsm.core.pipeline import Pipeline, PipelineConfig
-from lsm.core.state import LLMSummarizerUpdater, StateStore, state_to_dict
-from lsm.runtime.llm_backend import ChatMessage, GenerateOptions, LLMBackend, build_backend
+from lsm.core.memory import MemoryStore
+from lsm.core.pipeline import Pipeline
+from lsm.core.state import StateStore, state_to_dict
+from lsm.runtime.llm_backend import ChatMessage, GenerateOptions
+from lsm.runtime.pipeline_factory import build_default_pipeline
 from lsm.serve.schemas import (
     ChatCompletionChunk,
     ChatCompletionRequest,
@@ -51,53 +50,13 @@ from lsm.serve.schemas import (
 log = logging.getLogger(__name__)
 
 
-def _episodic_path(settings: Settings) -> Path:
-    return settings.memory_dir / "episodes.sqlite"
-
-
-def _build_pipeline(
-    settings: Settings, session_id: str
-) -> tuple[Pipeline, LLMBackend, EpisodicLog, StateStore, MemoryStore, "OutcomeLog"]:
-    from lsm.core.outcome import HeuristicOutcomeScorer, OutcomeLog
-
-    backend = build_backend(
-        settings.backend, model=settings.model, ollama_host=settings.ollama_host
-    )
-    episodic = EpisodicLog(_episodic_path(settings))
-    store = StateStore(settings.home)
-    embedder = get_default_embedder(settings.embed_model)
-    updater = LLMSummarizerUpdater(backend, embedder)
-    memory = build_store(
-        "lancedb",
-        root=settings.memory_dir / "durable.lance",
-        embedder=embedder,
-    )
-    outcome_log = OutcomeLog(settings.home / "outcomes.sqlite")
-    scorer = HeuristicOutcomeScorer()
-    pipe = Pipeline(
-        backend=backend,
-        episodic=episodic,
-        config=PipelineConfig(
-            session_id=session_id,
-            backend_name=settings.backend,
-            model=settings.model,
-        ),
-        state_store=store,
-        state_updater=updater,
-        memory=memory,
-        outcome_scorer=scorer,
-        outcome_log=outcome_log,
-    )
-    return pipe, backend, episodic, store, memory, outcome_log
-
-
 def create_app(settings: Settings | None = None) -> FastAPI:
     """FastAPI application factory."""
     s = settings or get_settings()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        pipe, backend, episodic, store, memory, outcome_log = _build_pipeline(
+        pipe, backend, episodic, store, memory, outcome_log = build_default_pipeline(
             s, session_id="default"
         )
         app.state.pipeline = pipe
@@ -257,9 +216,7 @@ async def _sse_stream(
         id=stream_id,
         created=created,
         model=model,
-        choices=[
-            ChoiceChunk(index=0, delta=DeltaMessage(role="assistant"), finish_reason=None)
-        ],
+        choices=[ChoiceChunk(index=0, delta=DeltaMessage(role="assistant"), finish_reason=None)],
     )
     yield _sse(first.model_dump())
 

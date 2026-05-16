@@ -49,9 +49,13 @@ def version() -> None:
 def serve(
     host: str | None = typer.Option(None, help="Bind host. Default from LSM_HOST."),
     port: int | None = typer.Option(None, help="Bind port. Default from LSM_PORT."),
-    model: str | None = typer.Option(None, help="Model tag override (e.g. qwen2.5:7b-instruct-q8_0)."),
+    model: str | None = typer.Option(
+        None, help="Model tag override (e.g. qwen2.5:7b-instruct-q8_0)."
+    ),
     reload: bool = typer.Option(False, help="Autoreload (dev only)."),
-    stop: bool = typer.Option(False, "--stop", help="Unload the current model from Ollama and exit."),
+    stop: bool = typer.Option(
+        False, "--stop", help="Unload the current model from Ollama and exit."
+    ),
 ) -> None:
     """Start the OpenAI-compatible API server.
 
@@ -105,23 +109,14 @@ def chat(
 
 
 async def _chat_loop(model: str | None, system: str | None, session_id: str) -> None:
-    from lsm.core.episodic import EpisodicLog
-    from lsm.core.pipeline import Pipeline, PipelineConfig
+    from lsm.runtime.pipeline_factory import build_default_pipeline
 
     settings = get_settings()
     effective_model = model or settings.model
-    backend = build_backend(
-        settings.backend, model=effective_model, ollama_host=settings.ollama_host
-    )
-    episodic = EpisodicLog(settings.memory_dir / "episodes.sqlite")
-    pipe = Pipeline(
-        backend=backend,
-        episodic=episodic,
-        config=PipelineConfig(
-            session_id=session_id,
-            backend_name=settings.backend,
-            model=effective_model,
-        ),
+    pipe, backend, episodic, _store, memory, outcome_log = build_default_pipeline(
+        settings,
+        session_id=session_id,
+        model=effective_model,
     )
 
     history: list[ChatMessage] = []
@@ -149,6 +144,8 @@ async def _chat_loop(model: str | None, system: str | None, session_id: str) -> 
             history.append(ChatMessage(role="assistant", content="".join(buf)))
     finally:
         await backend.close()
+        memory.close()
+        outcome_log.close()
         episodic.close()
 
 
@@ -231,9 +228,7 @@ app.add_typer(memory_app, name="memory")
 def _open_memory_store():
     settings = get_settings()
     embedder = get_default_embedder(settings.embed_model)
-    return build_store(
-        "lancedb", root=settings.memory_dir / "durable.lance", embedder=embedder
-    )
+    return build_store("lancedb", root=settings.memory_dir / "durable.lance", embedder=embedder)
 
 
 @memory_app.command("count")
@@ -290,9 +285,7 @@ def memory_delete(
 @app.command()
 def ingest(
     paths: list[Path] = typer.Argument(..., help="Files to ingest."),
-    source: str = typer.Option(
-        None, "--source", help="Source tag. Defaults to each file's path."
-    ),
+    source: str = typer.Option(None, "--source", help="Source tag. Defaults to each file's path."),
     chunk_chars: int = typer.Option(1200, "--chunk-chars", help="Chunk size in characters."),
     overlap: int = typer.Option(200, "--overlap", help="Overlap between chunks in characters."),
 ) -> None:
@@ -340,9 +333,7 @@ app.add_typer(eval_app, name="eval")
 @eval_app.command("run")
 def eval_run(
     config: Path = typer.Option(..., "--config", "-c", help="Path to experiment YAML."),
-    out: Path = typer.Option(
-        Path("experiments"), "--out", "-o", help="Output root directory."
-    ),
+    out: Path = typer.Option(Path("experiments"), "--out", "-o", help="Output root directory."),
     run_id: str | None = typer.Option(None, "--run-id"),
 ) -> None:
     """Run an experiment config and write results under ``experiments/<run_id>/``."""

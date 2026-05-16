@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import json
-from collections.abc import AsyncIterator, Sequence
+from collections.abc import AsyncIterator, Iterator, Sequence
 
 import pytest
 from fastapi.testclient import TestClient
-
 from lsm.config import get_settings
 from lsm.runtime.llm_backend import ChatMessage, GenerateOptions
 
@@ -19,9 +18,7 @@ class FakeBackend:
         self.model = "fake-model"
         self._reply = reply
 
-    async def generate(
-        self, messages: Sequence[ChatMessage], options: GenerateOptions
-    ) -> str:
+    async def generate(self, messages: Sequence[ChatMessage], options: GenerateOptions) -> str:
         return self._reply
 
     async def stream(
@@ -35,10 +32,11 @@ class FakeBackend:
 
 
 @pytest.fixture
-def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+def client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
+    from lsm.runtime import pipeline_factory
     from lsm.serve import api as api_mod
 
-    monkeypatch.setattr(api_mod, "build_backend", lambda *a, **k: FakeBackend())
+    monkeypatch.setattr(pipeline_factory, "build_backend", lambda *a, **k: FakeBackend())
 
     settings = get_settings()
     app = api_mod.create_app(settings)
@@ -87,7 +85,7 @@ def test_chat_completions_stream(client: TestClient) -> None:
         assert r.status_code == 200
         lines = [line for line in r.iter_lines() if line]
 
-    payload_lines = [l for l in lines if l.startswith("data: ") and "[DONE]" not in l]
+    payload_lines = [line for line in lines if line.startswith("data: ") and "[DONE]" not in line]
     assert payload_lines, lines
     # first chunk carries the role, subsequent chunks carry content deltas
     first = json.loads(payload_lines[0][len("data: ") :])

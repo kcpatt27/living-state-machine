@@ -76,12 +76,24 @@ class PlasticityState:
 
 @runtime_checkable
 class Plasticity(Protocol):
-    """Per-entry plasticity + trust interface."""
+    """Per-entry plasticity + trust interface.
+
+    ``observe`` accepts an optional ``surprise`` multiplier. When the
+    caller flags a turn as surprising (e.g. a correction-style user
+    message), implementations should amplify the trust update step and
+    the volatility input for this call only. ``surprise=1.0`` is the
+    no-op default and preserves the L10 baseline math.
+    """
 
     config: PlasticityConfig
 
     def observe(
-        self, entry_ids: Sequence[str], target: float, now: float | None = None
+        self,
+        entry_ids: Sequence[str],
+        target: float,
+        now: float | None = None,
+        *,
+        surprise: float = 1.0,
     ) -> None: ...
 
     def state_of(self, entry_id: str) -> PlasticityState: ...
@@ -106,8 +118,14 @@ class NullPlasticity:
         self.config = config or PlasticityConfig()
 
     def observe(
-        self, entry_ids: Sequence[str], target: float, now: float | None = None
+        self,
+        entry_ids: Sequence[str],
+        target: float,
+        now: float | None = None,
+        *,
+        surprise: float = 1.0,
     ) -> None:
+        _ = surprise
         return None
 
     def state_of(self, entry_id: str) -> PlasticityState:
@@ -148,23 +166,34 @@ class ExpDecayPlasticity:
         return st
 
     def observe(
-        self, entry_ids: Sequence[str], target: float, now: float | None = None
+        self,
+        entry_ids: Sequence[str],
+        target: float,
+        now: float | None = None,
+        *,
+        surprise: float = 1.0,
     ) -> None:
+        # ``surprise`` is an RPE-style amplifier supplied by the caller
+        # (e.g. the pipeline when it detects a correction-class user turn).
+        # It multiplies *this update's* effective plasticity and the
+        # volatility input feeding the next plasticity step, clamped by
+        # ``eta_max`` so we never escape the configured ceiling. The
+        # default 1.0 reproduces the original L10 math exactly.
         target = max(0.0, min(1.0, float(target)))
+        s = max(1.0, float(surprise))
         t = now if now is not None else time.time()
         for eid in entry_ids:
             st = self._ensure(eid)
-            eta = st.plasticity
+            eta = min(self.config.eta_max, st.plasticity * s)
             # Trust update.
             new_trust = (1.0 - eta) * st.trust + eta * target
             # Plasticity update: shrink when trust was consistent with target
-            # (|delta| small), expand when not.
-            delta = abs(st.trust - target)
+            # (|delta| small), expand when not. Surprise widens the perceived
+            # delta as well, so flagged turns drive plasticity up faster.
+            delta = min(1.0, abs(st.trust - target) * s)
             eta_next = eta * (1.0 - self.config.rho) + self.config.rho * delta
             st.trust = float(max(0.0, min(1.0, new_trust)))
-            st.plasticity = float(
-                max(self.config.eta_min, min(self.config.eta_max, eta_next))
-            )
+            st.plasticity = float(max(self.config.eta_min, min(self.config.eta_max, eta_next)))
             st.updates += 1
             st.last_update = t
 

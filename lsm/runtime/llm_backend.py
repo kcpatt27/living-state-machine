@@ -23,9 +23,25 @@ from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
 import httpx
-from tenacity import AsyncRetrying, retry_if_exception_type, stop_after_attempt, wait_exponential
+from tenacity import (
+    AsyncRetrying,
+    retry_if_exception,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 log = logging.getLogger(__name__)
+
+_RETRYABLE_HTTP_STATUS = frozenset({500, 502, 503, 504})
+
+
+def _is_retryable_http_error(exc: BaseException) -> bool:
+    """Return ``True`` when an HTTP error is transient and worth retrying."""
+    if not isinstance(exc, httpx.HTTPStatusError):
+        return False
+    code = exc.response.status_code if exc.response is not None else None
+    return code in _RETRYABLE_HTTP_STATUS
 
 
 @dataclass(slots=True, frozen=True)
@@ -76,9 +92,7 @@ class LLMBackend(Protocol):
     name: str
     model: str
 
-    async def generate(
-        self, messages: Sequence[ChatMessage], options: GenerateOptions
-    ) -> str: ...
+    async def generate(self, messages: Sequence[ChatMessage], options: GenerateOptions) -> str: ...
 
     def stream(
         self, messages: Sequence[ChatMessage], options: GenerateOptions
@@ -112,7 +126,8 @@ class OllamaBackend:
             wait=wait_exponential(multiplier=0.5, min=0.5, max=5.0),
             retry=retry_if_exception_type(
                 (httpx.ConnectError, httpx.ReadError, httpx.RemoteProtocolError)
-            ),
+            )
+            | retry_if_exception(_is_retryable_http_error),
             reraise=True,
         ):
             with attempt:
@@ -121,9 +136,7 @@ class OllamaBackend:
                 return resp
         raise RuntimeError("unreachable")
 
-    async def generate(
-        self, messages: Sequence[ChatMessage], options: GenerateOptions
-    ) -> str:
+    async def generate(self, messages: Sequence[ChatMessage], options: GenerateOptions) -> str:
         payload: dict[str, Any] = {
             "model": self.model,
             "messages": [m.to_ollama() for m in messages],
@@ -143,24 +156,41 @@ class OllamaBackend:
             "stream": True,
             "options": options.to_ollama(),
         }
-        async with self._client.stream(
-            "POST", f"{self._host}/api/chat", json=payload
-        ) as r:
-            r.raise_for_status()
-            async for line in r.aiter_lines():
-                if not line:
-                    continue
-                try:
-                    import json as _json
+        yielded_any = False
 
-                    chunk = _json.loads(line)
-                except ValueError:
-                    continue
-                piece = chunk.get("message", {}).get("content", "")
-                if piece:
-                    yield piece
-                if chunk.get("done"):
-                    break
+        def _retryable_stream_error(exc: BaseException) -> bool:
+            # Never retry after we have already emitted user-visible tokens:
+            # retried streams would duplicate output.
+            if yielded_any:
+                return False
+            if isinstance(exc, httpx.ConnectError | httpx.ReadError | httpx.RemoteProtocolError):
+                return True
+            return _is_retryable_http_error(exc)
+
+        async for attempt in AsyncRetrying(
+            stop=stop_after_attempt(3),
+            wait=wait_exponential(multiplier=0.5, min=0.5, max=5.0),
+            retry=retry_if_exception(_retryable_stream_error),
+            reraise=True,
+        ):
+            with attempt:
+                async with self._client.stream("POST", f"{self._host}/api/chat", json=payload) as r:
+                    r.raise_for_status()
+                    async for line in r.aiter_lines():
+                        if not line:
+                            continue
+                        try:
+                            import json as _json
+
+                            chunk = _json.loads(line)
+                        except ValueError:
+                            continue
+                        piece = chunk.get("message", {}).get("content", "")
+                        if piece:
+                            yielded_any = True
+                            yield piece
+                        if chunk.get("done"):
+                            return
 
     async def tags(self) -> list[str]:
         """Return the list of locally available model tags."""
@@ -252,18 +282,12 @@ class TransformersBackend:
         self._lazy_load()
         assert self._tokenizer is not None
         raw = [{"role": m.role, "content": m.content} for m in messages]
-        return self._tokenizer.apply_chat_template(
-            raw, tokenize=False, add_generation_prompt=True
-        )
+        return self._tokenizer.apply_chat_template(raw, tokenize=False, add_generation_prompt=True)
 
-    async def generate(
-        self, messages: Sequence[ChatMessage], options: GenerateOptions
-    ) -> str:
+    async def generate(self, messages: Sequence[ChatMessage], options: GenerateOptions) -> str:
         return await asyncio.to_thread(self._generate_sync, list(messages), options)
 
-    def _generate_sync(
-        self, messages: list[ChatMessage], options: GenerateOptions
-    ) -> str:
+    def _generate_sync(self, messages: list[ChatMessage], options: GenerateOptions) -> str:
         import torch
 
         prompt = self._format(messages)

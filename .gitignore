@@ -48,6 +48,7 @@ wandb/
 *.ckpt
 *.pt
 *.safetensors
+research-docs/*.pdf
 
 # Encrypted user memory (never check in)
 memory_store/

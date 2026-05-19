@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from lsm.core.memory import MemoryEntry
 from lsm.core.plasticity import (
     ExpDecayPlasticity,
@@ -82,3 +81,61 @@ def test_save_and_load_roundtrip(tmp_path: Path) -> None:
     p2.load(path)
     assert p2.trust("a") == pytest.approx(p.trust("a"))
     assert p2.state_of("b").plasticity == pytest.approx(p.state_of("b").plasticity)
+
+
+def test_observe_surprise_amplifies_trust_step() -> None:
+    cfg = PlasticityConfig(eta_init=0.2, rho=0.0, eta_max=0.9)
+    base = ExpDecayPlasticity(cfg)
+    surprised = ExpDecayPlasticity(cfg)
+
+    base.observe(["k"], target=0.0, surprise=1.0)
+    surprised.observe(["k"], target=0.0, surprise=2.0)
+
+    base_trust = base.trust("k")
+    surprised_trust = surprised.trust("k")
+    # Both should fall from the 0.5 baseline toward 0.0; surprised falls farther.
+    assert surprised_trust < base_trust < 0.5
+
+
+def test_observe_surprise_expands_plasticity() -> None:
+    cfg = PlasticityConfig(eta_init=0.2, rho=0.5, eta_max=0.9)
+    base = ExpDecayPlasticity(cfg)
+    surprised = ExpDecayPlasticity(cfg)
+
+    base.observe(["k"], target=0.0, surprise=1.0)
+    surprised.observe(["k"], target=0.0, surprise=2.0)
+
+    assert surprised.state_of("k").plasticity > base.state_of("k").plasticity
+
+
+def test_observe_surprise_is_clamped_by_eta_max() -> None:
+    cfg = PlasticityConfig(eta_init=0.3, rho=0.5, eta_max=0.6)
+    p = ExpDecayPlasticity(cfg)
+    # Wildly large surprise must not escape eta_max in either the immediate
+    # trust step or the stored plasticity.
+    p.observe(["k"], target=0.0, surprise=100.0)
+    st = p.state_of("k")
+    assert st.plasticity <= cfg.eta_max + 1e-9
+    # Trust must remain in [0, 1]; with eta clamped at 0.6 and target 0.0:
+    #   new_trust = (1 - 0.6) * 0.5 + 0.6 * 0.0 = 0.2
+    assert 0.0 <= st.trust <= 1.0
+    assert st.trust == pytest.approx(0.2, abs=1e-6)
+
+
+def test_observe_surprise_default_is_noop() -> None:
+    cfg = PlasticityConfig(eta_init=0.5, rho=0.0)
+    legacy = ExpDecayPlasticity(cfg)
+    explicit = ExpDecayPlasticity(cfg)
+
+    legacy.observe(["k"], target=1.0)
+    explicit.observe(["k"], target=1.0, surprise=1.0)
+
+    assert legacy.trust("k") == pytest.approx(explicit.trust("k"))
+    assert legacy.state_of("k").plasticity == pytest.approx(explicit.state_of("k").plasticity)
+
+
+def test_null_plasticity_accepts_surprise() -> None:
+    p = NullPlasticity()
+    # Should not raise and should remain a no-op.
+    p.observe(["a"], target=0.0, surprise=5.0)
+    assert p.trust("a") == 0.5

@@ -111,6 +111,10 @@ class MemoryStore(Protocol):
         combiner: ScoreCombiner | None = None,
     ) -> list[ScoredEntry]: ...
 
+    def query_by_tag(self, tag: str, *, top_k: int = 5) -> list[MemoryEntry]:
+        """Return the most recent entries carrying ``tag`` (recency order)."""
+        ...
+
     def get(self, entry_id: str) -> MemoryEntry | None: ...
 
     def delete(self, ids: Sequence[str]) -> int: ...
@@ -179,6 +183,11 @@ class InMemoryStore:
         scored.sort(key=lambda s: s.score, reverse=True)
         return scored[:top_k]
 
+    def query_by_tag(self, tag: str, *, top_k: int = 5) -> list[MemoryEntry]:
+        matches = [e for e in self._entries.values() if tag in e.tags]
+        matches.sort(key=lambda e: e.updated_at, reverse=True)
+        return matches[:top_k]
+
     def get(self, entry_id: str) -> MemoryEntry | None:
         return self._entries.get(entry_id)
 
@@ -214,9 +223,7 @@ class LanceDBStore:
         try:
             import lancedb
         except ImportError as e:  # pragma: no cover
-            raise RuntimeError(
-                "lancedb is required for LanceDBStore. Run: uv sync"
-            ) from e
+            raise RuntimeError("lancedb is required for LanceDBStore. Run: uv sync") from e
         self._lancedb = lancedb
         self._db = lancedb.connect(str(self._root))
         self._table = self._open_or_create()
@@ -320,10 +327,7 @@ class LanceDBStore:
         # LanceDB returns ``_distance`` (L2) by default. Convert to cosine via
         # pre-normalised embeddings when possible; else compute from vectors.
         results = (
-            self._table.search(q.tolist())
-            .metric("cosine")
-            .limit(max(top_k * 4, top_k))
-            .to_list()
+            self._table.search(q.tolist()).metric("cosine").limit(max(top_k * 4, top_k)).to_list()
         )
         cmb = combiner or identity_combiner
         scored: list[ScoredEntry] = []
@@ -334,6 +338,12 @@ class LanceDBStore:
             scored.append(ScoredEntry(entry=entry, score=final, components=comps))
         scored.sort(key=lambda s: s.score, reverse=True)
         return scored[:top_k]
+
+    def query_by_tag(self, tag: str, *, top_k: int = 5) -> list[MemoryEntry]:
+        rows = self._table.search().limit(self.count() or 1).to_list()
+        matches = [self._row_to_entry(row) for row in rows if tag in (row.get("tags") or [])]
+        matches.sort(key=lambda e: e.updated_at, reverse=True)
+        return matches[:top_k]
 
     def get(self, entry_id: str) -> MemoryEntry | None:
         rows = self._table.search().where(f"id = '{entry_id}'").limit(1).to_list()
@@ -360,9 +370,7 @@ class LanceDBStore:
         return None
 
 
-def build_store(
-    kind: str, *, root: Path, embedder: Embedder
-) -> MemoryStore:
+def build_store(kind: str, *, root: Path, embedder: Embedder) -> MemoryStore:
     """Factory for memory stores."""
     if kind == "lancedb":
         return LanceDBStore(root=root, embedder=embedder)

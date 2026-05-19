@@ -37,6 +37,20 @@ def test_delete_by_source() -> None:
     assert all(e.entry.source == "s2" for e in rest)
 
 
+def test_query_by_tag_returns_recent_matches() -> None:
+    store = InMemoryStore(embedder=HashEmbedder(dim=16))
+    older = store.put("old correction", tags=["correction"])
+    newer = store.put("new correction", tags=["correction"])
+    store.put("unrelated", tags=["chat"])
+    older.updated_at = 1.0
+    newer.updated_at = 2.0
+
+    hits = store.query_by_tag("correction", top_k=2)
+    assert len(hits) == 2
+    assert hits[0].id == newer.id
+    assert hits[1].id == older.id
+
+
 def test_custom_combiner_is_used() -> None:
     store = InMemoryStore(embedder=HashEmbedder(dim=16))
     store.put("A", source="s")

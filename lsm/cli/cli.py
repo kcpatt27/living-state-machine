@@ -15,8 +15,12 @@ from rich.table import Table
 from lsm import __version__
 from lsm.config import get_settings
 from lsm.core.embeddings import get_default_embedder
-from lsm.core.memory import build_store
+from lsm.core.facts import CAT_ASSISTANT_NOTES, Fact, FactStore
+from lsm.core.identity import IdentityStore
+from lsm.core.memory import MemoryEntry, build_store
+from lsm.core.normalize import EmbeddingTermNormalizer
 from lsm.core.state import StateStore
+from lsm.core.verifier import RuleBasedVerifier, VerifierContext
 from lsm.logging_setup import setup_logging
 from lsm.runtime.llm_backend import ChatMessage, GenerateOptions, build_backend
 
@@ -43,6 +47,93 @@ def _root(
 def version() -> None:
     """Print the installed lsm version and exit."""
     console.print(f"lsm {__version__}")
+
+
+@app.command()
+def verify(
+    text: str = typer.Argument(..., help="Candidate text to score."),
+    source: str = typer.Option(
+        "manual",
+        "--source",
+        help="Label for this candidate (summarizer | writer | reply | manual).",
+    ),
+    explain: bool = typer.Option(
+        False, "--explain", help="Show per-violation evidence (fact/memory ids)."
+    ),
+    threshold_reprompt: float = typer.Option(1.0, "--reprompt-threshold"),
+    threshold_reject: float = typer.Option(2.5, "--reject-threshold"),
+) -> None:
+    """Score ``text`` against the live ``$LSM_HOME`` context.
+
+    Useful for sanity-checking what the V.1 verifier would say about a
+    candidate ``s_t`` or assistant reply. Builds a ``VerifierContext`` from
+    the current FactStore, identity profile, and the last few correction
+    memory entries; runs ``RuleBasedVerifier`` and prints the verdict.
+    """
+    settings = get_settings()
+    fact_store = FactStore(settings.home)
+    identity = IdentityStore(settings.home).load()
+
+    # Optional: pull recent corrections from durable memory if it exists.
+    corrections: list[MemoryEntry] = []
+    try:
+        mem_store = _open_memory_store()
+    except Exception:
+        mem_store = None
+    if mem_store is not None:
+        try:
+            corrections = mem_store.query_by_tag("correction", top_k=5)
+        except Exception:
+            corrections = []
+        finally:
+            mem_store.close()
+
+    # Embed-backed normalizer: keeps verifier canonicalization consistent
+    # with what the pipeline uses. Falls back to None if it can't init.
+    try:
+        embedder = get_default_embedder(settings.embed_model)
+        normalizer = EmbeddingTermNormalizer(embedder, settings.home)
+    except Exception:
+        normalizer = None  # type: ignore[assignment]
+
+    ctx = VerifierContext(
+        facts=fact_store,
+        identity=identity,
+        recent_corrections=tuple(corrections),
+        normalizer=normalizer,
+    )
+    v = RuleBasedVerifier(
+        threshold_reprompt=threshold_reprompt,
+        threshold_reject=threshold_reject,
+    )
+    verdict = v.score(text, ctx)
+
+    decision_style = {
+        "accept": "green",
+        "reprompt": "yellow",
+        "reject": "red",
+    }.get(verdict.decision, "white")
+    console.print(
+        Panel(
+            f"[bold]{verdict.decision}[/bold]  energy={verdict.energy:.2f}  " f"source={source}",
+            border_style=decision_style,
+        )
+    )
+    if not verdict.violations:
+        console.print("[dim](no violations)[/dim]")
+        return
+    t = Table(title=f"violations ({len(verdict.violations)})")
+    t.add_column("kind")
+    t.add_column("weight", justify="right")
+    t.add_column("detail", overflow="fold")
+    if explain:
+        t.add_column("evidence", overflow="fold")
+    for vi in verdict.violations:
+        row = [vi.kind, f"{vi.weight:.2f}", vi.detail]
+        if explain:
+            row.append(vi.evidence)
+        t.add_row(*row)
+    console.print(t)
 
 
 @app.command()
@@ -150,16 +241,224 @@ async def _chat_loop(model: str | None, system: str | None, session_id: str) -> 
 
 
 state_app = typer.Typer(name="state", help="Inspect and manage the hidden state s_t.")
+state_note_app = typer.Typer(name="note", help="Manage rolling state notes.")
 snapshot_app = typer.Typer(
     name="snapshot", help="Create and restore named snapshots of the state directory."
 )
+identity_app = typer.Typer(
+    name="identity",
+    help="View and edit the assistant identity profile (pinned identity/role slot).",
+)
 app.add_typer(state_app, name="state")
+state_app.add_typer(state_note_app, name="note")
 app.add_typer(snapshot_app, name="snapshot")
+fact_app = typer.Typer(name="fact", help="Inspect structured facts (owner + category).")
+note_app = typer.Typer(
+    name="note", help="Manage assistant.notes facts (small thoughts the assistant keeps)."
+)
+app.add_typer(identity_app, name="identity")
+app.add_typer(fact_app, name="fact")
+app.add_typer(note_app, name="note")
+
+
+@note_app.command("add")
+def note_add(
+    text: str = typer.Argument(..., help="Free-form note text (small thought)."),
+    subject: str | None = typer.Option(
+        None, "--subject", help="Optional topic chip the note is about."
+    ),
+) -> None:
+    """Persist a small thought into ``assistant.notes``.
+
+    These appear under the ``assistant notes:`` slot in the s_t projection.
+    """
+    body = text.strip()
+    if not body:
+        console.print("Note text is empty.")
+        raise typer.Exit(code=2)
+    settings = get_settings()
+    store = FactStore(settings.home)
+    fact = store.upsert(
+        Fact(
+            owner="assistant",
+            category=CAT_ASSISTANT_NOTES,
+            subject=subject.strip() if subject else None,
+            value=body,
+        )
+    )
+    console.print(f"[green]note added[/green] id={fact.id}")
+
+
+@note_app.command("list")
+def note_list() -> None:
+    """List current assistant.notes facts."""
+    settings = get_settings()
+    store = FactStore(settings.home)
+    notes = store.query(owner="assistant", category=CAT_ASSISTANT_NOTES)
+    if not notes:
+        console.print("[dim](no notes)[/dim]")
+        return
+    t = Table(title=f"assistant notes ({len(notes)})")
+    t.add_column("subject")
+    t.add_column("value", overflow="fold")
+    for f in notes:
+        t.add_row(f.subject or "", f.value)
+    console.print(t)
+
+
+@note_app.command("clear")
+def note_clear(
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation."),
+) -> None:
+    """Delete every assistant.notes fact."""
+    settings = get_settings()
+    store = FactStore(settings.home)
+    if not yes:
+        confirmed = Prompt.ask("Delete ALL assistant notes? type 'yes' to confirm", default="no")
+        if confirmed.strip().lower() != "yes":
+            console.print("aborted")
+            raise typer.Exit(code=1)
+    n = store.delete_where(category=CAT_ASSISTANT_NOTES)
+    console.print(f"[yellow]cleared {n} note(s)[/yellow]")
+
+
+@fact_app.command("list")
+def fact_list(
+    owner: str | None = typer.Option(None, "--owner", help="Filter by owner."),
+    category: str | None = typer.Option(None, "--category", help="Filter by category."),
+) -> None:
+    """List structured facts from ``$LSM_HOME/facts.json``."""
+    settings = get_settings()
+    store = FactStore(settings.home)
+    facts = store.query(owner=owner, category=category)
+    if not facts:
+        console.print("[dim](no facts)[/dim]")
+        return
+    t = Table(title=f"facts ({len(facts)})")
+    t.add_column("category")
+    t.add_column("subject")
+    t.add_column("value", overflow="fold")
+    t.add_column("tags")
+    for f in facts:
+        t.add_row(
+            f.category,
+            f.subject or "",
+            f.value,
+            ", ".join(f.tags) if f.tags else "",
+        )
+    console.print(t)
+
+
+@fact_app.command("show")
+def fact_show() -> None:
+    """Show all structured facts (alias for ``fact list`` with full table)."""
+    fact_list(owner=None, category=None)
+
+
+@fact_app.command("prune")
+def fact_prune(
+    category: str | None = typer.Option(
+        None, "--category", help="Only delete facts in this category."
+    ),
+    subject: str | None = typer.Option(
+        None, "--subject", help="Only delete facts whose subject matches (case-insensitive)."
+    ),
+    value_contains: str | None = typer.Option(
+        None, "--value-contains", help="Only delete facts whose value contains this substring."
+    ),
+    all_: bool = typer.Option(
+        False, "--all", help="Drop every user-owned fact. Keeps assistant.identity."
+    ),
+    yes: bool = typer.Option(False, "--yes", help="Skip confirmation."),
+) -> None:
+    """Delete facts in ``$LSM_HOME/facts.json`` matching the given filters.
+
+    Examples:
+
+      lsm fact prune --category user.traits
+      lsm fact prune --subject general
+      lsm fact prune --value-contains "ice cream"
+      lsm fact prune --all
+    """
+    if not all_ and category is None and subject is None and value_contains is None:
+        console.print("Provide --category, --subject, --value-contains, or --all.")
+        raise typer.Exit(code=2)
+    settings = get_settings()
+    store = FactStore(settings.home)
+    if not yes:
+        target = "ALL user facts" if all_ else "matching facts"
+        confirmed = Prompt.ask(f"Delete {target}? type 'yes' to confirm", default="no")
+        if confirmed.strip().lower() != "yes":
+            console.print("aborted")
+            raise typer.Exit(code=1)
+    if all_:
+        n = store.clear_all(preserve_assistant_identity=True)
+    else:
+        n = store.delete_where(
+            category=category,
+            subject=subject,
+            value_contains=value_contains,
+        )
+    console.print(f"[yellow]pruned {n} fact(s)[/yellow]")
+
+
+@identity_app.command("show")
+def identity_show() -> None:
+    """Print the assistant name and description used in ``s_t`` identity/role."""
+    settings = get_settings()
+    profile = IdentityStore(settings.home).load()
+    t = Table(show_header=False, box=None)
+    t.add_row("name", profile.name)
+    t.add_row("description", profile.description)
+    console.print(t)
+    console.print(
+        Panel(
+            profile.identity_role_line(),
+            title="pinned identity/role line",
+            border_style="cyan",
+        )
+    )
+
+
+@identity_app.command("set")
+def identity_set(
+    name: str | None = typer.Option(None, "--name", help="Assistant display name."),
+    description: str | None = typer.Option(
+        None, "--description", help="What the assistant is / can be."
+    ),
+) -> None:
+    """Update the assistant identity profile (partial updates allowed)."""
+    if name is None and description is None:
+        console.print("Provide --name and/or --description.")
+        raise typer.Exit(code=2)
+    settings = get_settings()
+    store = IdentityStore(settings.home)
+    profile = store.load()
+    if name is not None:
+        profile.name = name.strip()
+    if description is not None:
+        profile.description = description.strip()
+    store.save(profile)
+    console.print("[green]identity updated[/green]")
+    console.print(Panel(profile.identity_role_line(), border_style="cyan"))
 
 
 @state_app.command("show")
-def state_show() -> None:
-    """Print the current state summary and metadata."""
+def state_show(
+    memories: int = typer.Option(
+        0,
+        "--memories",
+        "-m",
+        min=0,
+        help="If > 0, also show the top-N durable memory hits for s_t.text.",
+    ),
+) -> None:
+    """Print the current state summary and metadata.
+
+    ``s_t`` is a compressed running summary; durable memory holds the
+    verbatim-ish atoms. Use ``--memories N`` or ``lsm memory query "..."``
+    for ground truth.
+    """
     settings = get_settings()
     store = StateStore(settings.home)
     s = store.load()
@@ -172,7 +471,43 @@ def state_show() -> None:
     if s.text:
         console.print(Panel(s.text, title="s_t.text", border_style="cyan"))
     else:
-        console.print("[dim](state is empty)[/dim]")
+        console.print(
+            "[dim](state is empty \u2014 try: lsm chat, then re-run; or: "
+            'lsm memory query "...")[/dim]'
+        )
+
+    mem_store = _open_memory_store()
+    try:
+        try:
+            mem_count = mem_store.count()
+        except Exception:
+            mem_count = None
+        if mem_count is not None:
+            console.print(f"[dim]memory_count={mem_count}[/dim]")
+
+        if memories > 0:
+            if not s.text:
+                console.print("[dim](skipping --memories: state is empty, no query text)[/dim]")
+            else:
+                try:
+                    hits = mem_store.query(s.text, top_k=memories)
+                except Exception:
+                    hits = []
+                if not hits:
+                    console.print("[dim](no memory hits for s_t.text)[/dim]")
+                else:
+                    mt = Table(title=f"top {len(hits)} memories for s_t.text")
+                    mt.add_column("score", justify="right")
+                    mt.add_column("source")
+                    mt.add_column("text", overflow="fold")
+                    for h in hits:
+                        snippet = h.entry.text
+                        if len(snippet) > 200:
+                            snippet = snippet[:197] + "..."
+                        mt.add_row(f"{h.score:.3f}", h.entry.source, snippet)
+                    console.print(mt)
+    finally:
+        mem_store.close()
 
 
 @state_app.command("clear")
@@ -191,6 +526,65 @@ def state_clear(
 
     store.save(State())
     console.print("[yellow]state cleared[/yellow]")
+
+
+@state_note_app.command("set")
+def state_note_set(
+    text: str = typer.Argument(..., help="Rolling note text for the state projection."),
+) -> None:
+    """Set ``State.notes['rolling']``."""
+    settings = get_settings()
+    store = StateStore(settings.home)
+    s = store.load()
+    notes = dict(s.notes)
+    notes["rolling"] = text.strip()
+    from lsm.core.state import State
+
+    store.save(
+        State(
+            text=s.text,
+            vector=s.vector,
+            updated_at=s.updated_at,
+            revision=s.revision,
+            notes=notes,
+        )
+    )
+    console.print("[green]state rolling note updated[/green]")
+
+
+@state_note_app.command("clear")
+def state_note_clear() -> None:
+    """Clear ``State.notes['rolling']`` if present."""
+    settings = get_settings()
+    store = StateStore(settings.home)
+    s = store.load()
+    notes = dict(s.notes)
+    notes.pop("rolling", None)
+    from lsm.core.state import State
+
+    store.save(
+        State(
+            text=s.text,
+            vector=s.vector,
+            updated_at=s.updated_at,
+            revision=s.revision,
+            notes=notes,
+        )
+    )
+    console.print("[yellow]state rolling note cleared[/yellow]")
+
+
+@state_note_app.command("show")
+def state_note_show() -> None:
+    """Print ``State.notes['rolling']``."""
+    settings = get_settings()
+    store = StateStore(settings.home)
+    s = store.load()
+    note = s.notes.get("rolling", "").strip()
+    if not note:
+        console.print("[dim](no rolling note)[/dim]")
+        return
+    console.print(Panel(note, title="state.notes[rolling]", border_style="cyan"))
 
 
 @snapshot_app.command("create")

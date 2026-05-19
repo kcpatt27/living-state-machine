@@ -75,7 +75,25 @@ uv run pre-commit install
 
 See `memory-bank/techContext.md` for full VRAM accounting.
 
+## Troubleshooting Ollama `HTTP 500`
+
+If `lsm chat` fails with `500 Internal Server Error` from `localhost:11434/api/chat`,
+the Ollama daemon rejected the request (often a transient model-load failure on
+Windows). LSM retries `500/502/503/504` automatically (up to 3 times); if it
+still fails:
+
+1. Restart Ollama (quit from the tray, relaunch).
+2. Run `ollama list` to confirm models are present.
+3. Free VRAM: `ollama stop <model-tag>` then try the 7B fast model.
+4. Re-pull if needed: `ollama pull qwen2.5:7b-instruct-q8_0`.
+
+Full notes: `memory-bank/techContext.md` (Ollama troubleshooting).
+
 ## Daily-use CLI
+
+> **Mental model:** `s_t` is a compressed running summary; durable LanceDB
+> holds verbatim-ish atoms. For ground truth, use `lsm memory query` (or
+> `lsm state show --memories N`).
 
 (Subcommands are introduced as the ladder advances. L0 ships only
 `lsm version` and `lsm --help`.)
@@ -87,6 +105,10 @@ See `memory-bank/techContext.md` for full VRAM accounting.
 | `lsm chat` | L2 | Interactive REPL against the local server |
 | `lsm ingest <path>` | L4 | Ingest files into durable memory |
 | `lsm state show` | L3 | Inspect current `s_t` and top memory entries |
+| `lsm identity show` / `lsm identity set` | A.6 | View or edit the pinned assistant identity (`identity/role` in `s_t`) |
+| `lsm fact list` / `lsm fact show` / `lsm fact prune` | F.1 | Inspect or clean structured facts in `facts.json` |
+| `lsm verify "<text>" [--explain]` | V.1 | Score a candidate reply or `s_t` snippet against live facts + corrections |
+| `lsm note add` / `list` / `clear` | F.2 | Manage `assistant.notes` facts |
 | `lsm memory query "<text>"` | L4 | Manually query memory |
 | `lsm memory purge --older-than 90d` | L8 | Clean up durable memory |
 | `lsm snapshot create --tag <name>` | L3 | Snapshot state to a safe point |

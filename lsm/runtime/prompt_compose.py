@@ -49,6 +49,7 @@ class PromptContext:
 
     base_system: str = BASE_SYSTEM_PROMPT
     state_projection: str = ""
+    structured_facts: list[str] = field(default_factory=list)
     retrieved: list[str] = field(default_factory=list)
     fast_scratchpad: str = ""
     outcome_critique: str = ""
@@ -60,6 +61,12 @@ def compose(ctx: PromptContext, user_messages: Sequence[ChatMessage]) -> list[Ch
 
     if ctx.state_projection:
         system_parts.append("Current internal state (summary):\n" + ctx.state_projection)
+
+    if ctx.structured_facts:
+        bullets = "\n".join(f"- {line}" for line in ctx.structured_facts)
+        system_parts.append(
+            "Structured facts (authoritative; prefer over episodic memories):\n" + bullets
+        )
 
     if ctx.retrieved:
         bullets = "\n".join(f"- {r}" for r in ctx.retrieved)

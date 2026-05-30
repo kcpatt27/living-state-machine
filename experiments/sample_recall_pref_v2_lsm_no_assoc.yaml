@@ -1,0 +1,30 @@
+name: sample_recall_pref_v2_lsm_no_assoc
+task:
+  name: recall_pref_v2
+  num_items: 15
+  distractor_turns: 45
+system:
+  kind: lsm
+  backend: ollama
+  model: qwen2.5:7b-instruct-q8_0
+  top_k: 4
+  min_score: 0.15
+  memory:
+    kind: memory
+  writer:
+    kind: rules
+  state_updater: facts_backed
+ablation:
+  state_enabled: true
+  memory_enabled: true
+  habituation_enabled: true
+  association_enabled: false
+  writer_enabled: true
+run:
+  seeds:
+  - 0
+  - 1
+  - 2
+embedder:
+  kind: hash
+  dim: 384

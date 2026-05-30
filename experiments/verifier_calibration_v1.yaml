@@ -1,0 +1,10 @@
+name: verifier_calibration_v1
+task:
+  name: verifier_calibration_v1
+  dataset_path: data/verifier_dataset_v1.jsonl
+  linear_model_path: models/verifier_linear_v1.joblib
+  encoder_model_path: models/verifier_encoder_v1/model.onnx
+  encoder_tokenizer_path: models/verifier_encoder_v1/tokenizer
+  reject_floor: 2.5
+run:
+  seeds: [0]

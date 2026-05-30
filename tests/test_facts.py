@@ -288,3 +288,35 @@ def test_open_question_tag_emits_without_subject() -> None:
     facts = extract_facts_from_user_turn("should we try lance? (open question)")
     open_qs = [f for f in facts if f.category == CAT_USER_OPEN_QUESTIONS]
     assert len(open_qs) == 1
+
+
+# --------------------------------------------------------------------------- #
+# Extractor polish (F.1.1 follow-on)
+# --------------------------------------------------------------------------- #
+
+
+def test_like_requires_first_person_anchor() -> None:
+    """Second-person ``would you like …`` must not become a user preference."""
+    facts = extract_facts_from_user_turn("what improvements would you like for me to make to you?")
+    prefs = [f for f in facts if f.category == CAT_USER_PREFERENCES]
+    assert prefs == [], prefs
+
+
+def test_paired_path_suppresses_single_fallback_in_same_segment() -> None:
+    """Paired restaurants must not also upsert one long blob preference."""
+    text = "i prefer yakiniku and korean bbq restaurants, " "i love life and creating things"
+    facts = extract_facts_from_user_turn(text)
+    restaurant_prefs = [
+        f for f in facts if f.category == CAT_USER_PREFERENCES and f.subject == "restaurants"
+    ]
+    assert len(restaurant_prefs) == 2
+    values = {f.value.lower() for f in restaurant_prefs}
+    assert "yakiniku" in values or any("yakiniku" in v for v in values)
+    assert any("korean bbq" in v for v in values)
+    assert not any("love life" in f.value.lower() for f in restaurant_prefs)
+
+
+def test_function_word_tail_rejected() -> None:
+    facts = extract_facts_from_user_turn("i like for me to do X")
+    prefs = [f for f in facts if f.category == CAT_USER_PREFERENCES]
+    assert prefs == [], prefs

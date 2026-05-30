@@ -36,7 +36,7 @@ import asyncio
 import json
 import logging
 import time
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
@@ -50,12 +50,16 @@ from lsm.core.association import (
     NullAssociation,
 )
 from lsm.core.embeddings import FastEmbedder, HashEmbedder
+from lsm.core.facts import FactStore
 from lsm.core.habituation import ExpDecayHabituation, HabituationConfig, NullHabituation
+from lsm.core.memory import InMemoryStore, LanceDBStore, MemoryStore
 from lsm.core.multi_timescale import (
     MultiTimescaleConfig,
     MultiTimescaleMemory,
     TierConfig,
 )
+from lsm.core.projection import DeterministicProjection
+from lsm.core.state import FactsBackedUpdater, LLMSummarizerUpdater, StateStore
 from lsm.core.writer import (
     AlwaysWriter,
     LearnedWriter,
@@ -65,17 +69,34 @@ from lsm.core.writer import (
     RuleBasedWriter,
     RuleBasedWriterConfig,
 )
-from lsm.core.memory import InMemoryStore, LanceDBStore, MemoryStore
-from lsm.core.state import LLMSummarizerUpdater, StateStore
 from lsm.eval.baselines.lsm_system import LSMSystem, LSMSystemConfig
 from lsm.eval.baselines.naive_rag import NaiveRAGBaseline
 from lsm.eval.baselines.raw_llm import RawLLMBaseline
 from lsm.eval.metrics import accuracy, any_keyword_match, mean_std
 from lsm.eval.tasks.recall_pref_v1 import (
+    TASK_NAME as RECALL_PREF_V1,
+)
+from lsm.eval.tasks.recall_pref_v1 import (
     RecallConfig,
     RecallItem,
-    TASK_NAME as RECALL_PREF_V1,
+)
+from lsm.eval.tasks.recall_pref_v1 import (
     generate as generate_recall_pref_v1,
+)
+from lsm.eval.tasks.recall_pref_v2 import (
+    TASK_NAME as RECALL_PREF_V2,
+)
+from lsm.eval.tasks.recall_pref_v2 import (
+    generate as generate_recall_pref_v2,
+)
+from lsm.eval.tasks.verifier_calibration_v1 import (
+    TASK_NAME as VERIFIER_CALIBRATION_V1,
+)
+from lsm.eval.tasks.verifier_calibration_v1 import (
+    VerifierCalibrationConfig,
+)
+from lsm.eval.tasks.verifier_calibration_v1 import (
+    compare_ablation as compare_verifier_calibration,
 )
 from lsm.runtime.llm_backend import build_backend
 
@@ -93,8 +114,9 @@ TaskLoader = Callable[[dict[str, Any], int], list[RecallItem]]
 
 def _load_task(task_cfg: dict[str, Any], seed: int) -> list[RecallItem]:
     name = task_cfg.get("name")
-    if name == RECALL_PREF_V1:
-        return generate_recall_pref_v1(
+    if name in {RECALL_PREF_V1, RECALL_PREF_V2}:
+        gen = generate_recall_pref_v1 if name == RECALL_PREF_V1 else generate_recall_pref_v2
+        return gen(
             RecallConfig(
                 num_items=int(task_cfg.get("num_items", 20)),
                 distractor_turns=int(task_cfg.get("distractor_turns", 30)),
@@ -102,6 +124,25 @@ def _load_task(task_cfg: dict[str, Any], seed: int) -> list[RecallItem]:
             )
         )
     raise ValueError(f"unknown task: {name!r}")
+
+
+def _build_state_updater(
+    system_cfg: dict[str, Any],
+    *,
+    backend: Any,
+    embedder: HashEmbedder | FastEmbedder,
+    memory: MemoryStore | None,
+    fact_store: FactStore | None,
+) -> FactsBackedUpdater | LLMSummarizerUpdater:
+    kind = str(system_cfg.get("state_updater", "facts_backed")).lower()
+    if kind == "llm_summarizer":
+        return LLMSummarizerUpdater(backend=backend, embedder=embedder, memory=memory)
+    return FactsBackedUpdater(
+        embedder=embedder,
+        projection=DeterministicProjection(),
+        memory=memory,
+        fact_store=fact_store,
+    )
 
 
 def _build_embedder(embedder_cfg: dict[str, Any] | None) -> FastEmbedder | HashEmbedder:
@@ -170,7 +211,7 @@ def _build_memory(
             session=_tier_from_cfg(tiers_cfg.get("session", {}) or {}, defaults.session),
             durable=_tier_from_cfg(tiers_cfg.get("durable", {}) or {}, defaults.durable),
         )
-        return MultiTimescaleMemory(embedder=embedder, config=mtm_cfg)
+        return MultiTimescaleMemory(embedder=embedder, config=mtm_cfg)  # type: ignore[return-value]
     raise ValueError(f"unknown memory kind: {kind!r}")
 
 
@@ -190,11 +231,20 @@ def _build_system(
     if kind == "raw_llm":
         return RawLLMBaseline(backend=backend, max_context_turns=max_context_turns)
     if kind == "naive_rag":
-        return NaiveRAGBaseline(backend=backend, embedder=embedder, top_k=int(system_cfg.get("top_k", 5)))
+        return NaiveRAGBaseline(
+            backend=backend, embedder=embedder, top_k=int(system_cfg.get("top_k", 5))
+        )
     if kind == "lsm":
         memory = _build_memory(system_cfg.get("memory"), embedder, run_dir)
         state_store = StateStore(run_dir / "state")
-        updater = LLMSummarizerUpdater(backend=backend, embedder=embedder)
+        fact_store = FactStore(run_dir / "facts")
+        updater = _build_state_updater(
+            system_cfg,
+            backend=backend,
+            embedder=embedder,
+            memory=memory,
+            fact_store=fact_store,
+        )
         hab_cfg = system_cfg.get("habituation", {}) or {}
         habituation = (
             ExpDecayHabituation(
@@ -238,10 +288,33 @@ def _build_system(
                 association_enabled=bool(ablation_cfg.get("association_enabled", True)),
                 writer_enabled=bool(ablation_cfg.get("writer_enabled", True)),
                 recent_context_window=int(system_cfg.get("recent_context_window", 8)),
+                verifier_enabled=bool(system_cfg.get("verifier_enabled", False)),
+                verifier_reprompt_enabled=bool(system_cfg.get("verifier_reprompt_enabled", True)),
+                verifier_kind=str(system_cfg.get("verifier_kind", "rule")),
+                verifier_threshold_reprompt=float(
+                    system_cfg.get("verifier_threshold_reprompt", 1.0)
+                ),
+                verifier_threshold_reject=float(system_cfg.get("verifier_threshold_reject", 2.5)),
+                verifier_linear_model_path=(
+                    str(system_cfg.get("verifier_linear_model_path"))
+                    if system_cfg.get("verifier_linear_model_path")
+                    else None
+                ),
+                verifier_encoder_model_path=(
+                    str(system_cfg.get("verifier_encoder_model_path"))
+                    if system_cfg.get("verifier_encoder_model_path")
+                    else None
+                ),
+                verifier_encoder_tokenizer_path=(
+                    str(system_cfg.get("verifier_encoder_tokenizer_path"))
+                    if system_cfg.get("verifier_encoder_tokenizer_path")
+                    else None
+                ),
             ),
             habituation=habituation,
             association=association,
             writer=writer,
+            fact_store=fact_store,
         )
     raise ValueError(f"unknown system kind: {kind!r}")
 
@@ -285,7 +358,7 @@ async def _run_seed(
     for item in items:
         try:
             answer = await system.answer(item)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             log.exception("item %s failed: %s", item.item_id, e)
             answer = ""
         correct = _grade(item, answer)
@@ -328,6 +401,13 @@ async def run_from_config(
     embedder_cfg = cfg.get("embedder")
     max_context_turns = int(run_cfg.get("max_context_turns", 0))
 
+    if task_cfg.get("name") == VERIFIER_CALIBRATION_V1:
+        result = _run_verifier_calibration(task_cfg, run_dir)
+        (run_dir / "metrics.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+        (run_dir / "raw_outputs.jsonl").write_text("", encoding="utf-8")
+        log.info("done. verifier calibration -> %s", run_dir)
+        return run_dir
+
     seeds = [int(s) for s in run_cfg.get("seeds", [0, 1, 2])]
     seed_results: list[SeedResult] = []
     raw_path = run_dir / "raw_outputs.jsonl"
@@ -346,7 +426,9 @@ async def run_from_config(
             for row in res.per_item:
                 raw_fp.write(json.dumps({"seed": seed, **row}) + "\n")
             seed_results.append(res)
-            log.info("seed %d accuracy=%.3f n=%d elapsed=%.1fs", seed, res.accuracy, res.n, res.elapsed_s)
+            log.info(
+                "seed %d accuracy=%.3f n=%d elapsed=%.1fs", seed, res.accuracy, res.n, res.elapsed_s
+            )
 
     accs = [r.accuracy for r in seed_results]
     mean, std = mean_std(accs)
@@ -354,6 +436,7 @@ async def run_from_config(
         "task": task_cfg.get("name"),
         "system": system_cfg.get("kind"),
         "model": system_cfg.get("model"),
+        "state_updater": system_cfg.get("state_updater", "facts_backed"),
         "seeds": seeds,
         "accuracy_mean": mean,
         "accuracy_std": std,
@@ -366,3 +449,18 @@ async def run_from_config(
 
 def run_from_config_sync(*args: Any, **kwargs: Any) -> Path:
     return asyncio.run(run_from_config(*args, **kwargs))
+
+
+def _run_verifier_calibration(task_cfg: dict[str, Any], run_dir: Path) -> dict[str, Any]:
+    dataset_path = Path(str(task_cfg.get("dataset_path", "data/verifier_dataset_v1.jsonl")))
+    linear_path = task_cfg.get("linear_model_path")
+    encoder_path = task_cfg.get("encoder_model_path")
+    tok_path = task_cfg.get("encoder_tokenizer_path")
+    cfg = VerifierCalibrationConfig(
+        dataset_path=dataset_path,
+        linear_model_path=Path(str(linear_path)) if linear_path else None,
+        encoder_model_path=Path(str(encoder_path)) if encoder_path else None,
+        encoder_tokenizer_path=Path(str(tok_path)) if tok_path else None,
+        reject_floor=float(task_cfg.get("reject_floor", 2.5)),
+    )
+    return compare_verifier_calibration(cfg, out_path=run_dir / "result.json")

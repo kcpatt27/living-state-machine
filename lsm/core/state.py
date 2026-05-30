@@ -20,6 +20,7 @@ import os
 import re
 import shutil
 import time
+import uuid
 from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -489,6 +490,7 @@ class LLMSummarizerUpdater:
         fact_store: FactStore | None = None,
         verifier: object | None = None,
         verifier_reprompt_enabled: bool = True,
+        verifier_log: object | None = None,
     ) -> None:
         self._backend = backend
         self._embedder = embedder
@@ -504,6 +506,7 @@ class LLMSummarizerUpdater:
         # the verifier indirectly via facts.py); ducktyping is enough.
         self._verifier = verifier
         self._verifier_reprompt_enabled = verifier_reprompt_enabled
+        self._verifier_log = verifier_log
 
     def _correction_entries(self) -> list[MemoryEntry]:
         if self._memory is None or self._correction_top_k <= 0:
@@ -618,8 +621,10 @@ class LLMSummarizerUpdater:
         if self._verifier is not None:
             ctx = self._build_verifier_context(user_msg)
             verdict = self._verifier.score(new_text, ctx)  # type: ignore[attr-defined]
+            reprompt_used = False
             if verdict.decision != "accept":
                 if self._verifier_reprompt_enabled and verdict.fix_hints:
+                    reprompt_used = True
                     bullets = "\n".join(f"- {h}" for h in verdict.fix_hints)
                     prompt_messages.append(
                         ChatMessage(
@@ -652,7 +657,37 @@ class LLMSummarizerUpdater:
                         verdict.decision,
                         verdict.energy,
                     )
+                    if self._verifier_log is not None:
+                        try:
+                            from lsm.core.verifier_log import build_context_record
+
+                            event_id = str(uuid.uuid4())
+                            self._verifier_log.append(  # type: ignore[attr-defined]
+                                source="summarizer",
+                                candidate=new_text,
+                                verdict=verdict,
+                                context=build_context_record(event_id, ctx),
+                                reprompt_used=reprompt_used,
+                                event_id=event_id,
+                            )
+                        except Exception:
+                            log.debug("summarizer verifier telemetry failed", exc_info=True)
                     return prev
+            if self._verifier_log is not None:
+                try:
+                    from lsm.core.verifier_log import build_context_record
+
+                    event_id = str(uuid.uuid4())
+                    self._verifier_log.append(  # type: ignore[attr-defined]
+                        source="summarizer",
+                        candidate=new_text,
+                        verdict=verdict,
+                        context=build_context_record(event_id, ctx),
+                        reprompt_used=reprompt_used,
+                        event_id=event_id,
+                    )
+                except Exception:
+                    log.debug("summarizer verifier telemetry failed", exc_info=True)
 
         if self._identity is not None:
             new_text = _pin_identity_line(new_text, self._identity)

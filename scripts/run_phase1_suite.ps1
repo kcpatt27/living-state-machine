@@ -67,7 +67,11 @@ if (-not $SkipEndToEnd) {
         'experiments/sample_recall_pref_v1_naive_rag.yaml',
         'experiments/sample_recall_pref_v1_lsm.yaml',
         'experiments/sample_recall_pref_v1_lsm_no_assoc.yaml',
-        'experiments/sample_recall_pref_v1_lsm_rules_writer.yaml'
+        'experiments/sample_recall_pref_v1_lsm_rules_writer.yaml',
+        'experiments/sample_recall_pref_v1_lsm_no_habituation.yaml',
+        'experiments/sample_recall_pref_v1_lsm_no_writer.yaml',
+        'experiments/sample_recall_pref_v1_lsm_flat_memory.yaml',
+        'experiments/sample_recall_pref_v1_lsm_multi_memory.yaml'
     )
     foreach ($c in $configs) {
         try { RunEval $c } catch {

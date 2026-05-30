@@ -107,7 +107,10 @@ Full notes: `memory-bank/techContext.md` (Ollama troubleshooting).
 | `lsm state show` | L3 | Inspect current `s_t` and top memory entries |
 | `lsm identity show` / `lsm identity set` | A.6 | View or edit the pinned assistant identity (`identity/role` in `s_t`) |
 | `lsm fact list` / `lsm fact show` / `lsm fact prune` | F.1 | Inspect or clean structured facts in `facts.json` |
-| `lsm verify "<text>" [--explain]` | V.1 | Score a candidate reply or `s_t` snippet against live facts + corrections |
+| `lsm verify "<text>" [--explain]` | V.1 | Score a candidate against live facts + corrections |
+| `lsm verify --history N` | V.1 | Show recent verifier gate decisions from `verifier_log.sqlite` |
+| `lsm fact category add\|list\|remove` | F.3 | Register dynamic `user.*` categories |
+| `lsm fact set --category … --value …` | F.3 | Manually upsert a fact (incl. custom categories) |
 | `lsm note add` / `list` / `clear` | F.2 | Manage `assistant.notes` facts |
 | `lsm memory query "<text>"` | L4 | Manually query memory |
 | `lsm memory purge --older-than 90d` | L8 | Clean up durable memory |

@@ -19,9 +19,19 @@ from dataclasses import dataclass
 
 from lsm.core.association import Association, NullAssociation, chain_combiners
 from lsm.core.embeddings import Embedder
+from lsm.core.facts import FactStore, apply_extracted_facts
 from lsm.core.habituation import Habituation, NullHabituation
 from lsm.core.memory import MemoryStore, ScoreCombiner
 from lsm.core.state import State, StateStore, StateUpdater
+from lsm.core.verifier import (
+    EncoderLearnedVerifier,
+    HybridVerifier,
+    LinearLearnedVerifier,
+    NullVerifier,
+    RuleBasedVerifier,
+    Verifier,
+    VerifierContext,
+)
 from lsm.core.writer import AlwaysWriter, MemoryWriter, WriteCandidate
 from lsm.eval.tasks.recall_pref_v1 import RecallItem
 from lsm.runtime.llm_backend import ChatMessage, GenerateOptions, LLMBackend
@@ -41,6 +51,14 @@ class LSMSystemConfig:
     association_enabled: bool = True
     writer_enabled: bool = True
     recent_context_window: int = 8
+    verifier_enabled: bool = False
+    verifier_reprompt_enabled: bool = True
+    verifier_kind: str = "rule"
+    verifier_threshold_reprompt: float = 1.0
+    verifier_threshold_reject: float = 2.5
+    verifier_linear_model_path: str | None = None
+    verifier_encoder_model_path: str | None = None
+    verifier_encoder_tokenizer_path: str | None = None
 
 
 class LSMSystem:
@@ -59,16 +77,19 @@ class LSMSystem:
         habituation: Habituation | None = None,
         association: Association | None = None,
         writer: MemoryWriter | None = None,
+        fact_store: FactStore | None = None,
     ) -> None:
         self.backend = backend
         self.embedder = embedder
         self.memory = memory
         self.state_store = state_store
         self.state_updater = state_updater
+        self.fact_store = fact_store
         self.config = config or LSMSystemConfig()
         self.habituation: Habituation = habituation or NullHabituation()
         self.association: Association = association or NullAssociation()
         self.writer: MemoryWriter = writer or AlwaysWriter()
+        self.verifier: Verifier = self._build_verifier()
         self._state: State = state_store.load() if state_store is not None else State()
         self._recent_ids: deque[str] = deque(maxlen=self.config.recent_context_window)
 
@@ -77,8 +98,60 @@ class LSMSystem:
             return
         try:
             self._state = await self.state_updater.update(self._state, user_msg, reply)
-        except Exception:  # noqa: BLE001
+        except Exception:
             log.exception("state updater failed")
+
+    def _build_verifier(self) -> Verifier:
+        if not self.config.verifier_enabled:
+            return NullVerifier()
+        rule = RuleBasedVerifier(
+            threshold_reprompt=self.config.verifier_threshold_reprompt,
+            threshold_reject=self.config.verifier_threshold_reject,
+        )
+        kind = (self.config.verifier_kind or "rule").lower()
+        if kind in {"rule", "default"}:
+            return rule
+        if kind == "null":
+            return NullVerifier()
+        if kind == "linear":
+            if not self.config.verifier_linear_model_path:
+                raise ValueError("verifier_linear_model_path required for verifier_kind=linear")
+            return LinearLearnedVerifier(self.config.verifier_linear_model_path, fallback=rule)
+        if kind == "encoder":
+            if (
+                not self.config.verifier_encoder_model_path
+                or not self.config.verifier_encoder_tokenizer_path
+            ):
+                raise ValueError(
+                    "encoder verifier requires verifier_encoder_model_path + "
+                    "verifier_encoder_tokenizer_path"
+                )
+            return EncoderLearnedVerifier(
+                self.config.verifier_encoder_model_path,
+                tokenizer_path=self.config.verifier_encoder_tokenizer_path,
+                fallback=rule,
+            )
+        if kind == "hybrid":
+            if self.config.verifier_linear_model_path:
+                learned: Verifier = LinearLearnedVerifier(
+                    self.config.verifier_linear_model_path,
+                    fallback=rule,
+                )
+            elif (
+                self.config.verifier_encoder_model_path
+                and self.config.verifier_encoder_tokenizer_path
+            ):
+                learned = EncoderLearnedVerifier(
+                    self.config.verifier_encoder_model_path,
+                    tokenizer_path=self.config.verifier_encoder_tokenizer_path,
+                    fallback=rule,
+                )
+            else:
+                raise ValueError(
+                    "hybrid verifier requires a linear or encoder learned head artifact"
+                )
+            return HybridVerifier(learned=learned, rule=rule)
+        raise ValueError(f"unknown verifier_kind: {self.config.verifier_kind!r}")
 
     def _write_memory(self, text: str, tag: str) -> None:
         if not self.config.memory_enabled or self.memory is None or not text:
@@ -90,7 +163,7 @@ class LSMSystem:
                 return
         try:
             self.memory.put(text, source="eval", tags=[tag])
-        except Exception:  # noqa: BLE001
+        except Exception:
             log.exception("memory put failed")
 
     def _retrieve(self, query: str) -> list[str]:
@@ -125,8 +198,11 @@ class LSMSystem:
         self._recent_ids.clear()
         if self.memory is not None:
             self.memory.delete_by_source("eval")
+        if self.fact_store is not None:
+            self.fact_store.clear_all()
 
         dialogue = item.dialogue
+        recent_user_turns: deque[str] = deque(maxlen=3)
         for i in range(0, len(dialogue), 2):
             user_msg = dialogue[i][1] if dialogue[i][0] == "user" else ""
             reply_idx = i + 1
@@ -136,6 +212,9 @@ class LSMSystem:
                 else ""
             )
             if user_msg:
+                recent_user_turns.append(user_msg)
+                if self.fact_store is not None:
+                    apply_extracted_facts(self.fact_store, user_msg)
                 self._write_memory(user_msg, "user")
             if reply:
                 self._write_memory(reply, "assistant")
@@ -147,9 +226,40 @@ class LSMSystem:
             state_projection=self._state.project(),
             retrieved=retrieved,
         )
-        final_messages: Sequence[ChatMessage] = [
-            ChatMessage(role="user", content=item.question)
-        ]
+        final_messages: Sequence[ChatMessage] = [ChatMessage(role="user", content=item.question)]
         composed = compose(ctx, final_messages)
         options = GenerateOptions(temperature=0.0, max_tokens=self.config.answer_max_tokens)
-        return await self.backend.generate(composed, options)
+        answer = await self.backend.generate(composed, options)
+        if isinstance(self.verifier, NullVerifier):
+            return answer
+        vctx = VerifierContext(
+            recent_corrections=(
+                tuple(self.memory.query_by_tag("correction", top_k=5))
+                if self.memory is not None
+                else ()
+            ),
+            recent_user_turns=tuple(recent_user_turns),
+        )
+        verdict = self.verifier.score(answer, vctx)
+        if (
+            verdict.decision != "accept"
+            and self.config.verifier_reprompt_enabled
+            and verdict.fix_hints
+        ):
+            hint = "\n".join(f"- {h}" for h in verdict.fix_hints)
+            retry_messages = [
+                *composed,
+                ChatMessage(
+                    role="system",
+                    content=(
+                        "Your previous answer failed verification. "
+                        "Fix these issues before re-emitting:\n"
+                        f"{hint}"
+                    ),
+                ),
+            ]
+            retry = await self.backend.generate(retry_messages, options)
+            retry_verdict = self.verifier.score(retry, vctx)
+            if retry_verdict.energy < verdict.energy:
+                answer = retry
+        return answer

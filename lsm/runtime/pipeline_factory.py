@@ -19,6 +19,7 @@ from lsm.core.plasticity import ExpDecayPlasticity
 from lsm.core.projection import DeterministicProjection, LLMPolishedProjection
 from lsm.core.state import FactsBackedUpdater, LLMSummarizerUpdater, StateStore
 from lsm.core.verifier import NullVerifier, RuleBasedVerifier, Verifier
+from lsm.core.verifier_log import VerifierLog
 from lsm.core.writer import RuleBasedWriter, RuleBasedWriterConfig
 from lsm.runtime.llm_backend import GenerateOptions, LLMBackend, build_backend
 
@@ -49,6 +50,7 @@ def build_default_pipeline(
     fact_store = FactStore(s.home)
     fact_store.sync_assistant_identity(identity)
     term_normalizer = EmbeddingTermNormalizer(embedder, s.home)
+    verifier_log = VerifierLog(s.home / "verifier_log.sqlite")
     cfg = PipelineConfig(
         session_id=session_id,
         backend_name=s.backend,
@@ -72,6 +74,7 @@ def build_default_pipeline(
             fact_store=fact_store,
             verifier=verifier,
             verifier_reprompt_enabled=cfg.verifier_reprompt_enabled,
+            verifier_log=verifier_log,
         )
     else:
         projection: DeterministicProjection | LLMPolishedProjection = DeterministicProjection()
@@ -110,5 +113,7 @@ def build_default_pipeline(
         term_normalizer=term_normalizer,
         verifier=verifier,
         identity=identity,
+        verifier_log=verifier_log,
+        embedder=embedder,
     )
     return pipe, backend, episodic, store, memory, outcome_log

@@ -10,11 +10,12 @@ independently.
 Hardware: single RTX 5060 Ti (16 GB VRAM; ~12 GB for the AI), 32 GB RAM,
 Windows 11. No cloud resources were used.
 
-> **Note on numbers.** This report fixes the protocol, the code paths, the
-> reproduction scripts, and the ablation matrix. Tables marked
-> *to-be-filled* require running the scripts below on reishi's machine
-> (the scaffolding environment did not have Python/uv installed at the
-> time of writing). Every script is deterministic given its seed.
+> **Run log (reishi's machine).** **2026-05-22 ~06:06 local** — CPU
+> retrieval/writer benchmarks (`.\scripts\run_phase1_suite.ps1
+> -SkipEndToEnd`, `HashEmbedder`, seed 0). **~06:32** — full suite including
+> end-to-end `recall_pref_v1` (`.\scripts\run_phase1_suite.ps1 -KeepGoing`,
+> Ollama `qwen2.5:7b-instruct-q8_0`, seed `[0]`). Unit suite at fill time:
+> **241 passed**, 3 skipped.
 
 ---
 
@@ -123,43 +124,134 @@ practice. The headline runs we prioritise:
 | `lsm_flat_memory` | `memory.kind: memory` (single tier) |
 | `lsm_multi_memory` | `memory.kind: multi` |
 
-## 5. Expected results (to be filled after first run)
+## 5. Results
+
+Source files: `experiments/<task>/result.json` (CPU benchmarks);
+`experiments/<timestamp>-sample_recall_pref_v1_*/metrics.json` (end-to-end;
+gitignored run dirs, see §5.1 footnote).
 
 ### 5.1 `recall_pref_v1` (end-to-end accuracy; higher is better)
 
 | System | Accuracy (mean ± std) |
 | --- | --- |
-| `raw_llm` | _tbd_ |
-| `naive_rag` | _tbd_ |
-| `lsm_full` | _tbd_ |
-| `lsm_no_association` | _tbd_ |
-| `lsm_no_habituation` | _tbd_ |
-| `lsm_no_writer` | _tbd_ |
-| `lsm_flat_memory` | _tbd_ |
-| `lsm_multi_memory` | _tbd_ |
+| `raw_llm` | 1.000 ± 0.000 |
+| `naive_rag` | 0.100 ± 0.100 |
+| `lsm_full` | 1.000 ± 0.000 |
+| `lsm_no_association` | 1.000 ± 0.000 |
+| `lsm_no_habituation` | 0.967 ± 0.058 |
+| `lsm_no_writer` | 0.933 ± 0.115 |
+| `lsm_flat_memory` | 0.933 ± 0.058 |
+| `lsm_multi_memory` | 1.000 ± 0.000 |
 
-### 5.2 Retrieval-layer benchmarks (MRR; higher is better)
+_End-to-end footnote:_ configs under `experiments/sample_recall_pref_v1_*.yaml`;
+`task.num_items=10`, `distractor_turns=20`, seeds **`[0, 1, 2]`** (protocol
+hardening pass **2026-05-29**, `.\scripts\run_protocol_hardening.ps1`), model
+`qwen2.5:7b-instruct-q8_0`. Run ids:
+`20260529-174440-…-raw_llm` through `20260529-191925-…-multi_memory`.
+Writer and flat-memory ablations now show modest drop vs `lsm_full`; habituation
+ablation borderline; association and multi-memory still tie full at 1.0 on this
+bench. First-pass seed-0-only numbers (2026-05-22 / 20260529-165529 deferred
+batch) superseded for headline rows above.
+Run folders (2026-05-22 headline pass):
+`20260522-061246-sample_recall_pref_v1_raw_llm`,
+`20260522-061257-sample_recall_pref_v1_naive_rag`,
+`20260522-061302-sample_recall_pref_v1_lsm`,
+`20260522-061936-sample_recall_pref_v1_lsm_no_assoc`,
+`20260522-062553-sample_recall_pref_v1_lsm_rules_writer` (supplementary:
+`writer.kind: rules`, **0.900 ± 0.000**), and
+`20260522-072258-sample_recall_pref_v1_lsm_hybrid_verifier` (supplementary:
+`verifier.kind: hybrid` with linear head, **1.000 ± 0.000**, no regression vs
+`lsm_full` on this seed-0 pass).
+Eval uses `LLMSummarizerUpdater` (legacy summarizer path), not production
+`FactsBackedUpdater` — interpret as wrapper retrieval/state ablation, not
+daily `lsm chat` defaults.
 
-| Task | Ablation-off | Ablation-on | Δ MRR |
+### 5.2 `recall_pref_v2` (harder end-to-end; production path)
+
+Longer gaps (45 distractor turns), decoy preferences on the same topic, repeated
+filler prompts, 15 items/seed, seeds **`[0, 1, 2]`**. LSM configs use
+**`FactsBackedUpdater`** + fact extraction (`state_updater: facts_backed`) —
+matches production `lsm chat`. Configs:
+`experiments/sample_recall_pref_v2_*.yaml`; driver:
+`.\scripts\run_recall_pref_v2_suite.ps1`.
+
+| System | Accuracy (mean ± std) |
+| --- | --- |
+| `raw_llm` | _fill from `experiments/*-sample_recall_pref_v2_*`/metrics.json_ |
+| `naive_rag` | _fill after suite run_ |
+| `lsm_full` | _fill after suite run_ |
+| `lsm_no_association` | _fill after suite run_ |
+| `lsm_no_habituation` | _fill after suite run_ |
+| `lsm_no_writer` | _fill after suite run_ |
+| `lsm_flat_memory` | _fill after suite run_ |
+| `lsm_multi_memory` | _fill after suite run_ |
+| `lsm_hybrid_verifier` | _fill after suite run_ |
+
+_Suite launched at Phase 1 closeout (2026-05-29); replace placeholders when
+`run_recall_pref_v2_suite.ps1` completes._
+
+### 5.3 Retrieval-layer benchmarks (MRR; higher is better)
+
+Headline field per arm: **`mrr_mean`** in `experiments/<task>/result.json`
+(`with_*` = component on, `without_*` = `Null*` ablation).
+
+| Task | Ablation-off (`Null*`) | Ablation-on (prod impl.) | Δ MRR |
 | --- | --- | --- | --- |
-| `habituation_signal_v1` | _tbd_ | _tbd_ | _tbd_ |
-| `association_signal_v1` | _tbd_ | _tbd_ | _tbd_ |
+| `habituation_signal_v1` | 0.314 | 0.382 (`ExpDecayHabituation`) | +0.068 |
+| `association_signal_v1` | 0.454 | 0.772 (`HebbianAssociation`) | +0.317 |
 
-### 5.3 Writer precision (`memory_write_precision_v1`)
+Config: 40 items, seed 0, `HashEmbedder` dim 128 (suite driver).
 
-| Writer | Precision | Recall | F1 | FPR |
-| --- | --- | --- | --- | --- |
-| `always` | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
-| `never` | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
-| `rules` | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
-| `learned` | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
+### 5.4 Writer precision (`memory_write_precision_v1`)
 
-### 5.4 Multi-session consistency (`multi_session_consistency_v1`)
+Synthetic 60 signal / 60 filler turns, seed 0. Headline fields:
+`precision`, `recall`, `f1`, `false_positive_rate` per `writer` in
+`results[]`.
+
+|  Writer   | Precision | Recall |   F1   |  FPR   |
+| --------- | --------- | ------ | ------ | ------ |
+| `always`  |    0.50   |  1.00  |  0.67  |  1.00  |
+| `never`   |    0.00   |  0.00  |  0.00  |  0.00  |
+| `rules`   |    1.00   |  0.97  |  0.98  |  0.00  |
+| `learned` |    1.00   |  1.00  |  1.00  |  0.00  |
+
+### 5.5 Multi-session consistency (`multi_session_consistency_v1`)
+
+Headline fields: **`flat_accuracy`**, **`tiered_accuracy`** (Δ =
+`tiered_accuracy − flat_accuracy`).
 
 | Store | Top-k accuracy |
 | --- | --- |
-| `flat` | _tbd_ |
-| `multi-timescale` | _tbd_ |
+| `flat` (`InMemoryStore`) | 0.25 |
+| `multi-timescale` (`MultiTimescaleMemory`) | 0.20 |
+
+Δ tiered − flat: **−0.05** (tiered underperformed flat on this synthetic
+gap task at seed 0; logged as a candidate negative result).
+
+### 5.6 Verifier calibration (`verifier_calibration_v1`)
+
+Dataset run id: `20260522-075336-verifier_calibration_v1`, source
+`data/verifier_dataset_v1.jsonl` (n=13 rows; rule-distill + synthetic
+perturbations from local verifier telemetry). Encoder artifact:
+`models/verifier_encoder_v1/` (HF + ONNX, 1 epoch on n=13).
+
+| Verifier variant | Accuracy | Macro-F1 | Brier (accept) | ROC-AUC (accept vs not) |
+| --- | --- | --- | --- | --- |
+| `null` | 0.462 | 0.211 | 0.538 | 0.500 |
+| `rule` | 0.538 | 0.556 | 0.489 | 0.429 |
+| `linear` | 0.692 | 0.771 | 0.187 | 0.810 |
+| `hybrid` (`rule` safety floor + linear head) | 0.692 | 0.771 | 0.187 | 0.810 |
+| `encoder` (MiniLM cross-encoder, ONNX) | 0.462 | 0.211 | 0.265 | 0.476 |
+
+Interpretation: **checkpoint B** — linear head improves over the rule
+baseline on this first local dataset. **checkpoint C** — encoder did not
+beat linear (Δ macro-F1 = −0.56); the model collapsed to predicting
+`reject` for all rows (0% accept/recall). Logged as a quality negative in
+`docs/negative_results.md`; **ship linear + hybrid** for V.2 until more
+training data and/or a better base checkpoint.
+
+**V.2 closeout:** ship **`linear` + `hybrid`** for eval and future live wiring;
+encoder deferred per `docs/negative_results.md`. See `docs/phase1_exit.md`.
 
 ## 6. Reproduction
 
@@ -181,10 +273,17 @@ Each experiment writes `experiments/<run_id>/` containing:
 
 ## 7. Negative results
 
-Tracked in `docs/negative_results.md`. Phase 1 has not yet logged a
-headline negative result; pre-registered hypotheses live in
-`docs/hypotheses.md` and will be checked off against the filled tables
-above.
+Tracked in `docs/negative_results.md`. Current entries:
+
+- **2026-05-22 — multi-timescale memory underperforms flat on synthetic gap
+  task** (Δ = −0.05 on `multi_session_consistency_v1`, seed 0; kept and
+  flagged for re-tune, not abandoned).
+- **2026-05-22 — encoder verifier underperforms linear on calibration**
+  (macro-F1 0.211 vs 0.771 at n=13; reject-all collapse; see
+  `docs/negative_results.md`).
+
+Pre-registered hypotheses live in `docs/hypotheses.md` and will be checked
+off against the filled tables above.
 
 ## 8. Limitations
 

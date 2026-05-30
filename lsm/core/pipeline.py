@@ -22,7 +22,9 @@ from dataclasses import dataclass
 from typing import Literal
 
 from lsm.core.association import Association, chain_combiners
+from lsm.core.embeddings import Embedder
 from lsm.core.episodic import EpisodicLog, TurnRecord
+from lsm.core.fact_retrieval import fact_lines_for_prompt
 from lsm.core.facts import FactStore, apply_extracted_facts
 from lsm.core.habituation import Habituation
 from lsm.core.identity import IdentityProfile
@@ -42,7 +44,17 @@ from lsm.core.state import (
     _looks_like_additive,
     _looks_like_correction,
 )
-from lsm.core.verifier import NullVerifier, RuleBasedVerifier, Verifier, VerifierContext
+from lsm.core.verifier import (
+    EncoderLearnedVerifier,
+    HybridVerifier,
+    LinearLearnedVerifier,
+    NullVerifier,
+    RuleBasedVerifier,
+    Verdict,
+    Verifier,
+    VerifierContext,
+)
+from lsm.core.verifier_log import VerifierLog, build_context_record
 from lsm.core.writer import AlwaysWriter, MemoryWriter, WriteCandidate, WriteDecision
 from lsm.runtime.llm_backend import ChatMessage, GenerateOptions, LLMBackend
 from lsm.runtime.prompt_compose import PromptContext, compose
@@ -85,9 +97,21 @@ class PipelineConfig:
     verifier_threshold_reprompt: float = 1.0
     verifier_threshold_reject: float = 2.5
     verifier_weights: dict[str, float] | None = None
+    verifier_kind: Literal["rule", "linear", "encoder", "hybrid", "null"] = "rule"
+    verifier_linear_model_path: str | None = None
+    verifier_encoder_model_path: str | None = None
+    verifier_encoder_tokenizer_path: str | None = None
     # Number of recent user turns to feed into the verifier's list-merge
     # check (kept small to avoid stale paired-and noise).
     verifier_recent_user_turns: int = 3
+    verifier_telemetry_enabled: bool = True
+    # F.4 — structured facts in retrieval (prepended before episodic hits).
+    retrieve_facts_enabled: bool = True
+    retrieve_facts_top_k: int = 4
+    retrieve_facts_min_score: float = 0.12
+    # F.4 — on user correction turns, drop assistant memories the verifier
+    # would reject against the updated FactStore.
+    correction_memory_reconcile_enabled: bool = True
 
 
 class Pipeline:
@@ -127,6 +151,8 @@ class Pipeline:
         term_normalizer: TermNormalizer | None = None,
         verifier: Verifier | None = None,
         identity: IdentityProfile | None = None,
+        verifier_log: VerifierLog | None = None,
+        embedder: Embedder | None = None,
     ) -> None:
         self.backend = backend
         self.episodic = episodic
@@ -137,18 +163,14 @@ class Pipeline:
         self.fact_store = fact_store
         self.term_normalizer = term_normalizer
         self.identity = identity
+        self.verifier_log = verifier_log
+        self._embedder = embedder
         # V.1 verifier: if caller passed one, use it; otherwise honor the
         # config switch. ``NullVerifier`` is the explicit ablation baseline.
         if verifier is not None:
             self.verifier: Verifier = verifier
-        elif config.verifier_enabled:
-            self.verifier = RuleBasedVerifier(
-                threshold_reprompt=config.verifier_threshold_reprompt,
-                threshold_reject=config.verifier_threshold_reject,
-                weights=config.verifier_weights,  # type: ignore[arg-type]
-            )
         else:
-            self.verifier = NullVerifier()
+            self.verifier = self._build_verifier(config)
         self.habituation = habituation
         self.association = association
         self.plasticity = plasticity
@@ -164,7 +186,6 @@ class Pipeline:
         )
         # Bookkeeping for the reply gate so callers / tests can see what
         # the verifier said about the most recent assistant turn.
-        from lsm.core.verifier import Verdict  # local: avoid cycle in stubs
 
         self.last_verifier_verdict: Verdict | None = None
         self.last_verifier_reprompted: bool = False
@@ -183,6 +204,53 @@ class Pipeline:
 
         self._state: State = state_store.load() if state_store is not None else State()
         self._last_retrieved: list[ScoredEntry] = []
+
+    @staticmethod
+    def _build_verifier(config: PipelineConfig) -> Verifier:
+        if not config.verifier_enabled:
+            return NullVerifier()
+        if config.verifier_kind == "null":
+            return NullVerifier()
+        rule = RuleBasedVerifier(
+            threshold_reprompt=config.verifier_threshold_reprompt,
+            threshold_reject=config.verifier_threshold_reject,
+            weights=config.verifier_weights,  # type: ignore[arg-type]
+        )
+        if config.verifier_kind == "rule":
+            return rule
+        if config.verifier_kind == "linear":
+            if not config.verifier_linear_model_path:
+                raise ValueError("verifier_linear_model_path is required for verifier_kind=linear")
+            return LinearLearnedVerifier(config.verifier_linear_model_path, fallback=rule)
+        if config.verifier_kind == "encoder":
+            if not config.verifier_encoder_model_path or not config.verifier_encoder_tokenizer_path:
+                raise ValueError(
+                    "verifier_encoder_model_path and verifier_encoder_tokenizer_path are required "
+                    "for verifier_kind=encoder"
+                )
+            return EncoderLearnedVerifier(
+                config.verifier_encoder_model_path,
+                tokenizer_path=config.verifier_encoder_tokenizer_path,
+                fallback=rule,
+            )
+        if config.verifier_kind == "hybrid":
+            if config.verifier_linear_model_path:
+                learned: Verifier = LinearLearnedVerifier(
+                    config.verifier_linear_model_path, fallback=rule
+                )
+            elif config.verifier_encoder_model_path and config.verifier_encoder_tokenizer_path:
+                learned = EncoderLearnedVerifier(
+                    config.verifier_encoder_model_path,
+                    tokenizer_path=config.verifier_encoder_tokenizer_path,
+                    fallback=rule,
+                )
+            else:
+                raise ValueError(
+                    "verifier_kind=hybrid requires either verifier_linear_model_path "
+                    "or encoder model+tokenizer paths"
+                )
+            return HybridVerifier(learned=learned, rule=rule)
+        raise ValueError(f"unknown verifier_kind: {config.verifier_kind!r}")
 
     def _log_user(self, messages: Sequence[ChatMessage]) -> str:
         turn_id = str(uuid.uuid4())
@@ -235,14 +303,106 @@ class Pipeline:
             self._recent_ids.append(hid)
         return filtered
 
+    def _log_verifier_event(
+        self,
+        *,
+        source: str,
+        candidate: str,
+        verdict: Verdict,
+        ctx: VerifierContext | None = None,
+        reprompt_used: bool = False,
+    ) -> None:
+        if (
+            self.verifier_log is None
+            or not self.config.verifier_telemetry_enabled
+            or isinstance(self.verifier, NullVerifier)
+        ):
+            return
+        try:
+            event_id = str(uuid.uuid4())
+            snapshot = build_context_record(event_id, ctx or self._verifier_context())
+            self.verifier_log.append(
+                source=source,
+                candidate=candidate,
+                verdict=verdict,
+                context=snapshot,
+                reprompt_used=reprompt_used,
+                event_id=event_id,
+            )
+        except Exception:
+            log.debug("verifier telemetry append failed", exc_info=True)
+
+    def _structured_fact_retrieval(self, user_msg: str) -> list[str]:
+        if (
+            not self.config.retrieve_facts_enabled
+            or self.fact_store is None
+            or self._embedder is None
+            or not user_msg
+        ):
+            return []
+        try:
+            return fact_lines_for_prompt(
+                self.fact_store,
+                user_msg,
+                self._embedder,
+                top_k=self.config.retrieve_facts_top_k,
+                min_score=self.config.retrieve_facts_min_score,
+            )
+        except Exception:
+            log.debug("fact retrieval failed", exc_info=True)
+            return []
+
     def _context(self, user_msg: str) -> PromptContext:
         """Compose the prompt context: state projection + retrieved memories."""
         self._last_retrieved = self._retrieve(user_msg)
         retrieved_texts = [h.entry.text for h in self._last_retrieved]
+        fact_lines = self._structured_fact_retrieval(user_msg)
         return PromptContext(
             state_projection=self._state.project(),
+            structured_facts=fact_lines,
             retrieved=retrieved_texts,
         )
+
+    def _reconcile_stale_memory_on_correction(self, user_msg: str) -> int:
+        """F.4: remove assistant durable rows contradicted after a correction."""
+        if (
+            not self.config.correction_memory_reconcile_enabled
+            or self.memory is None
+            or not _looks_like_correction(user_msg)
+        ):
+            return 0
+        from lsm.core.facts import _TITLE_NP
+
+        seen_ids: set[str] = set()
+        hits: list[ScoredEntry] = []
+        queries = [user_msg]
+        for title in _TITLE_NP.findall(user_msg)[:4]:
+            if title.strip():
+                queries.append(title.strip())
+        for q in queries:
+            try:
+                for hit in self.memory.query(q, top_k=8):
+                    if hit.entry.id not in seen_ids:
+                        seen_ids.add(hit.entry.id)
+                        hits.append(hit)
+            except Exception:
+                log.debug("correction reconcile query failed for %r", q, exc_info=True)
+        ctx = self._verifier_context()
+        stale_ids: list[str] = []
+        for hit in hits:
+            entry = hit.entry
+            if "assistant" not in entry.tags:
+                continue
+            verdict = self.verifier.score(entry.text, ctx)
+            if verdict.decision != "accept":
+                stale_ids.append(entry.id)
+        if not stale_ids:
+            return 0
+        try:
+            return self.memory.delete(stale_ids)
+        except Exception:
+            log.exception("correction reconcile delete failed")
+            return 0
 
     @property
     def last_retrieved(self) -> list[ScoredEntry]:
@@ -336,7 +496,14 @@ class Pipeline:
         # and we don't want the verifier rejecting raw user corrections.
         verifier_meta: dict[str, object] = {}
         if role == "assistant":
-            verdict = self.verifier.score(text, self._verifier_context())
+            verifier_ctx = self._verifier_context()
+            verdict = self.verifier.score(text, verifier_ctx)
+            self._log_verifier_event(
+                source="writer",
+                candidate=text,
+                verdict=verdict,
+                ctx=verifier_ctx,
+            )
             verifier_meta = {
                 "verifier_energy": float(verdict.energy),
                 "verifier_decision": verdict.decision,
@@ -381,6 +548,10 @@ class Pipeline:
             apply_extracted_facts(self.fact_store, user_msg, normalizer=self.term_normalizer)
         except Exception:
             log.exception("fact extraction failed")
+        if _looks_like_correction(user_msg):
+            removed = self._reconcile_stale_memory_on_correction(user_msg)
+            if removed:
+                log.info("correction reconcile removed %d stale assistant memory row(s)", removed)
 
     def _write_turn_memories(self, user_msg: str, assistant_reply: str) -> None:
         if self.memory is None and self.fact_store is None:
@@ -462,15 +633,19 @@ class Pipeline:
         # V.1.1 reply gate (non-streaming path): up to one re-prompt with
         # fix hints; reject -> keep best draft for episodic logging but tag
         # the durable write as verifier_reject (handled in _maybe_write).
-        verdict = self.verifier.score(text, self._verifier_context())
+        verifier_ctx = self._verifier_context()
+        verdict = self.verifier.score(text, verifier_ctx)
+        log_ctx = verifier_ctx
         self.last_verifier_verdict = verdict
         self.last_verifier_reprompted = False
+        reprompt_used = False
         if (
             verdict.decision != "accept"
             and self.config.verifier_reprompt_enabled
             and verdict.fix_hints
         ):
             self.last_verifier_reprompted = True
+            reprompt_used = True
             retry_messages = [*composed, self._fix_hint_message(verdict.fix_hints)]
             try:
                 retry_text = await self.backend.generate(retry_messages, options)
@@ -478,10 +653,19 @@ class Pipeline:
                 log.exception("verifier re-prompt failed; keeping original draft")
                 retry_text = ""
             if retry_text:
-                retry_verdict = self.verifier.score(retry_text, self._verifier_context())
+                retry_ctx = self._verifier_context()
+                retry_verdict = self.verifier.score(retry_text, retry_ctx)
                 if retry_verdict.energy < verdict.energy:
                     text = retry_text
+                    log_ctx = retry_ctx
                     self.last_verifier_verdict = retry_verdict
+        self._log_verifier_event(
+            source="reply",
+            candidate=text,
+            verdict=self.last_verifier_verdict,
+            ctx=log_ctx,
+            reprompt_used=reprompt_used,
+        )
 
         assistant_turn_id = self._log_assistant(text, in_reply_to=turn_id)
         await self._score_outcome(
@@ -508,8 +692,17 @@ class Pipeline:
         # rewinding what the user already saw. We score post-stream and let
         # _maybe_write apply the writer gate; the verdict is exposed on the
         # pipeline so callers / next-turn extractors can react.
-        self.last_verifier_verdict = self.verifier.score(full, self._verifier_context())
+        stream_ctx = self._verifier_context()
+        stream_verdict = self.verifier.score(full, stream_ctx)
+        self.last_verifier_verdict = stream_verdict
         self.last_verifier_reprompted = False
+        self._log_verifier_event(
+            source="reply",
+            candidate=full,
+            verdict=stream_verdict,
+            ctx=stream_ctx,
+            reprompt_used=False,
+        )
 
         assistant_turn_id = self._log_assistant(full, in_reply_to=turn_id)
         await self._score_outcome(

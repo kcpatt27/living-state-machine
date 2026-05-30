@@ -41,3 +41,17 @@ def test_compose_injects_state_and_memories() -> None:
     assert "Relevant memories" in sys
     assert "IDE theme: Abyss" in sys
     assert "favourite game: Crimson Desert" in sys
+
+
+def test_compose_injects_structured_facts_before_memories() -> None:
+    ctx = PromptContext(
+        structured_facts=["[fact] [user.media] Crimson Desert: action RPG"],
+        retrieved=["old assistant paraphrase"],
+    )
+    out = compose(ctx, [ChatMessage(role="user", content="hi")])
+    sys = out[0].content
+    assert "Structured facts" in sys
+    assert "authoritative" in sys
+    assert "Crimson Desert" in sys
+    assert "Relevant memories" in sys
+    assert sys.index("Structured facts") < sys.index("Relevant memories")

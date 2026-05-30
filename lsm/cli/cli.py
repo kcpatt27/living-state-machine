@@ -15,20 +15,32 @@ from rich.table import Table
 from lsm import __version__
 from lsm.config import get_settings
 from lsm.core.embeddings import get_default_embedder
+from lsm.core.fact_categories import FactCategoryRegistry
 from lsm.core.facts import CAT_ASSISTANT_NOTES, Fact, FactStore
 from lsm.core.identity import IdentityStore
 from lsm.core.memory import MemoryEntry, build_store
 from lsm.core.normalize import EmbeddingTermNormalizer
 from lsm.core.state import StateStore
 from lsm.core.verifier import RuleBasedVerifier, VerifierContext
+from lsm.core.verifier_features import feature_dict
+from lsm.core.verifier_log import VerifierLog
 from lsm.logging_setup import setup_logging
 from lsm.runtime.llm_backend import ChatMessage, GenerateOptions, build_backend
+from lsm.verifier_data.context_text import render_context_text
+from lsm.verifier_data.export import context_from_snapshot, export_verifier_dataset
+from lsm.verifier_data.schema import VerifierDatasetRow, load_rows, write_rows
 
 app = typer.Typer(
     name="lsm",
     help="Living State Machine: a Stentor-inspired cognitive wrapper around local LLMs.",
     no_args_is_help=True,
     pretty_exceptions_show_locals=False,
+)
+verify_app = typer.Typer(
+    name="verify",
+    help="Verifier tools: score, inspect history, manual labels, dataset export.",
+    invoke_without_command=True,
+    no_args_is_help=False,
 )
 console = Console()
 log = logging.getLogger(__name__)
@@ -49,8 +61,35 @@ def version() -> None:
     console.print(f"lsm {__version__}")
 
 
-@app.command()
+app.add_typer(verify_app, name="verify")
+
+
+@verify_app.callback(invoke_without_command=True)
 def verify(
+    ctx: typer.Context,
+    explain: bool = typer.Option(
+        False, "--explain", help="Show per-violation evidence in --history output."
+    ),
+    history: int | None = typer.Option(
+        None,
+        "--history",
+        "-n",
+        help="Print the last N verifier telemetry events from verifier_log.sqlite.",
+    ),
+) -> None:
+    """Show history directly or run a verify subcommand."""
+    if ctx.invoked_subcommand is not None:
+        return
+    settings = get_settings()
+    if history is not None:
+        _verify_history(settings.home, limit=history, explain=explain)
+        return
+    console.print("Use `lsm verify score <text>` or `lsm verify --history N`.")
+    raise typer.Exit(code=2)
+
+
+@verify_app.command("score")
+def verify_score(
     text: str = typer.Argument(..., help="Candidate text to score."),
     source: str = typer.Option(
         "manual",
@@ -63,13 +102,150 @@ def verify(
     threshold_reprompt: float = typer.Option(1.0, "--reprompt-threshold"),
     threshold_reject: float = typer.Option(2.5, "--reject-threshold"),
 ) -> None:
-    """Score ``text`` against the live ``$LSM_HOME`` context.
+    """Score candidate text against the live verifier context."""
+    _score_candidate(
+        text=text,
+        source=source,
+        explain=explain,
+        threshold_reprompt=threshold_reprompt,
+        threshold_reject=threshold_reject,
+    )
 
-    Useful for sanity-checking what the V.1 verifier would say about a
-    candidate ``s_t`` or assistant reply. Builds a ``VerifierContext`` from
-    the current FactStore, identity profile, and the last few correction
-    memory entries; runs ``RuleBasedVerifier`` and prints the verdict.
-    """
+
+@verify_app.command("label")
+def verify_label(
+    limit: int = typer.Option(50, "--limit", "-n", min=1, help="Max events to review."),
+    out: Path = typer.Option(
+        Path("data/verifier_gold_v1.jsonl"),
+        "--out",
+        help="Output gold-label JSONL path.",
+    ),
+    append: bool = typer.Option(True, "--append/--overwrite", help="Append to existing file."),
+) -> None:
+    """Manually label verifier events (accept/reprompt/reject) into a gold set."""
+    settings = get_settings()
+    log_path = settings.home / "verifier_log.sqlite"
+    if not log_path.exists():
+        console.print(f"[dim]no verifier log at {log_path}[/dim]")
+        return
+    vlog = VerifierLog(log_path)
+    try:
+        events = list(reversed(vlog.recent(limit=max(1, limit))))
+        if not events:
+            console.print("[dim](no verifier events)[/dim]")
+            return
+        rows = load_rows(out) if append and out.exists() else []
+        labels = {"a": "accept", "r": "reprompt", "j": "reject"}
+        reviewed = 0
+        for ev in events:
+            ctx_record = vlog.context_for(ev.id)
+            ctx = context_from_snapshot(ctx_record)
+            rule = RuleBasedVerifier().score(ev.candidate, ctx)
+            snippet = ev.candidate if len(ev.candidate) <= 700 else ev.candidate[:700] + "…"
+            console.print(
+                Panel(
+                    snippet,
+                    title=(
+                        f"{ev.source}  decision={ev.decision} energy={ev.energy:.2f} "
+                        f"id={ev.id[:8]}"
+                    ),
+                    border_style="cyan",
+                )
+            )
+            if ctx_record is not None:
+                ctx_preview = render_context_text(ctx_record)
+                if ctx_preview:
+                    preview = ctx_preview if len(ctx_preview) <= 600 else ctx_preview[:600] + "…"
+                    console.print(Panel(preview, title="context", border_style="dim"))
+            choice = (
+                Prompt.ask(
+                    "label [a=accept / r=reprompt / j=reject / s=skip / q=quit]",
+                    default=ev.decision[:1].lower(),
+                )
+                .strip()
+                .lower()
+            )
+            if choice == "q":
+                break
+            if choice == "s":
+                continue
+            label = labels.get(choice)
+            if label is None:
+                console.print("[yellow]skipped (unknown label key)[/yellow]")
+                continue
+            rows.append(
+                VerifierDatasetRow(
+                    event_id=f"manual-{ev.id}",
+                    source=ev.source,
+                    candidate=ev.candidate,
+                    ctx_text=render_context_text(ctx_record),
+                    ctx_features=feature_dict(
+                        ev.candidate, ctx, source=ev.source, rule_verdict=rule
+                    ),
+                    rule_energy=float(rule.energy),
+                    rule_decision=rule.decision,
+                    rule_violations=[v.kind for v in rule.violations],
+                    label_source="manual_gold",
+                    label=label,  # type: ignore[arg-type]
+                    reprompt_used=ev.reprompt_used,
+                    meta={"event_id": ev.id},
+                )
+            )
+            reviewed += 1
+        write_rows(out, rows)
+        console.print(f"[green]wrote {len(rows)} row(s)[/green] to {out} (new labels: {reviewed})")
+    finally:
+        vlog.close()
+
+
+@verify_app.command("export")
+def verify_export(
+    out: Path = typer.Option(
+        Path("data/verifier_dataset_v1.jsonl"),
+        "--out",
+        "-o",
+        help="Output JSONL dataset path.",
+    ),
+    gold: Path = typer.Option(
+        Path("data/verifier_gold_v1.jsonl"),
+        "--gold",
+        help="Optional manual gold JSONL path.",
+    ),
+    limit: int = typer.Option(2000, "--limit", min=1, help="Max telemetry rows to include."),
+    mined: bool = typer.Option(True, "--mined/--no-mined", help="Include correction-mined rows."),
+    perturb: bool = typer.Option(
+        True,
+        "--perturb/--no-perturb",
+        help="Include synthetic perturbation rows.",
+    ),
+) -> None:
+    """Export unified verifier dataset (telemetry + mined + perturb + optional gold)."""
+    settings = get_settings()
+    rows = export_verifier_dataset(
+        settings.home,
+        out_path=out,
+        gold_path=gold if gold.exists() else None,
+        include_mined=mined,
+        include_perturb=perturb,
+        limit=limit,
+    )
+    by_source: dict[str, int] = {}
+    for row in rows:
+        by_source[row.label_source] = by_source.get(row.label_source, 0) + 1
+    source_bits = ", ".join(f"{k}={v}" for k, v in sorted(by_source.items()))
+    console.print(f"[green]exported {len(rows)} row(s)[/green] -> {out}")
+    if source_bits:
+        console.print(f"[dim]{source_bits}[/dim]")
+
+
+def _score_candidate(
+    *,
+    text: str,
+    source: str,
+    explain: bool,
+    threshold_reprompt: float,
+    threshold_reject: float,
+) -> None:
     settings = get_settings()
     fact_store = FactStore(settings.home)
     identity = IdentityStore(settings.home).load()
@@ -132,6 +308,47 @@ def verify(
         row = [vi.kind, f"{vi.weight:.2f}", vi.detail]
         if explain:
             row.append(vi.evidence)
+        t.add_row(*row)
+    console.print(t)
+
+
+def _verify_history(home: Path, *, limit: int, explain: bool) -> None:
+    log_path = home / "verifier_log.sqlite"
+    if not log_path.exists():
+        console.print(f"[dim]no verifier log at {log_path}[/dim]")
+        return
+    vlog = VerifierLog(log_path)
+    try:
+        events = vlog.recent(limit=max(1, limit))
+    finally:
+        vlog.close()
+    if not events:
+        console.print("[dim](no verifier events)[/dim]")
+        return
+    t = Table(title=f"verifier history ({len(events)})")
+    t.add_column("ts", style="dim")
+    t.add_column("source")
+    t.add_column("decision")
+    t.add_column("energy", justify="right")
+    t.add_column("reprompt", justify="center")
+    t.add_column("candidate", overflow="fold")
+    if explain:
+        t.add_column("violations", overflow="fold")
+    for ev in events:
+        from datetime import datetime
+
+        ts_label = datetime.fromtimestamp(ev.ts).strftime("%Y-%m-%d %H:%M:%S")
+        row = [
+            ts_label,
+            ev.source,
+            ev.decision,
+            f"{ev.energy:.2f}",
+            "yes" if ev.reprompt_used else "",
+            ev.candidate[:200] + ("…" if len(ev.candidate) > 200 else ""),
+        ]
+        if explain:
+            kinds = ", ".join(v.get("kind", "") for v in ev.violations)
+            row.append(kinds)
         t.add_row(*row)
     console.print(t)
 
@@ -253,11 +470,16 @@ app.add_typer(state_app, name="state")
 state_app.add_typer(state_note_app, name="note")
 app.add_typer(snapshot_app, name="snapshot")
 fact_app = typer.Typer(name="fact", help="Inspect structured facts (owner + category).")
+fact_category_app = typer.Typer(
+    name="category",
+    help="Register user-approved dynamic fact categories (F.3).",
+)
 note_app = typer.Typer(
     name="note", help="Manage assistant.notes facts (small thoughts the assistant keeps)."
 )
 app.add_typer(identity_app, name="identity")
 app.add_typer(fact_app, name="fact")
+fact_app.add_typer(fact_category_app, name="category")
 app.add_typer(note_app, name="note")
 
 
@@ -320,6 +542,90 @@ def note_clear(
             raise typer.Exit(code=1)
     n = store.delete_where(category=CAT_ASSISTANT_NOTES)
     console.print(f"[yellow]cleared {n} note(s)[/yellow]")
+
+
+@fact_category_app.command("add")
+def fact_category_add(
+    slug: str = typer.Argument(..., help="Short name, e.g. food → user.food"),
+    description: str = typer.Option("", "--description", help="Optional description."),
+) -> None:
+    """Register a dynamic category (``user.<slug>``)."""
+    settings = get_settings()
+    reg = FactCategoryRegistry(settings.home)
+    try:
+        defn = reg.register(slug, description=description)
+    except ValueError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(code=2) from exc
+    console.print(f"[green]registered[/green] {defn.id}")
+
+
+@fact_category_app.command("list")
+def fact_category_list() -> None:
+    """List user-registered dynamic categories."""
+    settings = get_settings()
+    reg = FactCategoryRegistry(settings.home)
+    custom = reg.list_custom()
+    if not custom:
+        console.print("[dim](no custom categories; built-in categories always available)[/dim]")
+        return
+    t = Table(title=f"custom categories ({len(custom)})")
+    t.add_column("id")
+    t.add_column("description", overflow="fold")
+    for c in custom:
+        t.add_row(c.id, c.description or "")
+    console.print(t)
+
+
+@fact_category_app.command("remove")
+def fact_category_remove(
+    slug: str = typer.Argument(..., help="Category slug or full id (e.g. food or user.food)."),
+) -> None:
+    """Remove a user-registered category (does not delete existing facts)."""
+    settings = get_settings()
+    reg = FactCategoryRegistry(settings.home)
+    try:
+        removed = reg.remove(slug)
+    except ValueError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(code=2) from exc
+    if removed:
+        console.print(f"[yellow]removed[/yellow] {FactCategoryRegistry.normalize_slug(slug)}")
+    else:
+        console.print("[dim]category not found[/dim]")
+
+
+@fact_app.command("set")
+def fact_set(
+    category: str = typer.Option(..., "--category", help="Category id, e.g. user.food"),
+    value: str = typer.Option(..., "--value", help="Fact value."),
+    subject: str | None = typer.Option(None, "--subject", help="Optional subject chip."),
+    owner: str = typer.Option("user", "--owner", help="Fact owner (user | assistant)."),
+) -> None:
+    """Upsert one fact (including custom categories registered via ``fact category add``)."""
+    body = value.strip()
+    if not body:
+        console.print("Value is empty.")
+        raise typer.Exit(code=2)
+    settings = get_settings()
+    reg = FactCategoryRegistry(settings.home)
+    store = FactStore(settings.home, category_registry=reg)
+    cat = category.strip()
+    if not reg.is_allowed(cat):
+        console.print(f"Unknown category {cat!r}. Register with: lsm fact category add <slug>")
+        raise typer.Exit(code=2)
+    if owner not in ("user", "assistant", "shared"):
+        console.print("owner must be user, assistant, or shared.")
+        raise typer.Exit(code=2)
+    fact = store.upsert(
+        Fact(
+            owner=owner,  # type: ignore[arg-type]
+            category=cat,
+            subject=subject.strip() if subject else None,
+            value=body,
+        )
+    )
+    console.print(f"[green]fact set[/green] id={fact.id} [{fact.category}]")
 
 
 @fact_app.command("list")

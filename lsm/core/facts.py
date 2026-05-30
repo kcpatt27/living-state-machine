@@ -26,7 +26,10 @@ import time
 import uuid
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from lsm.core.fact_categories import FactCategoryRegistry
 
 from lsm.core.identity import IdentityProfile
 from lsm.core.normalize import NullTermNormalizer, TermNormalizer, clean_term
@@ -65,8 +68,58 @@ MAX_FACT_VALUE_LEN = 80
 # --------------------------------------------------------------------------- #
 
 _LIKE = re.compile(
-    r"\b(?:i\s+)?(?:like|love|enjoy|prefer)\s+([^.\n?!]{2,120})",
+    r"\b(?:like|love|enjoy|prefer)\s+([^.\n?!]{2,120})",
     re.IGNORECASE,
+)
+_FIRST_PERSON = re.compile(
+    r"\b(?:i(?:'m| am)?|my|mine|we(?:'re| are)?|our|us)\b",
+    re.IGNORECASE,
+)
+_YOU_BEFORE_LIKE = re.compile(
+    r"\b(?:you|your|yours)\s+"
+    r"(?:(?:would|could|should|might|may)\s+)?"
+    r"(?:like|love|enjoy|prefer)\b",
+    re.IGNORECASE,
+)
+_FUNCTION_WORD_STARTS = frozenset({"for", "to", "of", "about", "with"})
+_PREF_VALUE_STOP = frozenset(
+    {
+        "for",
+        "to",
+        "of",
+        "about",
+        "with",
+        "from",
+        "the",
+        "me",
+        "you",
+        "your",
+        "my",
+        "our",
+        "and",
+        "or",
+        "but",
+        "that",
+        "this",
+        "make",
+        "have",
+        "been",
+        "being",
+        "would",
+        "could",
+        "should",
+        "will",
+        "can",
+        "did",
+        "does",
+        "do",
+        "are",
+        "was",
+        "were",
+        "is",
+        "am",
+        "be",
+    }
 )
 _DISLIKE = re.compile(
     r"\b(?:i\s+)?(?:dislike|hate|avoid)\s+([^.\n?!]{2,120})",
@@ -269,10 +322,18 @@ class FactStore:
 
     FILENAME = "facts.json"
 
-    def __init__(self, home: Path) -> None:
+    def __init__(
+        self,
+        home: Path,
+        *,
+        category_registry: FactCategoryRegistry | None = None,
+    ) -> None:
+        from lsm.core.fact_categories import FactCategoryRegistry as _Registry
+
         self.home = home
         self.home.mkdir(parents=True, exist_ok=True)
         self.path = self.home / self.FILENAME
+        self._category_registry = category_registry or _Registry(home)
         self._facts: dict[str, Fact] = {}
         self.load()
 
@@ -316,6 +377,11 @@ class FactStore:
                 time.sleep(0.02 * (attempt + 1))
 
     def upsert(self, fact: Fact) -> Fact:
+        if not self._category_registry.is_allowed(fact.category):
+            raise ValueError(
+                f"unknown category {fact.category!r}; register with "
+                f"'lsm fact category add <slug>'"
+            )
         now = time.time()
         if fact.id in self._facts:
             existing = self._facts[fact.id]
@@ -509,6 +575,32 @@ def _truncate_value(value: str, *, limit: int = MAX_FACT_VALUE_LEN) -> str | Non
         # Hard reject paragraph-blob captures; truncation hides the bug.
         return None
     return v
+
+
+def _like_match_is_first_person(segment: str, match: re.Match[str]) -> bool:
+    """Reject second-person ``you like …``; require a first-person anchor."""
+    before = segment[: match.start()]
+    tail = before[-80:] if len(before) > 80 else before
+    if _YOU_BEFORE_LIKE.search(tail):
+        return False
+    window = before[-40:] + segment[match.start() : min(len(segment), match.end() + 24)]
+    if _FIRST_PERSON.search(window):
+        return True
+    prefix = before.strip()
+    if not prefix or re.search(r"[.?!]\s*$", prefix):
+        return _FIRST_PERSON.search(segment[match.start() : match.end() + 24]) is not None
+    return False
+
+
+def _reject_function_word_preference(value: str) -> bool:
+    """Drop captures like ``for me to make to you`` (no concrete noun)."""
+    words = re.findall(r"[a-z']{2,}", value.strip().lower())
+    if not words:
+        return True
+    if words[0] not in _FUNCTION_WORD_STARTS:
+        return False
+    concrete = [w for w in words if len(w) >= 4 and w not in _PREF_VALUE_STOP]
+    return len(concrete) == 0
 
 
 def _derive_question_subject(text: str) -> str | None:
@@ -759,55 +851,52 @@ def extract_facts_from_user_turn(
         )
 
     # --- Paired-term preferences (restaurants today, generic infrastructure) ---
+    segments_with_paired_restaurants: set[str] = set()
     for seg in segments:
-        facts.extend(
-            _extract_paired_preferences(
-                seg,
-                scope="user.preferences:restaurants",
-                subject="restaurants",
-                aliases=_RESTAURANT_ALIASES,
-                normalizer=norm,
-                tags=base_tags,
-            )
+        paired = _extract_paired_preferences(
+            seg,
+            scope="user.preferences:restaurants",
+            subject="restaurants",
+            aliases=_RESTAURANT_ALIASES,
+            normalizer=norm,
+            tags=base_tags,
         )
+        facts.extend(paired)
+        if len(paired) >= 2:
+            segments_with_paired_restaurants.add(seg)
 
-    # --- Single-term preferences ---
-    if is_correction:
-        # On correction turns: tightly scoped, per-segment, short chips only.
-        for seg in segments:
-            if _text_has_paired_terms(seg, _RESTAURANT_ALIASES):
-                continue  # paired path already handled
-            for m in _LIKE.finditer(seg):
-                val = _truncate_value(m.group(1))
-                if val is None:
-                    continue
-                canonical = norm.canonicalize("user.preferences:general", val)
-                if not canonical:
-                    continue
-                facts.append(
-                    _new_fact(
-                        CAT_USER_PREFERENCES,
-                        canonical,
-                        subject=None,
-                        tags=base_tags,
-                        source_segment=seg,
-                    )
-                )
-    else:
-        for m in _LIKE.finditer(text):
-            val = _truncate_value(m.group(1))
-            if val is None:
+    # --- Single-term preferences (per-segment; skip when paired path won) ---
+    for seg in segments:
+        if seg in segments_with_paired_restaurants:
+            continue
+        for m in _LIKE.finditer(seg):
+            if not _like_match_is_first_person(seg, m):
                 continue
-            subj = "restaurants" if "restaurant" in val.lower() else None
-            scope = (
-                "user.preferences:restaurants"
-                if subj == "restaurants"
-                else "user.preferences:general"
-            )
+            val = _truncate_value(m.group(1))
+            if val is None or _reject_function_word_preference(val):
+                continue
+            if is_correction:
+                scope = "user.preferences:general"
+                subj = None
+            else:
+                subj = "restaurants" if "restaurant" in val.lower() else None
+                scope = (
+                    "user.preferences:restaurants"
+                    if subj == "restaurants"
+                    else "user.preferences:general"
+                )
             canonical = norm.canonicalize(scope, val)
             if not canonical:
                 continue
-            facts.append(_new_fact(CAT_USER_PREFERENCES, canonical, subject=subj, tags=base_tags))
+            facts.append(
+                _new_fact(
+                    CAT_USER_PREFERENCES,
+                    canonical,
+                    subject=subj,
+                    tags=base_tags,
+                    source_segment=seg,
+                )
+            )
 
     return facts
 

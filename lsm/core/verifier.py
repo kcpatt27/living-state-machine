@@ -15,15 +15,20 @@ This module ships:
 
 V.1 does not ship a learned scorer. The Protocol shape is identical to what a
 learned scorer would expose, so a contrastive / EBM-style scorer can drop in
-later as a clean ablation. Telemetry (sqlite log) is deferred to a follow-on.
+later as a clean ablation. Telemetry is persisted via :mod:`lsm.core.verifier_log`.
 """
 
 from __future__ import annotations
 
+import json
+import math
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal, Protocol, runtime_checkable
+
+import numpy as np
 
 from lsm.core.facts import (
     CAT_USER_MEDIA,
@@ -428,6 +433,14 @@ class RuleBasedVerifier:
             merged.update(weights)
         self._weights: dict[ViolationKind, float] = merged
 
+    @property
+    def threshold_reprompt(self) -> float:
+        return self._threshold_reprompt
+
+    @property
+    def threshold_reject(self) -> float:
+        return self._threshold_reject
+
     def _reweight(self, vs: Sequence[Violation]) -> list[Violation]:
         if not vs:
             return []
@@ -482,3 +495,196 @@ class RuleBasedVerifier:
             decision=decision,
             fix_hints=fix_hints,
         )
+
+
+class LinearLearnedVerifier:
+    """Multinomial linear classifier over hand-crafted verifier features."""
+
+    def __init__(
+        self,
+        model_path: Path | str,
+        *,
+        fallback: RuleBasedVerifier | None = None,
+        temperature: float = 1.0,
+    ) -> None:
+        from lsm.core.verifier_features import feature_names
+
+        artifact = _load_joblib_or_json(Path(model_path))
+        coef = np.asarray(artifact["coef"], dtype=np.float32)
+        intercept = np.asarray(artifact["intercept"], dtype=np.float32)
+        classes_raw = artifact.get("classes", [])
+        feat_raw = artifact.get("feature_names", feature_names())
+        self._coef = coef
+        self._intercept = intercept
+        self._classes = [str(c) for c in classes_raw] if isinstance(classes_raw, list) else []
+        self._feature_names = (
+            [str(n) for n in feat_raw] if isinstance(feat_raw, list) else feature_names()
+        )
+        temp = artifact.get("temperature", temperature)
+        self._temperature = (
+            float(temp) if isinstance(temp, int | float | str) else float(temperature)
+        )
+        self._fallback = fallback or RuleBasedVerifier()
+        if self._coef.ndim != 2:
+            raise ValueError("linear verifier coef must be 2D")
+        if self._intercept.ndim != 1:
+            raise ValueError("linear verifier intercept must be 1D")
+        if self._coef.shape[0] != len(self._classes):
+            raise ValueError("linear verifier classes mismatch coef rows")
+
+    def score(self, candidate: str, ctx: VerifierContext) -> Verdict:
+        from lsm.core.verifier_features import feature_dict
+
+        base = self._fallback.score(candidate, ctx)
+        f = feature_dict(candidate, ctx, rule_verdict=base)
+        x = np.asarray([float(f.get(name, 0.0)) for name in self._feature_names], dtype=np.float32)
+        logits = (self._coef @ x) + self._intercept
+        probs = _softmax(logits / max(self._temperature, 1e-6))
+        decision = self._classes[int(np.argmax(probs))]
+        p_accept = float(probs[self._class_index("accept")])
+        energy = -math.log(max(p_accept, 1e-6))
+        return Verdict(
+            energy=energy,
+            decision=decision,  # type: ignore[arg-type]
+            violations=base.violations,
+            fix_hints=base.fix_hints,
+        )
+
+    def _class_index(self, label: str) -> int:
+        try:
+            return self._classes.index(label)
+        except ValueError:
+            return 0
+
+
+class EncoderLearnedVerifier:
+    """ONNX-backed cross-encoder verifier over ``candidate [SEP] context``."""
+
+    def __init__(
+        self,
+        model_path: Path | str,
+        *,
+        tokenizer_path: Path | str,
+        fallback: RuleBasedVerifier | None = None,
+        max_length: int = 384,
+    ) -> None:
+        try:
+            import onnxruntime as ort
+            from transformers import AutoTokenizer
+        except Exception as exc:
+            raise RuntimeError(
+                "EncoderLearnedVerifier requires onnxruntime + transformers installed."
+            ) from exc
+        self._ort = ort
+        self._tokenizer = AutoTokenizer.from_pretrained(str(tokenizer_path))
+        self._session = ort.InferenceSession(str(model_path), providers=["CPUExecutionProvider"])
+        self._max_length = int(max_length)
+        self._classes = ["accept", "reprompt", "reject"]
+        self._fallback = fallback or RuleBasedVerifier()
+
+    def score(self, candidate: str, ctx: VerifierContext) -> Verdict:
+        base = self._fallback.score(candidate, ctx)
+        ctx_text = _context_as_text(ctx)
+        enc = self._tokenizer(
+            candidate,
+            ctx_text,
+            truncation=True,
+            max_length=self._max_length,
+            padding="max_length",
+            return_tensors="np",
+        )
+        ort_inputs = {
+            k: v for k, v in enc.items() if k in {"input_ids", "attention_mask", "token_type_ids"}
+        }
+        logits = np.asarray(self._session.run(None, ort_inputs)[0], dtype=np.float32)[0]
+        probs = _softmax(logits)
+        decision = self._classes[int(np.argmax(probs))]
+        p_accept = float(probs[0])
+        energy = -math.log(max(p_accept, 1e-6))
+        return Verdict(
+            energy=energy,
+            decision=decision,  # type: ignore[arg-type]
+            violations=base.violations,
+            fix_hints=base.fix_hints,
+        )
+
+
+class HybridVerifier:
+    """Rule safety floor + learned head for low-energy decisions."""
+
+    def __init__(
+        self,
+        learned: Verifier,
+        *,
+        rule: RuleBasedVerifier | None = None,
+        reject_floor: float | None = None,
+    ) -> None:
+        self._learned = learned
+        self._rule = rule or RuleBasedVerifier()
+        self._reject_floor = (
+            float(reject_floor) if reject_floor is not None else self._rule.threshold_reject
+        )
+
+    def score(self, candidate: str, ctx: VerifierContext) -> Verdict:
+        rule_verdict = self._rule.score(candidate, ctx)
+        if rule_verdict.energy >= self._reject_floor:
+            return rule_verdict
+        learned_verdict = self._learned.score(candidate, ctx)
+        return Verdict(
+            energy=learned_verdict.energy,
+            decision=learned_verdict.decision,
+            violations=rule_verdict.violations,
+            fix_hints=rule_verdict.fix_hints,
+        )
+
+
+def _softmax(logits: np.ndarray) -> np.ndarray:
+    x = np.asarray(logits, dtype=np.float32)
+    x = x - np.max(x)
+    exp = np.exp(x)
+    z = np.sum(exp)
+    if z <= 0:
+        return np.zeros_like(exp)
+    return exp / z
+
+
+def _load_joblib_or_json(path: Path) -> dict[str, object]:
+    if not path.exists():
+        raise FileNotFoundError(path)
+    try:
+        import joblib
+
+        data = joblib.load(path)
+        if isinstance(data, dict):
+            return data
+    except Exception:
+        pass
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("linear verifier artifact must be dict-like")
+    return raw
+
+
+def _context_as_text(ctx: VerifierContext) -> str:
+    parts: list[str] = []
+    if ctx.identity is not None:
+        parts.append(f"identity: {ctx.identity.name} - {ctx.identity.description}")
+    if ctx.facts is not None:
+        try:
+            facts = list(ctx.facts.all_facts())
+        except Exception:
+            facts = []
+        if facts:
+            parts.append("facts:")
+            for fact in facts[:24]:
+                subj = f"{fact.subject}: " if fact.subject else ""
+                parts.append(f"- [{fact.category}] {subj}{fact.value}")
+    if ctx.recent_corrections:
+        parts.append("recent_corrections:")
+        for item in ctx.recent_corrections[:8]:
+            parts.append(f"- {item.text}")
+    if ctx.recent_user_turns:
+        parts.append("recent_user_turns:")
+        for turn in ctx.recent_user_turns[:8]:
+            parts.append(f"- {turn}")
+    return "\n".join(parts)

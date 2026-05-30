@@ -1,13 +1,15 @@
-name: recall_pref_v1_raw_llm
+name: sample_recall_pref_v1_raw_llm
 task:
   name: recall_pref_v1
-  num_items: 20
-  distractor_turns: 30
+  num_items: 10
+  distractor_turns: 20
 system:
   kind: raw_llm
   backend: ollama
-  model: qwen2.5:14b-instruct-q4_K_M
-ablation: {}
+  model: qwen2.5:7b-instruct-q8_0
 run:
-  seeds: [0, 1, 2]
+  seeds: [0]
   max_context_turns: 0
+embedder:
+  kind: hash
+  dim: 384

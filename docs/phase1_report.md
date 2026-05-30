@@ -177,18 +177,24 @@ matches production `lsm chat`. Configs:
 
 | System | Accuracy (mean ± std) |
 | --- | --- |
-| `raw_llm` | _fill from `experiments/*-sample_recall_pref_v2_*`/metrics.json_ |
-| `naive_rag` | _fill after suite run_ |
-| `lsm_full` | _fill after suite run_ |
-| `lsm_no_association` | _fill after suite run_ |
-| `lsm_no_habituation` | _fill after suite run_ |
-| `lsm_no_writer` | _fill after suite run_ |
-| `lsm_flat_memory` | _fill after suite run_ |
-| `lsm_multi_memory` | _fill after suite run_ |
-| `lsm_hybrid_verifier` | _fill after suite run_ |
+| `raw_llm` | 0.911 ± 0.038 |
+| `naive_rag` | 0.044 ± 0.038 |
+| `lsm_full` | 0.089 ± 0.038 |
+| `lsm_no_association` | 0.089 ± 0.038 |
+| `lsm_no_habituation` | 0.089 ± 0.038 |
+| `lsm_no_writer` | 0.000 ± 0.000 |
+| `lsm_flat_memory` | 0.089 ± 0.038 |
+| `lsm_multi_memory` | 0.089 ± 0.038 |
+| `lsm_hybrid_verifier` | 0.089 ± 0.038 |
 
-_Suite launched at Phase 1 closeout (2026-05-29); replace placeholders when
-`run_recall_pref_v2_suite.ps1` completes._
+_Suite completed 2026-05-30_ (`20260530-072304-…-raw_llm` through
+`…-072606-hybrid_verifier`). v2 **does** separate ablations (writer gate
+critical at 0.000), but headline LSM configs cluster at ~0.09 while
+`raw_llm` stays high — likely interaction of long scripted dialogues,
+decoy pollution, and retrieval/top-k limits vs full-context baseline.
+Treat as **stress-test**, not a Phase 1 success claim. Full write-up (baseline
+mismatch, retrieval/decoys, learning-vs-regex direction):
+**`docs/recall_pref_v2_findings.md`**. Exit framing: `docs/phase1_exit.md`.
 
 ### 5.3 Retrieval-layer benchmarks (MRR; higher is better)
 

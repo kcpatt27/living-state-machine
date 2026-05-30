@@ -39,11 +39,16 @@
 
 ## Known limitations (honest)
 
-1. **Easy v1 bench** — many ablations tied at 1.0 until v2 / protocol hardening; v2 adds decoys + 45-turn gaps.
-2. **Eval path** — v1 E2E used `LLMSummarizerUpdater`; v2 uses `FactsBackedUpdater` (matches `lsm chat` default).
-3. **Association / multi-memory** — may still tie on synthetic prefs; negative result on `multi_session_consistency_v1` logged.
-4. **Verifier dataset** — n=13 local rows; calibration is directional, not paper-grade ML.
-5. **Encryption at rest** — listed in brief; not fully audited in this exit pass.
+1. **Easy v1 bench** — many ablations tied at 1.0 until protocol hardening; see §5.1.
+2. **Hard v2 bench** — `recall_pref_v2` does **not** support the same headline claim as
+   v1 (LSM ≪ `raw_llm` on full-context baseline). Documented in
+   **`docs/recall_pref_v2_findings.md`** — stress test, not exit blocker.
+3. **Eval path** — v1 E2E used `LLMSummarizerUpdater`; v2 uses `FactsBackedUpdater`
+   (matches `lsm chat` default).
+4. **Association / multi-memory** — tied on v2 prefs; CPU negative on
+   `multi_session_consistency_v1` logged.
+5. **Verifier dataset** — n=13 local rows; calibration is directional, not paper-grade ML.
+6. **Encryption at rest** — listed in brief; not fully audited in this exit pass.
 
 ## Reproduction commands
 

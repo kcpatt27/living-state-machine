@@ -22,7 +22,9 @@ written. Format:
 - Expected delta: +0.20 absolute at matched token budget.
 - Falsification: delta < +0.05 across 3 seeds.
 - **Outcome:** **Supported** on v1 protocol hardening — LSM 1.000 vs naive_rag
-  0.100 (Δ +0.90). v2 harder bench pending (`recall_pref_v2`).
+  0.100 (Δ +0.90). **v2 stress test:** LSM ~0.09 vs `raw_llm` ~0.91 (unmatched
+  full-dialogue baseline); see `docs/recall_pref_v2_findings.md` — does not
+  overturn v1 at matched retrieval budget.
 
 ### H5: habituation improves retrieval quality by suppressing repeated filler
 
@@ -31,7 +33,8 @@ written. Format:
 - Expected delta: +0.05–0.10 absolute.
 - Falsification: no improvement or regression across 3 seeds.
 - **Outcome:** **Partial** — v1 protocol: `lsm_no_habituation` 0.967 vs full
-  1.000 (Δ −0.033). CPU `habituation_signal_v1` MRR +0.068. v2 pending.
+  1.000 (Δ −0.033). CPU `habituation_signal_v1` MRR +0.068. v2 E2E: tied full
+  at ~0.09 (bench bottleneck is retrieval/context, not habituation margin).
 
 ### H6: association traces improve multi-key retrieval
 
@@ -40,7 +43,7 @@ written. Format:
 - Expected delta: +0.10 absolute at matched top-k.
 - Falsification: no improvement across 3 seeds.
 - **Outcome:** **Supported** on CPU signal task (Δ MRR +0.317). E2E v1
-  `lsm_no_association` still 1.000 — bench too easy; v2 pending.
+  `lsm_no_association` still 1.000 — bench too easy; v2 tied at ~0.09.
 
 ### H7: gated writer reduces memory bloat without hurting recall
 
@@ -50,8 +53,8 @@ written. Format:
 - Expected: entries reduced by ~40%, accuracy unchanged or improved.
 - Falsification: accuracy drop > 0.03.
 - **Outcome:** **Supported** on writer precision (rules F1 0.98). E2E v1:
-  `lsm_no_writer` 0.933 vs full 1.000 (Δ −0.067 > falsification threshold on
-  easy bench — writer matters when stressed).
+  `lsm_no_writer` 0.933 vs full 1.000 (Δ −0.067). v2: `always` writer
+  **0.000** vs gated **~0.09** — writer gate critical under decoy load.
 
 ### H8: multi-timescale memory beats single-tier at long horizons
 

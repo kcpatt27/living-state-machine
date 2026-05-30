@@ -135,6 +135,7 @@ gitignored run dirs, see §5.1 footnote).
 | System | Accuracy (mean ± std) |
 | --- | --- |
 | `raw_llm` | 1.000 ± 0.000 |
+| `raw_llm` matched (`max_context_turns: 4`) | 0.000 ± 0.000 |
 | `naive_rag` | 0.100 ± 0.100 |
 | `lsm_full` | 1.000 ± 0.000 |
 | `lsm_no_association` | 1.000 ± 0.000 |
@@ -178,6 +179,7 @@ matches production `lsm chat`. Configs:
 | System | Accuracy (mean ± std) |
 | --- | --- |
 | `raw_llm` | 0.911 ± 0.038 |
+| `raw_llm` matched (`max_context_turns: 4`) | 0.000 ± 0.000 |
 | `naive_rag` | 0.044 ± 0.038 |
 | `lsm_full` | 0.089 ± 0.038 |
 | `lsm_no_association` | 0.089 ± 0.038 |
@@ -192,9 +194,11 @@ _Suite completed 2026-05-30_ (`20260530-072304-…-raw_llm` through
 critical at 0.000), but headline LSM configs cluster at ~0.09 while
 `raw_llm` stays high — likely interaction of long scripted dialogues,
 decoy pollution, and retrieval/top-k limits vs full-context baseline.
-Treat as **stress-test**, not a Phase 1 success claim. Full write-up (baseline
-mismatch, retrieval/decoys, learning-vs-regex direction):
-**`docs/recall_pref_v2_findings.md`**. Exit framing: `docs/phase1_exit.md`.
+Treat as **stress-test**, not a Phase 1 success claim. Matched `raw_llm` at
+**0.000** (last 4 turn-pairs only) vs full **0.911** confirms the headline gap
+is mostly **context access**, not wrapper failure — LSM ~0.09 still beats
+matched `raw_llm`. Full write-up: **`docs/recall_pref_v2_findings.md`**.
+Fair-baseline driver: `scripts/run_recall_pref_fair_baselines.ps1`.
 
 ### 5.3 Retrieval-layer benchmarks (MRR; higher is better)
 

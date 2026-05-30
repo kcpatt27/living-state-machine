@@ -19,6 +19,7 @@ from dataclasses import dataclass
 
 from lsm.core.association import Association, NullAssociation, chain_combiners
 from lsm.core.embeddings import Embedder
+from lsm.core.fact_retrieval import fact_lines_for_prompt
 from lsm.core.facts import FactStore, apply_extracted_facts
 from lsm.core.habituation import Habituation, NullHabituation
 from lsm.core.memory import MemoryStore, ScoreCombiner
@@ -222,8 +223,18 @@ class LSMSystem:
                 await self._update_state(user_msg, reply)
 
         retrieved = self._retrieve(item.question)
+        fact_lines: list[str] = []
+        if self.fact_store is not None:
+            fact_lines = fact_lines_for_prompt(
+                self.fact_store,
+                item.question,
+                self.embedder,
+                top_k=self.config.top_k,
+                min_score=self.config.min_score,
+            )
         ctx = PromptContext(
             state_projection=self._state.project(),
+            structured_facts=fact_lines,
             retrieved=retrieved,
         )
         final_messages: Sequence[ChatMessage] = [ChatMessage(role="user", content=item.question)]

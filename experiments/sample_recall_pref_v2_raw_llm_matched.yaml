@@ -1,0 +1,19 @@
+name: sample_recall_pref_v2_raw_llm_matched
+task:
+  name: recall_pref_v2
+  num_items: 15
+  distractor_turns: 45
+system:
+  kind: raw_llm
+  backend: ollama
+  model: qwen2.5:7b-instruct-q8_0
+run:
+  seeds:
+  - 0
+  - 1
+  - 2
+  # Fair baseline: last N user+assistant pairs only (matches LSM top_k=4 budget).
+  max_context_turns: 4
+embedder:
+  kind: hash
+  dim: 384

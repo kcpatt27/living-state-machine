@@ -69,6 +69,40 @@ def test_runner_runs_raw_llm_baseline(monkeypatch, tmp_path: Path) -> None:
     assert all(r["passed"] for r in raw)
 
 
+def test_runner_raw_llm_max_context_turns_limits_history(monkeypatch, tmp_path: Path) -> None:
+    """max_context_turns keeps only the tail of the dialogue in the prompt."""
+
+    class _LenBackend:
+        async def generate(self, messages: Sequence[ChatMessage], options: GenerateOptions) -> str:
+            return str(len(messages))
+
+        async def stream(
+            self, messages: Sequence[ChatMessage], options: GenerateOptions
+        ) -> AsyncIterator[str]:
+            yield await self.generate(messages, options)
+
+        async def close(self) -> None:
+            return None
+
+    monkeypatch.setattr(runner, "build_backend", lambda *a, **k: _LenBackend())
+
+    cfg = {
+        "name": "matched_ctx",
+        "task": {"name": "recall_pref_v1", "num_items": 1, "distractor_turns": 10},
+        "system": {"kind": "raw_llm", "backend": "ollama", "model": "scripted"},
+        "embedder": {"kind": "hash", "dim": 32},
+        "run": {"seeds": [0], "max_context_turns": 2},
+    }
+    cfg_path = tmp_path / "cfg.yaml"
+    cfg_path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
+    run_dir = asyncio.run(
+        runner.run_from_config(cfg_path, out_root=tmp_path / "exp", run_id="matched")
+    )
+    raw = [json.loads(line) for line in (run_dir / "raw_outputs.jsonl").read_text().splitlines()]
+    # 2 turn-pairs (4 msgs) + final question = 5 messages, not full dialogue.
+    assert raw[0]["answer"] == "5"
+
+
 def test_runner_runs_naive_rag_baseline(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setattr(runner, "build_backend", lambda *a, **k: _ScriptedBackend())
     cfg = {

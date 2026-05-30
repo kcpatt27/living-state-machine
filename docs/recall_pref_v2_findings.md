@@ -52,8 +52,11 @@ So v2 compares **full transcript in context** vs **compressed state + 4 snippets
 That alone can explain much of the `raw_llm` vs LSM gap without invoking a
 mysterious regression.
 
-**Future eval hygiene (optional, not blocking Phase 1 exit):** add a
-`raw_llm` arm with `max_context_turns` capped to match LSM’s effective budget.
+**Matched baseline (eval hygiene):** `experiments/sample_recall_pref_v2_raw_llm_matched.yaml`
+sets `run.max_context_turns: 4` (last four user+assistant pairs + question).
+Driver: `scripts/run_recall_pref_fair_baselines.ps1`. v1 twin:
+`sample_recall_pref_v1_raw_llm_matched.yaml`. Fill results in §“Matched baseline
+results” below after running.
 
 ### 2. Opening lines vs conservative fact extraction
 
@@ -141,17 +144,33 @@ preference-specific templates for benchmark phrasing.
 | --- | --- |
 | v2 as Phase 1 success metric | **Rejected** — stress test only (`docs/phase1_exit.md`) |
 | v1 protocol + CPU signals | **Keep** as primary Phase 1 evidence |
-| Matched `raw_llm` baseline | **Optional** future eval tweak |
-| Eval `structured_facts` parity | **Backlog** when chat path is benchmarked fairly |
+| Matched `raw_llm` baseline | **Shipped** — YAMLs + `run_recall_pref_fair_baselines.ps1` |
+| Eval `structured_facts` parity | **Shipped** in `LSMSystem.answer` (fact retrieval at question time) |
 | More preference regexes | **Rejected** per product direction above |
 | Phase 2 train / dynamics | **Next** engineering track |
 
 ---
 
+## Matched baseline results
+
+| Task | `raw_llm` (full) | `raw_llm` matched (`max_context_turns: 4`) | `lsm_full` (v2) |
+| --- | --- | --- | --- |
+| `recall_pref_v1` | 1.000 ± 0.000 (§5.1) | **0.000 ± 0.000** | — |
+| `recall_pref_v2` | 0.911 ± 0.038 | **0.000 ± 0.000** | 0.089 ± 0.038 |
+
+_Runs 2026-05-30:_ `20260530-081245-sample_recall_pref_v1_raw_llm_matched`,
+`20260530-081310-sample_recall_pref_v2_raw_llm_matched`.
+
+With only the **last four** dialogue pairs in context, the opening preference is
+never visible — `raw_llm` fails entirely. LSM still ~0.09 because retrieval/state
+can surface older material. The v2 gap vs full `raw_llm` (~0.91) is therefore
+**dominated by full-transcript access**, not proof that the wrapper adds nothing.
+
 ## Reproduction
 
 ```powershell
 .\scripts\run_recall_pref_v2_suite.ps1
+.\scripts\run_recall_pref_fair_baselines.ps1
 ```
 
 Inspect per-run `metrics.json` under `experiments/20260530-*`.

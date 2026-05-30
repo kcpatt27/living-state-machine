@@ -13,6 +13,7 @@ BASE = Path("experiments")
 
 STEMS = [
     "raw_llm",
+    "raw_llm_matched",
     "naive_rag",
     "lsm",
     "lsm_no_assoc",
@@ -29,7 +30,10 @@ def main() -> None:
         cfg = yaml.safe_load(src.read_text(encoding="utf-8"))
         cfg["name"] = f"sample_recall_pref_v2_{stem}"
         cfg["task"] = dict(V2_TASK)
-        cfg["run"] = dict(RUN)
+        run: dict[str, object] = {"seeds": list(RUN["seeds"])}
+        if stem == "raw_llm_matched":
+            run["max_context_turns"] = 4
+        cfg["run"] = run
         cfg["embedder"] = dict(EMBED)
         if cfg.get("system", {}).get("kind") == "lsm":
             cfg["system"]["state_updater"] = "facts_backed"

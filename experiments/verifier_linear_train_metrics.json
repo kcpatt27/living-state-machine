@@ -1,0 +1,10 @@
+{
+  "n_rows": 13,
+  "train_accuracy": 0.6923076923076923,
+  "test_accuracy": 0.6923076923076923,
+  "classes": [
+    "accept",
+    "reject",
+    "reprompt"
+  ]
+}

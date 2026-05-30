@@ -36,6 +36,7 @@ models/
 data/
 experiments/*/
 !experiments/.gitkeep
+!experiments/verifier_linear_train_metrics.json
 *.sqlite
 *.sqlite3
 *.db
@@ -45,6 +46,8 @@ logs/
 *.log
 wandb/
 .env
+# Training checkpoints (keep summary.json + trainer_config.json under runs/)
+runs/**/ckpts/
 *.ckpt
 *.pt
 *.safetensors
@@ -52,3 +55,5 @@ research-docs/*.pdf
 
 # Encrypted user memory (never check in)
 memory_store/
+fact_categories.json
+facts.json

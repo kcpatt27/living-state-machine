@@ -63,6 +63,8 @@ uv run lsm eval run --config experiments/verifier_calibration_v1.yaml
 
 ## What comes next (Phase 2 — not part of this exit)
 
-- L11 `small` train: minimal vs stentor SSM on GPU (`scripts/run_phase2_tiny_smoke.py` smoke done).
+- L11 `small` train: `scripts/run_phase2_small_train.py` (tiny smoke:
+  `scripts/run_phase2_tiny_smoke.py` + `runs/tiny_smoke/summary.json`).
+- Post-train checklist: `docs/phase2_post_train_tasks.md`.
 - L12–L14: bake Stentor dynamics into recurrent core; hybrid `s_t` updater.
 - See `docs/north_star_science_in_simulation.md` for the long-term discovery goal (separate track).

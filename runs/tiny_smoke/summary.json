@@ -1,0 +1,26 @@
+{
+  "device": "cuda",
+  "steps": 128,
+  "variants": {
+    "minimal": {
+      "steps": 128,
+      "param_count": 5872320,
+      "ckpts": [
+        "runs\\tiny_smoke\\minimal\\step_000128.pt"
+      ],
+      "final_loss": 9.881869316101074,
+      "model_kind": "minimal",
+      "device": "cuda"
+    },
+    "stentor": {
+      "steps": 128,
+      "param_count": 7500486,
+      "ckpts": [
+        "runs\\tiny_smoke\\stentor\\step_000128.pt"
+      ],
+      "final_loss": 49.18296766281128,
+      "model_kind": "stentor",
+      "device": "cuda"
+    }
+  }
+}

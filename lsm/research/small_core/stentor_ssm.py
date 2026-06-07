@@ -44,6 +44,7 @@ from typing import Any
 from lsm.research.small_core.minimal_ssm import (
     MinimalSSMConfig,
     _require_torch,
+    diagonal_ssm_scan,
 )
 
 
@@ -98,48 +99,48 @@ def build_model(config: StentorSSMConfig) -> Any:
 
             if block_state is None:
                 h = torch.zeros(b, cfg.d_state, device=x.device, dtype=x.dtype)
-                M = torch.zeros(
-                    b, cfg.assoc_rank, cfg.assoc_rank, device=x.device, dtype=x.dtype
-                )
+                M = torch.zeros(b, cfg.assoc_rank, cfg.assoc_rank, device=x.device, dtype=x.dtype)
                 hab_ema = torch.zeros_like(u[:, 0])
             else:
                 h = block_state["h"]
                 M = block_state["M"]
                 hab_ema = block_state["hab_ema"]
 
-            outs = []
             decay = torch.sigmoid(self.hab_ema_decay)
-            for step in range(t):
-                u_t = u[:, step]
-
-                # Habituation: gate goes down as EMA of |u_t| grows.
-                if cfg.use_habituation:
+            u_gated = u
+            if cfg.use_habituation:
+                gated = []
+                for step in range(t):
+                    u_t = u[:, step]
                     g_hab = torch.sigmoid(self.hab_gate(u_t) - cfg.hab_gamma * hab_ema)
-                    u_gated = g_hab * u_t
-                    hab_ema = (1 - decay) * hab_ema + decay * u_gated.abs()
-                else:
-                    u_gated = u_t
+                    u_t_g = g_hab * u_t
+                    hab_ema = (1 - decay) * hab_ema + decay * u_t_g.abs()
+                    gated.append(u_t_g)
+                u_gated = torch.stack(gated, dim=1)
+            elif t > 1:
+                u_gated = u
 
-                b_t = self.B(u_gated)
-                h = A * h + b_t
+            h_seq = diagonal_ssm_scan(A, self.B(u_gated))
 
-                if cfg.use_association:
-                    phi_t = self.phi(u_gated)
+            if cfg.use_association:
+                outs = []
+                for step in range(t):
+                    u_t = u_gated[:, step]
+                    h = h_seq[:, step]
+                    phi_t = self.phi(u_t)
                     psi_t = self.psi(h)
                     M = (1 - cfg.assoc_lambda) * M + cfg.assoc_eta * torch.einsum(
                         "bi,bj->bij", phi_t, psi_t
                     )
-                    # Recall via M @ phi, then map back to state space via psi.weight.
                     assoc_bias = torch.einsum("bij,bi->bj", M, phi_t)
                     assoc_h = torch.einsum("rd,br->bd", self.psi.weight, assoc_bias)
                     h = h + cfg.assoc_beta * assoc_h
-
-                y_t = self.C(h) + self.D * u_gated
-                outs.append(y_t)
-
-            y = torch.stack(outs, dim=1)
+                    outs.append(self.C(h) + self.D * u_t)
+                y = torch.stack(outs, dim=1)
+            else:
+                y = self.C(h_seq) + self.D.unsqueeze(0).unsqueeze(0) * u_gated
             y = self.dropout(self.out_proj(y))
-            return x + y, {"h": h, "M": M, "hab_ema": hab_ema}
+            return x + y, {"h": h_seq[:, -1], "M": M, "hab_ema": hab_ema}
 
     class StentorSSM(nn.Module):
         def __init__(self, cfg: StentorSSMConfig) -> None:
@@ -166,10 +167,7 @@ def build_model(config: StentorSSMConfig) -> Any:
                 x, s_new = block(x, s)
                 new_states.append(s_new)
             x = self.final_norm(x)
-            if self.lm_head is None:
-                logits = x @ self.token_emb.weight.T
-            else:
-                logits = self.lm_head(x)
+            logits = x @ self.token_emb.weight.T if self.lm_head is None else self.lm_head(x)
             if return_states:
                 return logits, new_states
             return logits
@@ -179,9 +177,7 @@ def build_model(config: StentorSSMConfig) -> Any:
             for _ in range(self.cfg.n_layers):
                 states.append(
                     {
-                        "h": torch.zeros(
-                            batch_size, self.cfg.d_state, device=device, dtype=dtype
-                        ),
+                        "h": torch.zeros(batch_size, self.cfg.d_state, device=device, dtype=dtype),
                         "M": torch.zeros(
                             batch_size,
                             self.cfg.assoc_rank,

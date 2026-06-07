@@ -59,7 +59,7 @@ from lsm.core.multi_timescale import (
     TierConfig,
 )
 from lsm.core.projection import DeterministicProjection
-from lsm.core.state import FactsBackedUpdater, LLMSummarizerUpdater, StateStore
+from lsm.core.state import FactsBackedUpdater, LLMSummarizerUpdater, StateStore, StateUpdater
 from lsm.core.writer import (
     AlwaysWriter,
     LearnedWriter,
@@ -133,10 +133,39 @@ def _build_state_updater(
     embedder: HashEmbedder | FastEmbedder,
     memory: MemoryStore | None,
     fact_store: FactStore | None,
-) -> FactsBackedUpdater | LLMSummarizerUpdater:
+) -> StateUpdater:
     kind = str(system_cfg.get("state_updater", "facts_backed")).lower()
     if kind == "llm_summarizer":
         return LLMSummarizerUpdater(backend=backend, embedder=embedder, memory=memory)
+    if kind == "hybrid":
+        from transformers import GPT2Tokenizer
+
+        from lsm.research.hybrid import HybridConfig, hybrid_from_checkpoint
+
+        hybrid_cfg_dict = system_cfg.get("hybrid", {})
+        ckpt_path = Path(
+            hybrid_cfg_dict.get("ckpt_path", "runs/small/minimal/ckpts/step_002500.pt")
+        )
+
+        # Load GPT-2 tokenizer
+        tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+        if tokenizer.pad_token is None:
+            tokenizer.pad_token = tokenizer.eos_token
+
+        config = HybridConfig(
+            mode=hybrid_cfg_dict.get("mode", "topk_tokens"),
+            summary_tokens=int(hybrid_cfg_dict.get("summary_tokens", 48)),
+            top_k_neighbours=int(hybrid_cfg_dict.get("top_k_neighbours", 4)),
+            device=hybrid_cfg_dict.get("device", "cuda"),
+        )
+
+        return hybrid_from_checkpoint(
+            ckpt_path,
+            tokenizer=tokenizer,
+            config=config,
+            memory=memory,
+            embedder=embedder,
+        )
     return FactsBackedUpdater(
         embedder=embedder,
         projection=DeterministicProjection(),

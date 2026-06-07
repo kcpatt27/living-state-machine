@@ -38,9 +38,7 @@ def _base(name: str) -> TrainerConfig:
 
 def tiny(*, stentor: bool = False) -> TrainerConfig:
     cfg = _base("tiny")
-    base = MinimalSSMConfig(
-        vocab_size=16_000, d_model=256, n_layers=6, d_state=32, d_inner=512
-    )
+    base = MinimalSSMConfig(vocab_size=16_000, d_model=256, n_layers=6, d_state=32, d_inner=512)
     model = _promote(base) if stentor else base
     return replace(
         cfg,
@@ -56,28 +54,44 @@ def tiny(*, stentor: bool = False) -> TrainerConfig:
 
 
 def small(*, stentor: bool = False) -> TrainerConfig:
+    """~30M params; tuned for 5060 Ti **wall-clock**, not paper-scale step counts.
+
+    Defaults: 2_500 steps, seq_len 512 (was 20k / 1024 with a per-token Python loop).
+    Override ``steps`` / ``seq_len`` when you have time for a long run.
+    """
     cfg = _base("small")
-    base = MinimalSSMConfig(
-        vocab_size=32_000, d_model=512, n_layers=12, d_state=64, d_inner=1024
-    )
-    model = _promote(base) if stentor else base
+    base = MinimalSSMConfig(vocab_size=32_000, d_model=512, n_layers=12, d_state=64, d_inner=1024)
+    if stentor:
+        model = _promote(base)
+        # Association + habituation stay sequential; shorter ctx + fewer steps for wall-clock.
+        return replace(
+            cfg,
+            model_kind="stentor",
+            model=model,
+            vocab_size=base.vocab_size,
+            seq_len=256,
+            batch_size=8,
+            grad_accum=2,
+            steps=1_200,
+            save_every=400,
+        )
+    model = base
     return replace(
         cfg,
-        model_kind="stentor" if stentor else "minimal",
+        model_kind="minimal",
         model=model,
         vocab_size=base.vocab_size,
-        seq_len=1024,
-        batch_size=4,
-        grad_accum=4,
-        steps=20_000,
+        seq_len=512,
+        batch_size=8,
+        grad_accum=2,
+        steps=2_500,
+        save_every=500,
     )
 
 
 def medium(*, stentor: bool = False) -> TrainerConfig:
     cfg = _base("medium")
-    base = MinimalSSMConfig(
-        vocab_size=32_000, d_model=768, n_layers=16, d_state=96, d_inner=1536
-    )
+    base = MinimalSSMConfig(vocab_size=32_000, d_model=768, n_layers=16, d_state=96, d_inner=1536)
     model = _promote(base) if stentor else base
     return replace(
         cfg,
@@ -94,9 +108,7 @@ def medium(*, stentor: bool = False) -> TrainerConfig:
 
 def large(*, stentor: bool = False) -> TrainerConfig:
     cfg = _base("large")
-    base = MinimalSSMConfig(
-        vocab_size=32_000, d_model=1024, n_layers=20, d_state=128, d_inner=2048
-    )
+    base = MinimalSSMConfig(vocab_size=32_000, d_model=1024, n_layers=20, d_state=128, d_inner=2048)
     model = _promote(base) if stentor else base
     return replace(
         cfg,

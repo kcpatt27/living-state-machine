@@ -73,3 +73,13 @@ Template:
 
 - Was environment-only (`ModuleNotFoundError: torch`). Fixed via
   `uv sync --extra research`; superseded by the quality result above.
+
+## 2026-05-31 — Stentor SSM underperforms Minimal SSM on language modeling loss (Phase 2 small train)
+
+- Hypothesis tested: H12 (Stentor-augmented recurrence outperforms matched vanilla SSM on language modeling loss).
+- Run id(s): `runs/small/summary.json` (real TinyStories train).
+- Config: `lsm/research/training/scale_configs.py` (`small` profile).
+- Observed: `minimal` final loss **2.95** (2,500 steps, seq_len 512) vs `stentor` final loss **5.21** (1,200 steps, seq_len 256).
+- Expected: Stentor-augmented SSM should achieve equal or better perplexity/loss compared to minimal SSM at matched compute.
+- Analysis: Stentor SSM adds habituation gates (`g_hab`) and association traces (`M`) directly inside the recurrence. On a sequential story dataset like TinyStories, these additional recurrent dynamics introduce extra complexity and noise during early training phases. Furthermore, because the association trace update and habituation EMA decay are currently computed sequentially over the sequence length `T` (rather than fully parallelized via a scan like the diagonal SSM path), the training dynamics are slower and gradients may be more difficult to propagate efficiently.
+- Disposition: **Kept, flagged for optimization.** Stentor SSM's sequential gates and association traces require further tuning of hyper-parameters (e.g. `assoc_eta`, `assoc_lambda`, `hab_gamma`) or a parallelized scan implementation for the association trace before we can expect it to outperform a clean, parallelized minimal SSM on general language modeling.

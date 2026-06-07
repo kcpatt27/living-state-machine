@@ -25,6 +25,7 @@ file of token ids (the standard "tokens.bin" format).
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import math
@@ -49,11 +50,12 @@ class TrainerConfig:
 
     data_path: Path = Path("data/tokens.bin")
     vocab_size: int = 32_000
-    seq_len: int = 1024
-    batch_size: int = 4
-    grad_accum: int = 4
+    seq_len: int = 512
+    batch_size: int = 8
+    grad_accum: int = 2
 
-    steps: int = 10_000
+    steps: int = 2_500
+    compile_model: bool = False
     lr: float = 3e-4
     min_lr: float = 3e-5
     warmup_steps: int = 500
@@ -83,6 +85,17 @@ def cosine_lr(step: int, *, cfg: TrainerConfig) -> float:
     return cfg.min_lr + 0.5 * (cfg.lr - cfg.min_lr) * (1.0 + math.cos(math.pi * progress))
 
 
+def _setup_cuda_runtime(device: Any) -> None:
+    """TF32 + cuDNN autotune for matmul-heavy paths (scan still benefits)."""
+    if device.type != "cuda":
+        return
+    import torch
+
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+    torch.backends.cudnn.benchmark = True
+
+
 def packed_bin_iterator(
     path: Path, *, seq_len: int, batch_size: int, device: str, seed: int
 ) -> Iterator[Any]:
@@ -96,11 +109,18 @@ def packed_bin_iterator(
     max_start = n - (seq_len + 1)
     if max_start <= 0:
         raise RuntimeError(f"token file too small: {n} tokens, need > {seq_len + 1}")
+    win = seq_len + 1
+    use_cuda = device.startswith("cuda")
+    pin = use_cuda
     while True:
         starts = rng.integers(0, max_start, size=batch_size)
-        batch = [arr[s : s + seq_len + 1].astype(np.int64) for s in starts]
-        x = torch.tensor(np.stack(batch), device=device)
-        yield x
+        batch_np = np.empty((batch_size, win), dtype=np.int64)
+        for i, s in enumerate(starts):
+            batch_np[i] = np.asarray(arr[s : s + win], dtype=np.int64)
+        batch = torch.from_numpy(batch_np)
+        if pin:
+            batch = batch.pin_memory()
+        yield batch.to(device, non_blocking=pin)
 
 
 def build_for_cfg(cfg: TrainerConfig) -> Any:
@@ -128,9 +148,18 @@ def train(cfg: TrainerConfig, data_iter: Iterable[Any] | None = None) -> dict[st
 
     torch.manual_seed(cfg.seed)
     device = torch.device(cfg.device)
+    _setup_cuda_runtime(device)
     model = build_for_cfg(cfg).to(device)
+    # Stentor still has a sequential association loop; compile often slows first runs on Windows.
+    if cfg.compile_model and device.type == "cuda" and cfg.model_kind == "minimal":
+        try:
+            model = torch.compile(model)  # type: ignore[assignment]
+            log.info("torch.compile enabled (minimal)")
+        except Exception:
+            log.warning("torch.compile unavailable, using eager mode", exc_info=True)
     param_count = sum(p.numel() for p in model.parameters())
     log.info("model ready; params=%.2fM", param_count / 1e6)
+    tokens_per_step = cfg.batch_size * cfg.seq_len * cfg.grad_accum
 
     opt = torch.optim.AdamW(
         model.parameters(),
@@ -166,14 +195,16 @@ def train(cfg: TrainerConfig, data_iter: Iterable[Any] | None = None) -> dict[st
                 name=cfg.wandb_run_name,
                 config={k: str(v) for k, v in asdict(cfg).items()},
             )
-        except Exception:  # noqa: BLE001
+        except Exception:
             log.exception("wandb init failed, continuing without it")
             wandb_run = None
 
     ckpts: list[Path] = []
     t0 = time.time()
+    step_t0 = time.time()
     running_loss = 0.0
     running_steps = 0
+    last_avg_loss: float | None = None
 
     data_iter_exhausted = iter(data_iter)
 
@@ -201,16 +232,29 @@ def train(cfg: TrainerConfig, data_iter: Iterable[Any] | None = None) -> dict[st
 
         if step % cfg.log_every == 0:
             elapsed = time.time() - t0
+            step_dt = max(time.time() - step_t0, 1e-6)
+            step_t0 = time.time()
             avg = running_loss / max(running_steps, 1)
+            last_avg_loss = avg
+            tok_s = tokens_per_step / step_dt
             log.info(
-                "step=%d loss=%.4f lr=%.5f elapsed=%ds",
+                "step=%d loss=%.4f lr=%.5f elapsed=%ds step_time=%.2fs tok/s=%.0f",
                 step,
                 avg,
                 lr_now,
                 int(elapsed),
+                step_dt,
+                tok_s,
             )
             if wandb_run is not None:
-                wandb_run.log({"train/loss": avg, "train/lr": lr_now, "step": step})
+                wandb_run.log(
+                    {
+                        "train/loss": avg,
+                        "train/lr": lr_now,
+                        "train/tok_per_sec": tok_s,
+                        "step": step,
+                    }
+                )
             running_loss = 0.0
             running_steps = 0
 
@@ -229,10 +273,8 @@ def train(cfg: TrainerConfig, data_iter: Iterable[Any] | None = None) -> dict[st
             ckpts.append(ckpt_path)
             while len(ckpts) > cfg.keep_last_n:
                 old = ckpts.pop(0)
-                try:
+                with contextlib.suppress(OSError):
                     old.unlink()
-                except OSError:
-                    pass
 
     if wandb_run is not None:
         wandb_run.finish()
@@ -241,7 +283,10 @@ def train(cfg: TrainerConfig, data_iter: Iterable[Any] | None = None) -> dict[st
         "steps": cfg.steps,
         "param_count": param_count,
         "ckpts": [str(p) for p in ckpts],
-        "final_loss": running_loss / max(running_steps, 1) if running_steps else None,
+        "final_loss": last_avg_loss,
+        "seq_len": cfg.seq_len,
+        "batch_size": cfg.batch_size,
+        "grad_accum": cfg.grad_accum,
     }
 
 

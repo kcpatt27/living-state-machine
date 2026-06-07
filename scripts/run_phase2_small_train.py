@@ -1,15 +1,21 @@
 """Phase 2 ``small`` train: minimal vs Stentor SSM on GPU (or CPU fallback).
 
-Default profile: ``scale_configs.small()`` (~30M params, 20k steps, seq_len 1024).
+Default profile: ``scale_configs.small()`` (~30M params, **2500** steps, seq_len **512**).
 Runs **minimal** then **stentor** unless ``--minimal-only`` / ``--stentor-only``.
+
+**Windows:** disable sleep/hibernate during training; screen-off is OK if the machine
+stays awake. Old runs were ~60s/step due to a Python loop over every token (fixed).
 
 Token data
 ----------
-- **Real run:** pass ``--data-path path/to/tokens.bin`` (uint16 ids, see
-  ``lsm.research.training.trainer.packed_bin_iterator``). File must be large
-  enough for ``seq_len + 1`` random windows across all steps.
-- **Pipeline test:** ``--synthetic`` writes ``data/tokens_small.bin`` (random
-  ids). Loss curves are not meaningful; use only to verify VRAM and checkpoints.
+- **Real run:** prepare once, then train::
+
+      uv run python scripts/prepare_tokens_small.py
+      uv run python scripts/run_phase2_small_train.py --data-path data/tokens_small_tinystories.bin
+
+  Source: TinyStories (HF) + GPT-2 tokenizer → ``data/tokens_small.bin``.
+  See ``scripts/prepare_tokens_small.py``.
+- **Pipeline test:** ``--synthetic`` writes random ids (loss not meaningful).
 
 Prereqs::
 
@@ -19,7 +25,7 @@ Prereqs::
 Examples::
 
     # Full small train (both variants, real data you prepared):
-    python scripts/run_phase2_small_train.py --data-path data/tokens_small.bin
+    python scripts/run_phase2_small_train.py --data-path data/tokens_small_tinystories.bin
 
     # Shorter dry-run on GPU:
     python scripts/run_phase2_small_train.py --synthetic --steps 500
@@ -93,6 +99,7 @@ def run_variant(
     *,
     stentor: bool,
     steps: int | None,
+    seq_len: int | None,
     device: str,
     data_path: Path,
     synthetic: bool,
@@ -112,6 +119,8 @@ def run_variant(
         )
 
     n_steps = steps if steps is not None else cfg.steps
+    if seq_len is not None:
+        cfg = replace(cfg, seq_len=seq_len)
     ckpt_dir = run_root / variant / "ckpts"
     cfg = replace(
         cfg,
@@ -156,7 +165,13 @@ def main() -> None:
         "--steps",
         type=int,
         default=None,
-        help="Override step count (default: scale_configs.small = 20000)",
+        help="Override step count (default: scale_configs.small = 2500)",
+    )
+    parser.add_argument(
+        "--seq-len",
+        type=int,
+        default=None,
+        help="Override context length (default: 512)",
     )
     parser.add_argument("--device", default="cuda", choices=("cuda", "cpu"))
     parser.add_argument(
@@ -166,6 +181,11 @@ def main() -> None:
     )
     parser.add_argument("--minimal-only", action="store_true")
     parser.add_argument("--stentor-only", action="store_true")
+    parser.add_argument(
+        "--keep-going",
+        action="store_true",
+        help="Continue to the next variant if one variant fails",
+    )
     parser.add_argument(
         "--out",
         type=Path,
@@ -203,6 +223,7 @@ def main() -> None:
             results["variants"][name] = run_variant(
                 stentor=stentor,
                 steps=args.steps,
+                seq_len=args.seq_len,
                 device=device,
                 data_path=data_path,
                 synthetic=args.synthetic,
@@ -211,6 +232,8 @@ def main() -> None:
         except Exception as exc:
             log.exception("%s train failed", name)
             results["variants"][name] = {"error": str(exc)}
+            if not args.keep_going:
+                break
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(results, indent=2), encoding="utf-8")

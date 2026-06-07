@@ -14,18 +14,21 @@ The summariser runs in one of three modes:
 - ``feature_report``: describe the state vector numerically — top-k
   dimensions by magnitude with learned labels (requires a label
   dictionary; not trained yet).
-- ``nearest_neighbours``: pick the nearest memory entries from the LSM
-  memory store in the state-vector space (requires a shared embedding
-  dimension between the core and the embedder — see
-  :class:`HybridStateUpdater`'s ``projection`` kwarg).
+- ``nearest_neighbours``: use the core's decoded summary as a semantic
+  query into the LSM memory store and project the top-k nearest durable
+  memories. A learned ``projection`` (state-vector -> embedder space) is a
+  future enhancement; until it is trained we route through text, which is
+  what the LLM consumes anyway.
 
 Only ``topk_tokens`` and ``nearest_neighbours`` ship with Phase 2's
-opening; the other is scaffolding for future research.
+opening; ``feature_report`` (numeric top-k state dims with learned labels)
+is scaffolding for future research.
 """
 
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -70,46 +73,68 @@ class HybridStateUpdater:
         self.projection = projection
         self._states: list[Any] | None = None
 
+        # Move model to device
+        torch = _require_torch()
+        self.model.to(torch.device(self.config.device))
+
     async def update(
         self,
-        *,
-        prev_state: State,
+        prev: State,
         user_msg: str,
         assistant_reply: str,
     ) -> State:
         """Advance the custom core and write a fresh text projection."""
         torch = _require_torch()
         device = torch.device(self.config.device)
-        ids = self.tokenizer.encode(
+        vocab_size = self.model.token_emb.num_embeddings
+        raw_ids = self.tokenizer.encode(
             f"User: {user_msg}\nAssistant: {assistant_reply}\n",
-            return_tensors="pt",
-        ).to(device)
+        )
+        filtered_ids = [tid for tid in raw_ids if tid < vocab_size]
+        if not filtered_ids:
+            filtered_ids = [0]
+        ids = torch.tensor([filtered_ids], device=device)
 
         with torch.no_grad():
             if self._states is None:
                 self._states = self.model.init_state(1, device, torch.float32)
             _, self._states = self.model(ids, states=self._states, return_states=True)
 
+        summary = await self._summarise_topk(
+            seed_prompt=f"Summarise the user's latest turn: {user_msg}"
+        )
         if self.config.mode == "topk_tokens":
-            projection = await self._summarise_topk(
-                seed_prompt=f"Summarise the user's latest turn: {user_msg}"
-            )
+            projection = summary
         elif self.config.mode == "nearest_neighbours":
-            projection = self._summarise_neighbours()
+            # Use the core's decoded "thought" as a semantic query into
+            # memory; fall back to the raw user turn when the undertrained
+            # core emits an empty/degenerate summary.
+            projection = self._summarise_neighbours(query_text=summary or user_msg)
         else:
             raise ValueError(f"unknown hybrid mode: {self.config.mode!r}")
 
+        if self.embedder is not None:
+            vec = self.embedder.embed(projection)
+        else:
+            vec = self._flatten_last_state()
+
         return State(
-            projection=projection,
-            slots=prev_state.slots.copy(),
-            embedding=self._flatten_last_state(),
-            meta=prev_state.meta | {"hybrid_mode": self.config.mode},
+            text=projection,
+            vector=vec,
+            updated_at=time.time(),
+            revision=prev.revision + 1,
+            notes=prev.notes | {"hybrid_mode": self.config.mode},
         )
 
     async def _summarise_topk(self, *, seed_prompt: str) -> str:
         torch = _require_torch()
         device = torch.device(self.config.device)
-        input_ids = self.tokenizer.encode(seed_prompt, return_tensors="pt").to(device)
+        vocab_size = self.model.token_emb.num_embeddings
+        raw_ids = self.tokenizer.encode(seed_prompt)
+        filtered_ids = [tid for tid in raw_ids if tid < vocab_size]
+        if not filtered_ids:
+            filtered_ids = [0]
+        input_ids = torch.tensor([filtered_ids], device=device)
 
         out_ids: list[int] = []
         with torch.no_grad():
@@ -123,26 +148,27 @@ class HybridStateUpdater:
                 out_ids.append(next_id)
         return self.tokenizer.decode(out_ids, skip_special_tokens=True)
 
-    def _summarise_neighbours(self) -> str:
-        if self.memory is None or self.embedder is None or self.projection is None:
-            log.warning("neighbour summary needs memory + embedder + projection")
+    def _summarise_neighbours(self, *, query_text: str) -> str:
+        """Render a text projection from the memory neighbours of ``query_text``.
+
+        The custom core's decoded summary is used as the semantic query so the
+        recurrent state stays in the loop; the resulting projection is the
+        top-k nearest durable memories. A learned ``projection`` (state-vector
+        -> embedder space) is a future enhancement once it is trained — until
+        then we route through text, which is what the LLM consumes anyway.
+        """
+        if self.memory is None:
+            log.warning("nearest_neighbours mode needs a memory store")
             return ""
-        torch = _require_torch()
-        vec = self._flatten_last_state()
-        if vec is None:
+        if not query_text.strip():
             return ""
-        # Project custom-core state into embedder space and query.
-        with torch.no_grad():
-            embed_dim = self.embedder.dim
-            state_tensor = torch.tensor(vec).to(self.projection.weight.device)
-            projected = self.projection(state_tensor)
-            v = projected.detach().cpu().numpy().astype("float32")
-        assert v.shape[-1] == embed_dim
-        # Re-use memory.query with a synthetic "text" bypass is awkward — so we
-        # fall back to reading the top-k by cosine against raw vectors. The
-        # MemoryStore protocol doesn't expose a vector-only query today, so
-        # we round-trip through text using the LLM's most recent projection.
-        return ""
+        try:
+            hits = self.memory.query(query_text, top_k=self.config.top_k_neighbours)
+        except Exception:
+            log.exception("neighbour query failed")
+            return ""
+        lines = [f"- {hit.entry.text}" for hit in hits if hit.entry.text.strip()]
+        return "\n".join(lines)
 
     def _flatten_last_state(self) -> Any:
         if self._states is None:
@@ -159,11 +185,16 @@ class HybridStateUpdater:
 
 
 def hybrid_from_checkpoint(
-    ckpt_path: Path, *, tokenizer: Any, config: HybridConfig | None = None
+    ckpt_path: Path,
+    *,
+    tokenizer: Any,
+    config: HybridConfig | None = None,
+    memory: MemoryStore | None = None,
+    embedder: Embedder | None = None,
 ) -> HybridStateUpdater:
     """Load a trained custom core from ``ckpt_path`` and return a ready updater."""
     torch = _require_torch()
-    payload = torch.load(str(ckpt_path), map_location="cpu")
+    payload = torch.load(str(ckpt_path), map_location="cpu", weights_only=False)
     cfg = payload.get("config", {})
     kind = cfg.get("model_kind", "minimal")
     if kind == "minimal":
@@ -178,7 +209,11 @@ def hybrid_from_checkpoint(
         model = build_model(model_cfg)
     model.load_state_dict(payload["model"])
     return HybridStateUpdater(
-        model=model, tokenizer=tokenizer, config=config or HybridConfig()
+        model=model,
+        tokenizer=tokenizer,
+        config=config or HybridConfig(),
+        memory=memory,
+        embedder=embedder,
     )
 
 

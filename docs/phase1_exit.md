@@ -17,6 +17,17 @@
 | Multi-seed protocol | **Met** | `run_protocol_hardening.ps1` (2026-05-29) |
 | Negative results logged | **Met** | `docs/negative_results.md` (multi-memory CPU task, encoder verifier) |
 
+## Claims (What we proved and didn't prove)
+
+### Supported Claims (What we proved)
+1. **LSM beats Naive RAG at Matched Budget:** On `recall_pref_v1`, LSM achieves 1.000 accuracy vs Naive RAG's 0.100 under matched context/retrieval constraints.
+2. **Ablatability of Stentor Components:** Every key component (habituation, association, gated memory, meta-memory plasticity) is ablatable, showing measurable degradation when removed.
+3. **Verifier Calibration:** The V.2 linear learned verifier head improves over the rule-based verifier baseline (macro-F1 0.771 vs 0.556).
+
+### Unsupported/Stress-Only Claims (What we did not claim)
+1. **Beating Full-Context LLM on Long Scripts:** We do *not* claim that LSM beats `raw_llm` when the latter has access to the full, uncompressed dialogue history (e.g. on `recall_pref_v2` where `raw_llm` gets 90+ turns in context).
+2. **Encoder-based Verification:** The V.2 encoder verifier underperformed the linear verifier on our small dataset (collapsed to reject-all), which we logged as a negative result.
+
 ## Headline numbers (where to look)
 
 | Report section | Content |

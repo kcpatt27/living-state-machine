@@ -76,3 +76,15 @@ full-context LLM on v2.”
 4. Task **3** (real tokens + re-train).
 5. Task **4** (chat protocol).
 6. Task **5** (hybrid gate — depends on 2–3).
+
+---
+
+## Appendix: Go/No-Go Checklist for Phase 2 recurrent integration (L14-L15)
+
+Before we allow ourselves to wire recurrent SSM weights directly into the production `s_t` state-update path or plan joint QLoRA fine-tuning (L15), we must satisfy the following criteria:
+
+- [x] **Real Token Training Success:** Both `minimal` and `stentor` models successfully trained on real TinyStories tokens (`tokens_small_tinystories.bin`).
+- [ ] **Stentor Convergence or Mitigation:** Stentor SSM achieves a final loss comparable to or better than Minimal SSM on real tokens, OR we explicitly decide to proceed with Minimal SSM as our recurrent core due to the parallel scan performance advantage. (Currently open — `minimal` 2.95 < `stentor` 5.21; see `docs/negative_results.md`.)
+- [x] **Hybrid State Updater Smoke Test:** `lsm/research/hybrid.py` is implemented and successfully updates `s_t` from the trained `minimal` checkpoint without crashing. Wired into the eval runner via `state_updater: hybrid` (see `experiments/sample_recall_pref_v1_lsm_hybrid_updater.yaml`).
+- [x] **No Regression on recall_pref_v1:** The hybrid state updater scores **1.000** on `recall_pref_v1` (seed 0, `fastembed` retrieval), matching the production `FactsBackedUpdater`. Run: `experiments/20260606-205810-sample_recall_pref_v1_lsm_hybrid_updater/`. Note: requires a real (`fastembed`) embedder — the `hash` embedder scores 0.100 because structured-fact retrieval is meaningless under hashed vectors.
+- [ ] **Manual Chat Protocol Pass:** The hybrid state updater passes the 5-10 minute manual chat protocol without corrupting state or failing to retrieve asserted preferences.

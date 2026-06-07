@@ -30,19 +30,37 @@ import math
 from dataclasses import dataclass
 from typing import Any
 
-_TORCH_ERR = (
-    "torch is required for the minimal SSM core. "
-    "Install with: uv sync --extra research"
-)
+_TORCH_ERR = "torch is required for the minimal SSM core. " "Install with: uv sync --extra research"
 
 
 def _require_torch() -> Any:
     try:
-        import torch  # noqa: F401
+        import torch
 
         return torch
     except ImportError as e:  # pragma: no cover
         raise RuntimeError(_TORCH_ERR) from e
+
+
+def diagonal_ssm_scan(A: Any, b_seq: Any) -> Any:
+    """Parallel scan for ``h_t = A * h_{t-1} + b_t`` with diagonal ``A``.
+
+    ``A``: ``(d_state,)``; ``b_seq``: ``(B, T, d_state)`` → ``h`` same shape.
+    Replaces a Python loop over ``T`` (was the main training bottleneck).
+    """
+    torch = _require_torch()
+    _b, t_len, _s = b_seq.shape
+    idx = torch.arange(t_len, device=b_seq.device, dtype=b_seq.dtype)
+    # M[t, k] = A^{t-k} when t >= k else 0
+    diff = idx[:, None] - idx[None, :]
+    mask = diff >= 0
+    log_a = torch.log(A.clamp(min=1e-8))
+    # (d_state, T, T) would be huge; scan per state dim (d_state is small, e.g. 64).
+    hs = []
+    for s in range(_s):
+        m = torch.exp(log_a[s] * diff.clamp(min=0).to(b_seq.dtype)) * mask.to(b_seq.dtype)
+        hs.append(torch.matmul(b_seq[:, :, s], m.T))
+    return torch.stack(hs, dim=2)
 
 
 @dataclass(slots=True)
@@ -107,19 +125,22 @@ def build_model(config: MinimalSSMConfig) -> Any:
             u = self.in_proj(x_n)
             A = torch.sigmoid(self.log_A)
 
-            if state is None:
-                h = torch.zeros(b, self.cfg.d_state, device=x.device, dtype=x.dtype)
-            else:
+            if state is not None:
                 h = state
+                outs = []
+                for step in range(t):
+                    u_t = u[:, step]
+                    b_t = self.B(u_t)
+                    h = A * h + b_t
+                    outs.append(self.C(h) + self.D * u_t)
+                y = torch.stack(outs, dim=1)
+                y = self.dropout(self.out_proj(y))
+                return x + y, h
 
-            outs = []
-            for step in range(t):
-                u_t = u[:, step]
-                b_t = self.B(u_t)
-                h = A * h + b_t
-                y_t = self.C(h) + self.D * u_t
-                outs.append(y_t)
-            y = torch.stack(outs, dim=1)
+            b_seq = self.B(u)
+            h_seq = diagonal_ssm_scan(A, b_seq)
+            y = self.C(h_seq) + self.D.unsqueeze(0).unsqueeze(0) * u
+            h = h_seq[:, -1]
             y = self.dropout(self.out_proj(y))
             return x + y, h
 
@@ -151,10 +172,7 @@ def build_model(config: MinimalSSMConfig) -> Any:
                 x, s_new = block(x, s)
                 new_states.append(s_new)
             x = self.final_norm(x)
-            if self.lm_head is None:
-                logits = x @ self.token_emb.weight.T
-            else:
-                logits = self.lm_head(x)
+            logits = x @ self.token_emb.weight.T if self.lm_head is None else self.lm_head(x)
             if return_states:
                 return logits, new_states
             return logits
@@ -176,4 +194,4 @@ def build_model(config: MinimalSSMConfig) -> Any:
     return MinimalSSM(config)
 
 
-__all__ = ["MinimalSSMConfig", "build_model"]
+__all__ = ["MinimalSSMConfig", "build_model", "diagonal_ssm_scan"]

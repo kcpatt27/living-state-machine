@@ -1,0 +1,32 @@
+name: sample_recall_pref_v1_lsm_hybrid_updater
+task:
+  name: recall_pref_v1
+  num_items: 10
+  distractor_turns: 20
+system:
+  kind: lsm
+  backend: ollama
+  model: qwen2.5:7b-instruct-q8_0
+  top_k: 4
+  min_score: 0.15
+  state_updater: hybrid
+  hybrid:
+    ckpt_path: "runs/small/minimal/ckpts/step_002500.pt"
+    mode: "topk_tokens"
+    summary_tokens: 48
+    device: "cuda"
+  memory:
+    kind: memory
+  writer:
+    kind: rules
+ablation:
+  state_enabled: true
+  memory_enabled: true
+  habituation_enabled: true
+  association_enabled: true
+  writer_enabled: true
+run:
+  seeds: [0]
+embedder:
+  kind: fastembed
+  model: BAAI/bge-small-en-v1.5

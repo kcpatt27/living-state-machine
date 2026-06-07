@@ -41,7 +41,7 @@ pipeline is committed yet.
 ## Suggested first tasks (order)
 
 1. **`scripts/export_sft_from_lsm_home.py`** — read episodic log + facts, emit JSONL
-   (reject verifier-rejected assistant rows).
+   (reject verifier-rejected assistant rows). **Shipped** — run after `lsm chat` sessions.
 2. **`scripts/run_phase2_qlora_smoke.py`** — 50-step QLoRA on 32-row slice; write
    `runs/qlora_smoke/metrics.json`.
 3. **Eval hook** — optional `system.backend: transformers` + adapter path in eval YAML

@@ -58,8 +58,7 @@ from lsm.core.multi_timescale import (
     MultiTimescaleMemory,
     TierConfig,
 )
-from lsm.core.projection import DeterministicProjection
-from lsm.core.state import FactsBackedUpdater, LLMSummarizerUpdater, StateStore, StateUpdater
+from lsm.core.state import StateStore, StateUpdater
 from lsm.core.writer import (
     AlwaysWriter,
     LearnedWriter,
@@ -99,6 +98,7 @@ from lsm.eval.tasks.verifier_calibration_v1 import (
     compare_ablation as compare_verifier_calibration,
 )
 from lsm.runtime.llm_backend import build_backend
+from lsm.runtime.state_updater_factory import build_state_updater
 
 log = logging.getLogger(__name__)
 
@@ -134,43 +134,15 @@ def _build_state_updater(
     memory: MemoryStore | None,
     fact_store: FactStore | None,
 ) -> StateUpdater:
-    kind = str(system_cfg.get("state_updater", "facts_backed")).lower()
-    if kind == "llm_summarizer":
-        return LLMSummarizerUpdater(backend=backend, embedder=embedder, memory=memory)
-    if kind == "hybrid":
-        from transformers import GPT2Tokenizer
-
-        from lsm.research.hybrid import HybridConfig, hybrid_from_checkpoint
-
-        hybrid_cfg_dict = system_cfg.get("hybrid", {})
-        ckpt_path = Path(
-            hybrid_cfg_dict.get("ckpt_path", "runs/small/minimal/ckpts/step_002500.pt")
-        )
-
-        # Load GPT-2 tokenizer
-        tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-        if tokenizer.pad_token is None:
-            tokenizer.pad_token = tokenizer.eos_token
-
-        config = HybridConfig(
-            mode=hybrid_cfg_dict.get("mode", "topk_tokens"),
-            summary_tokens=int(hybrid_cfg_dict.get("summary_tokens", 48)),
-            top_k_neighbours=int(hybrid_cfg_dict.get("top_k_neighbours", 4)),
-            device=hybrid_cfg_dict.get("device", "cuda"),
-        )
-
-        return hybrid_from_checkpoint(
-            ckpt_path,
-            tokenizer=tokenizer,
-            config=config,
-            memory=memory,
-            embedder=embedder,
-        )
-    return FactsBackedUpdater(
+    kind = str(system_cfg.get("state_updater", "facts_backed"))
+    hybrid_cfg = system_cfg.get("hybrid")
+    return build_state_updater(
+        kind,
+        backend=backend,
         embedder=embedder,
-        projection=DeterministicProjection(),
         memory=memory,
         fact_store=fact_store,
+        hybrid_cfg=hybrid_cfg,
     )
 
 

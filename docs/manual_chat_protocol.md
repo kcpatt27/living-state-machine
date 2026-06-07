@@ -2,6 +2,10 @@
 
 This protocol allows you to manually verify the facts-backed pipeline, episodic memory retrieval, and slot-attribution dynamics in an interactive `lsm chat` session. It mirrors the shape of the `recall_pref_v2` benchmark but uses a real, live session to ensure product-level parity.
 
+**Automated smoke (no Ollama):** `uv run pytest tests/test_manual_chat_protocol.py -q`
+
+**Hybrid recurrent core in live chat (opt-in):** set `LSM_STATE_UPDATER=hybrid` (and ensure `runs/small/minimal/ckpts/step_002500.pt` exists) before `uv run lsm chat`.
+
 ---
 
 ## Step 1: Clean Slate
@@ -26,10 +30,10 @@ Start the interactive chat REPL:
 uv run lsm chat
 ```
 
-Once the chat loads, assert your favorite drink:
+Once the chat loads, assert your favorite drink (phrasing the extractor accepts today):
 
 ```
-user> just for context: my favorite drink is negroni. please remember that.
+user> just for context: I prefer negroni. please remember that.
 ```
 
 **Expected Assistant Response:**
@@ -66,7 +70,7 @@ assistant> [Acknowledges weather...]
 user> can you tell me a short joke?
 assistant> [Tells a joke...]
 
-user> random note: my coworker's favorite drink is hibiscus tea, not that it matters.
+user> random note: someone at work loves hibiscus tea, not that it matters.
 assistant> [Acknowledges coworker's drink...]
 ```
 
@@ -105,8 +109,10 @@ user> what is my favorite drink?
 Exit the chat REPL (`exit` or `Ctrl+C`). Run a manual memory query to verify episodic retrieval:
 
 ```powershell
-uv run lsm memory query "favorite drink"
+uv run lsm memory query "negroni"
 ```
 
 **Expected Output:**
-- You should see scored hits from the conversation history, with the highest scores pointing to Turn 1 ("my favorite drink is negroni").
+- You should see scored hits from the conversation history containing the preference turn.
+
+_Note: with production `fastembed`, `uv run lsm memory query "favorite drink"` also works semantically; hash-style tests use the literal token instead._

@@ -85,7 +85,13 @@ class PipelineConfig:
     correction_surprise: float = 2.0
     correction_target: float = 0.2
     # F.2 updater selection / optional polish wrapper.
-    state_updater: Literal["facts_backed", "llm_summarizer"] = "facts_backed"
+    state_updater: Literal["facts_backed", "llm_summarizer", "hybrid"] = "facts_backed"
+    # L14 hybrid recurrent core (Phase 2). Used when state_updater == "hybrid".
+    hybrid_ckpt_path: str = "runs/small/minimal/ckpts/step_002500.pt"
+    hybrid_mode: str = "topk_tokens"
+    hybrid_device: str = "cuda"
+    hybrid_summary_tokens: int = 48
+    hybrid_top_k_neighbours: int = 4
     state_projection_polish: bool = False
     state_projection_polish_max_tokens: int = 192
     # V.1 verifier (scoring-not-authoring gate). Master switch defaults on;

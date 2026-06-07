@@ -74,8 +74,9 @@ uv run lsm eval run --config experiments/verifier_calibration_v1.yaml
 
 ## What comes next (Phase 2 — not part of this exit)
 
-- L11 `small` train: `scripts/run_phase2_small_train.py` (tiny smoke:
-  `scripts/run_phase2_tiny_smoke.py` + `runs/tiny_smoke/summary.json`).
-- Post-train checklist: `docs/phase2_post_train_tasks.md`.
-- L12–L14: bake Stentor dynamics into recurrent core; hybrid `s_t` updater.
+- L11 `small` train: **done** — `runs/small/summary.json`, `scripts/run_phase2_small_train.py`.
+- Post-train checklist: **done** — `docs/phase2_post_train_tasks.md` (go/no-go all [x]).
+- L14 hybrid `s_t` updater: **opt-in shipped** — `LSM_STATE_UPDATER=hybrid` in `lsm chat`
+  (default remains `facts_backed`). See `docs/manual_chat_protocol.md`.
+- L15 QLoRA / joint fine-tune: **next** — `docs/phase2_l15_gate.md`.
 - See `docs/north_star_science_in_simulation.md` for the long-term discovery goal (separate track).

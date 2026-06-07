@@ -17,11 +17,12 @@ from lsm.core.outcome import HeuristicOutcomeScorer, OutcomeLog
 from lsm.core.pipeline import Pipeline, PipelineConfig
 from lsm.core.plasticity import ExpDecayPlasticity
 from lsm.core.projection import DeterministicProjection, LLMPolishedProjection
-from lsm.core.state import FactsBackedUpdater, LLMSummarizerUpdater, StateStore
+from lsm.core.state import StateStore
 from lsm.core.verifier import NullVerifier, RuleBasedVerifier, Verifier
 from lsm.core.verifier_log import VerifierLog
 from lsm.core.writer import RuleBasedWriter, RuleBasedWriterConfig
 from lsm.runtime.llm_backend import GenerateOptions, LLMBackend, build_backend
+from lsm.runtime.state_updater_factory import build_state_updater
 
 
 def episodic_path(settings: Settings) -> Path:
@@ -55,6 +56,11 @@ def build_default_pipeline(
         session_id=session_id,
         backend_name=s.backend,
         model=effective_model,
+        state_updater=s.state_updater,
+        hybrid_ckpt_path=str(s.hybrid_ckpt_path),
+        hybrid_mode=s.hybrid_mode,
+        hybrid_device=s.hybrid_device,
+        hybrid_summary_tokens=s.hybrid_summary_tokens,
     )
     verifier: Verifier = (
         RuleBasedVerifier(
@@ -65,36 +71,36 @@ def build_default_pipeline(
         if cfg.verifier_enabled
         else NullVerifier()
     )
-    if cfg.state_updater == "llm_summarizer":
-        updater = LLMSummarizerUpdater(
-            backend,
-            embedder,
-            identity=identity,
-            memory=memory,
-            fact_store=fact_store,
-            verifier=verifier,
-            verifier_reprompt_enabled=cfg.verifier_reprompt_enabled,
-            verifier_log=verifier_log,
+    projection: DeterministicProjection | LLMPolishedProjection = DeterministicProjection()
+    if cfg.state_projection_polish:
+        projection = LLMPolishedProjection(
+            base=projection,
+            backend=backend,
+            enabled=True,
+            options=GenerateOptions(
+                temperature=0.0,
+                max_tokens=cfg.state_projection_polish_max_tokens,
+            ),
         )
-    else:
-        projection: DeterministicProjection | LLMPolishedProjection = DeterministicProjection()
-        if cfg.state_projection_polish:
-            projection = LLMPolishedProjection(
-                base=projection,
-                backend=backend,
-                enabled=True,
-                options=GenerateOptions(
-                    temperature=0.0,
-                    max_tokens=cfg.state_projection_polish_max_tokens,
-                ),
-            )
-        updater = FactsBackedUpdater(
-            embedder,
-            projection,
-            identity=identity,
-            memory=memory,
-            fact_store=fact_store,
-        )
+    updater = build_state_updater(
+        cfg.state_updater,
+        backend=backend,
+        embedder=embedder,
+        memory=memory,
+        fact_store=fact_store,
+        identity=identity,
+        projection=projection,
+        verifier=verifier,
+        verifier_reprompt_enabled=cfg.verifier_reprompt_enabled,
+        verifier_log=verifier_log,
+        hybrid_cfg={
+            "ckpt_path": cfg.hybrid_ckpt_path,
+            "mode": cfg.hybrid_mode,
+            "device": cfg.hybrid_device,
+            "summary_tokens": cfg.hybrid_summary_tokens,
+            "top_k_neighbours": cfg.hybrid_top_k_neighbours,
+        },
+    )
     outcome_log = OutcomeLog(s.home / "outcomes.sqlite")
     pipe = Pipeline(
         backend=backend,

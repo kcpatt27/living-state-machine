@@ -18,8 +18,12 @@ only projects `s_t`.
 | SFT on conversation / memory-adjacent JSONL derived from `$LSM_HOME` logs | End-to-end Robin / multi-agent discovery loop (north star — separate repo) |
 | Eval regression on `recall_pref_v1` after adapter load | Making hybrid `s_t` the default in `lsm chat` (daily-drive gate) |
 
-Scaffold lives in `lsm/research/training/qlora.py`. No runner script or dataset
-pipeline is committed yet.
+Scaffold lives in `lsm/research/training/qlora.py`. Runners + RunPod playbook:
+
+- `scripts/run_phase2_qlora_smoke.py` — 50-step smoke → `runs/qlora_smoke/metrics.json`
+- `scripts/run_phase2_qlora.py` — full train (default 2000 steps)
+- `docs/cloud_burst.md` — RunPod pod spec, upload/download, privacy checklist
+- `scripts/runpod_l40s_burst.py` — L40S one-shot: smoke + QLoRA + SSM (see `docs/cloud_burst.md`)
 
 ---
 
@@ -43,10 +47,11 @@ pipeline is committed yet.
 1. **`scripts/export_sft_from_lsm_home.py`** — read episodic log + facts, emit JSONL
    (reject verifier-rejected assistant rows). **Shipped** — run after `lsm chat` sessions.
 2. **`scripts/run_phase2_qlora_smoke.py`** — 50-step QLoRA on 32-row slice; write
-   `runs/qlora_smoke/metrics.json`.
-3. **Eval hook** — optional `system.backend: transformers` + adapter path in eval YAML
+   `runs/qlora_smoke/metrics.json`. **Shipped** — run on RunPod per `docs/cloud_burst.md`.
+3. **`scripts/run_phase2_qlora.py`** — full QLoRA train. **Shipped**.
+4. **Eval hook** — optional `system.backend: transformers` + adapter path in eval YAML
    (keep Ollama default for daily chat).
-4. **Regression matrix** — one `recall_pref_v1` run with adapter vs without.
+5. **Regression matrix** — one `recall_pref_v1` run with adapter vs without.
 
 ---
 

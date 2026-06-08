@@ -69,6 +69,8 @@ class QLoRAConfig:
     seed: int = 0
     output_dir: Path = Path("runs/qlora_qwen_7b")
     save_every: int = 500
+    max_rows: int | None = None
+    gradient_checkpointing: bool = True
 
 
 def load_base_model(cfg: QLoRAConfig) -> tuple[Any, Any]:
@@ -100,6 +102,8 @@ def prepare_lora_model(base_model: Any, cfg: QLoRAConfig) -> Any:
     from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
     base_model = prepare_model_for_kbit_training(base_model)
+    if cfg.gradient_checkpointing:
+        base_model.gradient_checkpointing_enable()
     lora_cfg = LoraConfig(
         r=cfg.lora_r,
         lora_alpha=cfg.lora_alpha,
@@ -112,31 +116,26 @@ def prepare_lora_model(base_model: Any, cfg: QLoRAConfig) -> Any:
     return model
 
 
-def jsonl_dataset(path: Path) -> Iterator[str]:
-    """Yield plain-text rows from a JSONL file (``text`` key)."""
-    import json
-
-    with path.open("r", encoding="utf-8") as fh:
-        for line in fh:
-            rec = json.loads(line)
-            yield rec["text"] if "text" in rec else rec.get("prompt", "")
-
-
-def _pack_batches(
-    rows: Iterator[str], tokenizer: Any, cfg: QLoRAConfig
-) -> Iterator[Any]:
+def _pack_batches(rows: Iterator[str], tokenizer: Any, cfg: QLoRAConfig) -> Iterator[Any]:
     torch = _require_torch()
     buf: list[int] = []
     for text in rows:
         ids = tokenizer.encode(text, add_special_tokens=False)
-        buf.extend(ids + [tokenizer.eos_token_id])
+        buf.extend([*ids, tokenizer.eos_token_id])
         while len(buf) >= cfg.batch_size * (cfg.seq_len + 1):
             batch = buf[: cfg.batch_size * (cfg.seq_len + 1)]
             buf = buf[cfg.batch_size * (cfg.seq_len + 1) :]
-            t = torch.tensor(batch, dtype=torch.long).reshape(
-                cfg.batch_size, cfg.seq_len + 1
-            )
+            t = torch.tensor(batch, dtype=torch.long).reshape(cfg.batch_size, cfg.seq_len + 1)
             yield t
+
+
+def _cycle_batches(texts: list[str], tokenizer: Any, cfg: QLoRAConfig) -> Iterator[Any]:
+    """Yield packed batches, restarting when the dataset is exhausted."""
+    if not texts:
+        msg = f"no training rows in {cfg.dataset_path}"
+        raise ValueError(msg)
+    while True:
+        yield from _pack_batches(iter(texts), tokenizer, cfg)
 
 
 def train_qlora(cfg: QLoRAConfig) -> dict[str, Any]:
@@ -158,12 +157,16 @@ def train_qlora(cfg: QLoRAConfig) -> dict[str, Any]:
     )
     loss_fn = torch.nn.CrossEntropyLoss()
 
-    rows = jsonl_dataset(cfg.dataset_path)
-    batch_iter = _pack_batches(rows, tokenizer, cfg)
+    from lsm.research.training.sft_format import load_sft_texts
+
+    texts = load_sft_texts(cfg.dataset_path, tokenizer, max_rows=cfg.max_rows)
+    log.info("loaded %d SFT rows from %s", len(texts), cfg.dataset_path)
+    batch_iter = _cycle_batches(texts, tokenizer, cfg)
 
     t0 = time.time()
     running = 0.0
     steps_seen = 0
+    last_loss = 0.0
     for step in range(1, cfg.steps + 1):
         opt.zero_grad(set_to_none=True)
         for _ in range(cfg.grad_accum):
@@ -172,13 +175,13 @@ def train_qlora(cfg: QLoRAConfig) -> dict[str, Any]:
             x = batch[:, :-1]
             y = batch[:, 1:]
             logits = model(x).logits
-            loss = loss_fn(
-                logits.reshape(-1, logits.size(-1)), y.reshape(-1)
-            ) / cfg.grad_accum
+            loss = loss_fn(logits.reshape(-1, logits.size(-1)), y.reshape(-1)) / cfg.grad_accum
             loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
         opt.step()
-        running += float(loss.detach().item()) * cfg.grad_accum
+        step_loss = float(loss.detach().item()) * cfg.grad_accum
+        last_loss = step_loss
+        running += step_loss
         steps_seen += 1
         if step % 10 == 0:
             log.info(
@@ -192,7 +195,14 @@ def train_qlora(cfg: QLoRAConfig) -> dict[str, Any]:
         if step % cfg.save_every == 0 or step == cfg.steps:
             model.save_pretrained(cfg.output_dir / f"step_{step:06d}")
 
-    return {"steps": cfg.steps, "output_dir": str(cfg.output_dir)}
+    elapsed = int(time.time() - t0)
+    return {
+        "steps": cfg.steps,
+        "output_dir": str(cfg.output_dir),
+        "elapsed_sec": elapsed,
+        "final_loss": last_loss,
+        "dataset_rows": len(texts),
+    }
 
 
 __all__ = [

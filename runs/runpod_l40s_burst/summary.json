@@ -1,0 +1,75 @@
+{
+  "profile": "runpod_l40s_burst",
+  "l40s_qlora": {
+    "batch_size": 4,
+    "grad_accum": 4,
+    "seq_len": 1024,
+    "steps": 2000,
+    "seeds": [
+      0
+    ]
+  },
+  "l40s_ssm": {
+    "batch_size": 16,
+    "grad_accum": 1,
+    "steps": 10000,
+    "minimal_only": true
+  },
+  "phases": {
+    "qlora_smoke": {
+      "steps": 50,
+      "output_dir": "/workspace/lsm/runs/runpod_l40s_burst/qlora_smoke",
+      "elapsed_sec": 91,
+      "final_loss": 0.0002138806157745421,
+      "dataset_rows": 32,
+      "device": "cuda",
+      "gpu_name": "NVIDIA L40S",
+      "torch": "2.11.0+cu128",
+      "cuda": "12.8",
+      "smoke": true,
+      "dataset_path": "/workspace/lsm/data/sft_v0.jsonl",
+      "max_rows": 32,
+      "l40s": true
+    },
+    "qlora_train": {
+      "0": {
+        "steps": 2000,
+        "output_dir": "/workspace/lsm/runs/runpod_l40s_burst/qlora_qwen_7b/seed_0",
+        "elapsed_sec": 28496,
+        "final_loss": 2.5682511477498338e-06,
+        "dataset_rows": 500,
+        "device": "cuda",
+        "gpu_name": "NVIDIA L40S",
+        "torch": "2.11.0+cu128",
+        "cuda": "12.8",
+        "smoke": false,
+        "dataset_path": "/workspace/lsm/data/sft_v0.jsonl",
+        "max_rows": null,
+        "l40s": true
+      }
+    },
+    "tokens": {
+      "skipped": false,
+      "path": "/workspace/lsm/data/tokens_small.bin"
+    },
+    "ssm_minimal": {
+      "steps": 10000,
+      "param_count": 30566144,
+      "ckpts": [
+        "/workspace/lsm/runs/runpod_l40s_burst/ssm/minimal/ckpts/step_009000.pt",
+        "/workspace/lsm/runs/runpod_l40s_burst/ssm/minimal/ckpts/step_009500.pt",
+        "/workspace/lsm/runs/runpod_l40s_burst/ssm/minimal/ckpts/step_010000.pt"
+      ],
+      "final_loss": 2.354782943725586,
+      "seq_len": 512,
+      "batch_size": 16,
+      "grad_accum": 1,
+      "model_kind": "minimal"
+    }
+  },
+  "gpu_name": "NVIDIA L40S",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "elapsed_sec": 33642,
+  "estimated_cost_usd_086_hr": 8.04
+}

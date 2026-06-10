@@ -1,7 +1,7 @@
 # Phase 2 L15 gate — joint QLoRA fine-tune
 
-**Status:** open (2026-06-06). L14 go/no-go is **closed** — see appendix in
-`docs/phase2_post_train_tasks.md`.
+**Status:** train **complete** (2026-06-10); eval regression **open**. L14 go/no-go
+is **closed** — see appendix in `docs/phase2_post_train_tasks.md`.
 
 L15 is the first step that **touches the wrapped LLM's weights** (via low-rank
 adapters). Everything through L14 kept Qwen frozen behind Ollama; the custom SSM
@@ -32,9 +32,8 @@ Scaffold lives in `lsm/research/training/qlora.py`. Runners + RunPod playbook:
 - [x] L14 go/no-go closed (minimal core, hybrid eval 1.000 on v1, chat protocol test).
 - [ ] **Daily-drive hybrid smoke:** reishi runs `LSM_STATE_UPDATER=hybrid` + `lsm chat`
   for one real session; notes in `docs/manual_chat_protocol.md` or a dated log.
-- [ ] **SFT dataset v0:** ≥500 rows JSONL at `data/sft_v0.jsonl` with fields
-  `{messages: [{role, content}, ...]}` mined from verifier-safe turns in
-  `$LSM_HOME` (or synthetic mirror of `recall_pref` dialogues for bootstrap).
+- [x] **SFT dataset v0:** 500 bootstrap rows on-pod (`recall_pref` mirror, seed 0).
+  Provenance: `runs/runpod_l40s_burst/DATA_PROVENANCE.md` §1.
 - [ ] **VRAM budget check:** 5060 Ti can hold 4-bit 7B + LoRA + hybrid SSM without OOM
   (one forward pass smoke, no full train).
 - [ ] **Baseline frozen:** document pre-L15 `recall_pref_v1` + manual chat numbers so

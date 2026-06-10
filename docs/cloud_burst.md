@@ -138,9 +138,12 @@ uv run python scripts/run_phase2_qlora.py --l40s --bootstrap --dataset data/sft_
 
 ## After download (local)
 
-1. Copy hybrid checkpoint path if using new SSM:
-   `runs/runpod_l40s_burst/ssm/minimal/ckpts/step_*.pt`
-2. QLoRA adapters under `runs/runpod_l40s_burst/qlora_qwen_7b/seed_*/`
-3. Daily chat still Ollama 14B; adapter eval when Transformers hook lands
+**Completed 2026-06-10** via `runs/lsm_results.tgz` → extracted to
+`runs/runpod_l40s_burst/`. See `runs/runpod_l40s_burst/DATA_PROVENANCE.md`.
+
+1. Hybrid checkpoint default: `runs/runpod_l40s_burst/ssm/minimal/ckpts/step_010000.pt`
+   (`LSM_HYBRID_CKPT_PATH` in `.env.example`; opt-in `LSM_STATE_UPDATER=hybrid`)
+2. QLoRA adapters under `runs/runpod_l40s_burst/qlora_qwen_7b/seed_*/` (weights gitignored)
+3. Daily chat: Ollama `qwen3.5:9b`; adapter eval when Transformers hook lands
 
 See also: `docs/phase2_l15_gate.md`, `docs/phase2_training_perf.md`.

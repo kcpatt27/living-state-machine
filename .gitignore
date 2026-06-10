@@ -46,6 +46,8 @@ logs/
 *.log
 wandb/
 lsm_runpod.tgz
+lsm_results.tgz
+runs/lsm_results.tgz
 .env
 # Training checkpoints (keep summary.json + trainer_config.json under runs/)
 runs/**/ckpts/

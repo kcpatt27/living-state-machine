@@ -43,7 +43,9 @@ class Settings(BaseSettings):
 
     # L14 — optional recurrent-core state updater (default: facts_backed).
     state_updater: Literal["facts_backed", "llm_summarizer", "hybrid"] = "facts_backed"
-    hybrid_ckpt_path: Path = Field(default=Path("runs/small/minimal/ckpts/step_002500.pt"))
+    hybrid_ckpt_path: Path = Field(
+        default=Path("runs/runpod_l40s_burst/ssm/minimal/ckpts/step_010000.pt")
+    )
     hybrid_mode: str = "topk_tokens"
     hybrid_device: str = "cuda"
     hybrid_summary_tokens: int = 48

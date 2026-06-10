@@ -6,7 +6,7 @@
   Model tag to load. Defaults to the value in .env / LSM_MODEL.
 
 .PARAMETER Fast
-  Start in fast mode (7B Q8).
+  Start in fast mode (qwen3.5:4b).
 
 .EXAMPLE
   .\scripts\start_server.ps1
@@ -40,7 +40,7 @@ if (-not $ollamaProc) {
 Push-Location $PSScriptRoot\..
 try {
     $extra = @()
-    if ($Fast) { $extra += @("--model", "qwen2.5:7b-instruct-q8_0") }
+    if ($Fast) { $extra += @("--model", "qwen3.5:4b") }
     if ($Model) { $extra += @("--model", $Model) }
 
     uv run lsm serve @extra

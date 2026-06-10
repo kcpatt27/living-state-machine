@@ -1,0 +1,15 @@
+{
+  "steps": 50,
+  "output_dir": "/workspace/lsm/runs/runpod_l40s_burst/qlora_smoke",
+  "elapsed_sec": 91,
+  "final_loss": 0.0002138806157745421,
+  "dataset_rows": 32,
+  "device": "cuda",
+  "gpu_name": "NVIDIA L40S",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "smoke": true,
+  "dataset_path": "/workspace/lsm/data/sft_v0.jsonl",
+  "max_rows": 32,
+  "l40s": true
+}

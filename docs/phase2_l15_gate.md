@@ -1,8 +1,7 @@
 # Phase 2 L15 gate — joint QLoRA fine-tune
 
-**Status:** train **complete** (2026-06-10); eval regression **run** (2026-06-10) — **L15 exit
-not met** (adapter 0.200 vs Ollama baseline 1.000). L14 go/no-go **closed** including
-`step_010000` hybrid re-smoke — see `docs/phase2_report.md` §5.
+**Status:** train **complete**; eval regression **complete** (2026-06-10) — **L15 exit met**
+(adapter + base both **1.000** with fastembed harness). See `docs/phase2_report.md` §5.
 
 L15 is the first step that **touches the wrapped LLM's weights** (via low-rank
 adapters). Everything through L14 kept Qwen frozen behind Ollama; the custom SSM
@@ -53,7 +52,7 @@ Scaffold lives in `lsm/research/training/qlora.py`. Runners + RunPod playbook:
    (keep Ollama default for daily chat). **Done** — `build_backend(adapter_path=…)`,
    `tests/test_transformers_adapter.py`.
 5. **Regression matrix** — one `recall_pref_v1` run with adapter vs without. **Done**
-   (2026-06-10): base **0.100**, +LoRA **0.200**; see `docs/phase2_report.md` §5.
+   (2026-06-10, fastembed): base **1.000**, +LoRA **1.000**; see `docs/phase2_report.md` §5.
 
 ---
 
@@ -61,12 +60,12 @@ Scaffold lives in `lsm/research/training/qlora.py`. Runners + RunPod playbook:
 
 - Adapter loads in Transformers backend without breaking `lsm chat` or eval runner. **✅**
 - `recall_pref_v1` accuracy **≥ pre-L15 baseline − 0.05** (adapter must not wreck memory path).
-  **❌ 0.200** (need ≥ 0.950 vs Ollama 1.000).
+  **✅ 1.000** (fastembed harness; hash embedder was a false failure — see §5.1 in phase2_report).
 - Checkpoint + config archived under `runs/qlora_qwen_7b/` with reproduction command in
   `runs/runpod_l40s_burst/DATA_PROVENANCE.md`. **✅**
 
-**Open follow-ups:** diagnose Transformers-vs-Ollama harness gap; consider fastembed on
-Transformers YAMLs; retrain or more bootstrap rows if adapter-vs-base delta stalls.
+**Open follow-ups:** wire fact regex for `my favourite X is Y` benchmark template; daily-drive
+hybrid smoke still optional per entry criteria.
 
 ---
 

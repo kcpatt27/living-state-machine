@@ -25,5 +25,5 @@ ablation:
 run:
   seeds: [0]
 embedder:
-  kind: hash
-  dim: 384
+  kind: fastembed
+  model: BAAI/bge-small-en-v1.5

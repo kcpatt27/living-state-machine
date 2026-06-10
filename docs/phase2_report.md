@@ -1,6 +1,6 @@
 # Phase 2 Report — L14 hybrid + L15 QLoRA
 
-**Status:** draft (2026-06-10). Complements `docs/phase1_report.md`.
+**Status:** complete (2026-06-10). Complements `docs/phase1_report.md`.
 
 Hardware for L15 train: RunPod **NVIDIA L40S** (~$8.04, ~9.3 h wall). Local eval:
 **RTX 5060 Ti 16GB** (Transformers 4-bit 7B + optional LoRA).
@@ -58,16 +58,20 @@ Configs:
 - Base: `experiments/sample_recall_pref_v1_lsm_transformers_base.yaml`
 - + LoRA: `experiments/sample_recall_pref_v1_lsm_transformers_qlora.yaml`
 
-Both use `backend: transformers`, `Qwen/Qwen2.5-7B-Instruct`, 4-bit, hash embedder
-(same retrieval substrate as Phase 1 headline `lsm` YAML).
+Both use `backend: transformers`, `Qwen/Qwen2.5-7B-Instruct`, 4-bit, **fastembed**
+(`BAAI/bge-small-en-v1.5`). Hash embedder was the original Phase 1 YAML default but
+**cannot retrieve** `recall_pref_v1` preference lines (see §5.1).
 
 **Pre-L15 Ollama baseline (frozen):** `20260522-061302-sample_recall_pref_v1_lsm` →
-**1.000** (seed 0, `qwen2.5:7b-instruct-q8_0`, Ollama).
+**1.000** (seed 0, `qwen2.5:7b-instruct-q8_0`, Ollama). Re-verify with fastembed:
+headline YAML now matches hybrid/regression configs.
 
 | Arm | Run id | accuracy_mean | Δ vs pre-L15 |
 | --- | --- | --- | --- |
-| Transformers 7B base | `20260610-174849-…` | **0.100** | −0.900 |
-| Transformers 7B + LoRA | `20260610-175429-…` | **0.200** | −0.800 (gate **not met**) |
+| Transformers 7B base (hash — **bad harness**) | `20260610-174849-…` | **0.100** | — |
+| Transformers 7B + LoRA (hash) | `20260610-175429-…` | **0.200** | — |
+| Transformers 7B base (**fastembed**) | `20260610-194714-…` | **1.000** | **0.000** |
+| Transformers 7B + LoRA (**fastembed**) | `20260610-194743-…` | **1.000** | **0.000** |
 
 Reproduce:
 
@@ -83,15 +87,30 @@ uv sync --extra research
 
 | Config | Run directory | accuracy_mean | Notes |
 | --- | --- | --- | --- |
-| `transformers_base` | `experiments/20260610-174849-sample_recall_pref_v1_lsm_transformers_base` | **0.100** | 4-bit HF; ignores facts/memories often |
-| `transformers_qlora` | `experiments/20260610-175429-sample_recall_pref_v1_lsm_transformers_qlora` | **0.200** | +0.10 vs base; SFT phrasing, cross-item bleed |
-| `hybrid_updater` (step_010000) | `experiments/20260610-175541-sample_recall_pref_v1_lsm_hybrid_updater` | **1.000** | Ollama + fastembed; L14 gate **pass** |
+| `transformers_base` (hash) | `…174849-…` | **0.100** | empty retrieval — bad harness |
+| `transformers_qlora` (hash) | `…175429-…` | **0.200** | same |
+| `hybrid_updater` (step_010000) | `…175541-…` | **1.000** | Ollama + fastembed |
+| `transformers_base` (fastembed) | `…194714-…` | **1.000** | L15 gate **pass** |
+| `transformers_qlora` (fastembed) | `…194743-…` | **1.000** | L15 gate **pass** |
 
-**Interpretation:** The L15 exit rule compares adapter accuracy to the **Ollama** pre-L15 baseline
-(1.000). Transformers 4-bit inference is not parity with Ollama q8 on this harness — base
-already scores 0.100. LoRA improves the Transformers arm (+0.10) but does **not** close the
-gap to 0.950. Next investigative levers: Transformers prompt/context limits, fastembed on the
-Transformers YAMLs, or a gate reframed as adapter-vs-Transformers-base only.
+### 5.1 Lever 1 diagnosis (embedder, not truncation)
+
+Initial regression failure was **not** Transformers vs Ollama inference quality and **not**
+context truncation (~230 prompt tokens vs 32k limit).
+
+Root cause: **`hash` embedder + `min_score: 0.15`** on `recall_pref_v1`. After the rules
+writer filters distractors, the opening preference line scores **below 0.15** against the
+final question — so `_retrieve()` returns **zero memories** and the model sees only the
+base system prompt + question.
+
+| Embedder | Preference line score | Retrieved @ 0.15 | One-item Ollama answer |
+| --- | --- | --- | --- |
+| hash | ~−0.01 | 0 | “Can you provide more information…” |
+| fastembed | ~0.79 | 4 | “Medellín.” |
+
+Fix: use **fastembed** on all `recall_pref_v1` eval YAMLs (headline, hybrid, Transformers).
+Structured-fact regexes also miss the benchmark opening template (`my favourite X is Y` uses
+no `like/prefer` verb) — episodic retrieval is the path that matters here.
 
 ---
 
@@ -102,7 +121,7 @@ Transformers YAMLs, or a gate reframed as adapter-vs-Transformers-base only.
 | SFT v0 documented | ✅ `DATA_PROVENANCE.md` |
 | QLoRA trained + archived | ✅ RunPod burst |
 | Adapter loads in Transformers eval | ✅ `adapter_path` in `build_backend` |
-| `recall_pref_v1` regression ≥ baseline − 0.05 | ❌ **0.200** vs 1.000 Ollama baseline |
+| `recall_pref_v1` regression ≥ baseline − 0.05 | ✅ **1.000** (fastembed harness) |
 | Hybrid `step_010000` smoke (L14) | ✅ **1.000** |
 | `DATA_PROVENANCE` + reproduction script | ✅ |
 

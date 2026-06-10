@@ -1,7 +1,8 @@
 # Phase 2 L15 gate — joint QLoRA fine-tune
 
-**Status:** train **complete** (2026-06-10); eval regression **open**. L14 go/no-go
-is **closed** — see appendix in `docs/phase2_post_train_tasks.md`.
+**Status:** train **complete** (2026-06-10); eval regression **run** (2026-06-10) — **L15 exit
+not met** (adapter 0.200 vs Ollama baseline 1.000). L14 go/no-go **closed** including
+`step_010000` hybrid re-smoke — see `docs/phase2_report.md` §5.
 
 L15 is the first step that **touches the wrapped LLM's weights** (via low-rank
 adapters). Everything through L14 kept Qwen frozen behind Ollama; the custom SSM
@@ -49,17 +50,23 @@ Scaffold lives in `lsm/research/training/qlora.py`. Runners + RunPod playbook:
    `runs/qlora_smoke/metrics.json`. **Shipped** — run on RunPod per `docs/cloud_burst.md`.
 3. **`scripts/run_phase2_qlora.py`** — full QLoRA train. **Shipped**.
 4. **Eval hook** — optional `system.backend: transformers` + adapter path in eval YAML
-   (keep Ollama default for daily chat).
-5. **Regression matrix** — one `recall_pref_v1` run with adapter vs without.
+   (keep Ollama default for daily chat). **Done** — `build_backend(adapter_path=…)`,
+   `tests/test_transformers_adapter.py`.
+5. **Regression matrix** — one `recall_pref_v1` run with adapter vs without. **Done**
+   (2026-06-10): base **0.100**, +LoRA **0.200**; see `docs/phase2_report.md` §5.
 
 ---
 
 ## Success looks like (L15 exit)
 
-- Adapter loads in Transformers backend without breaking `lsm chat` or eval runner.
+- Adapter loads in Transformers backend without breaking `lsm chat` or eval runner. **✅**
 - `recall_pref_v1` accuracy **≥ pre-L15 baseline − 0.05** (adapter must not wreck memory path).
+  **❌ 0.200** (need ≥ 0.950 vs Ollama 1.000).
 - Checkpoint + config archived under `runs/qlora_qwen_7b/` with reproduction command in
-  `runs/qlora_qwen_7b/DATA_PROVENANCE.md`.
+  `runs/runpod_l40s_burst/DATA_PROVENANCE.md`. **✅**
+
+**Open follow-ups:** diagnose Transformers-vs-Ollama harness gap; consider fastembed on
+Transformers YAMLs; retrain or more bootstrap rows if adapter-vs-base delta stalls.
 
 ---
 

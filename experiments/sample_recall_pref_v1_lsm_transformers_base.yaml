@@ -1,0 +1,29 @@
+name: sample_recall_pref_v1_lsm_transformers_base
+task:
+  name: recall_pref_v1
+  num_items: 10
+  distractor_turns: 20
+system:
+  kind: lsm
+  backend: transformers
+  model: Qwen/Qwen2.5-7B-Instruct
+  device: cuda
+  load_in_4bit: true
+  top_k: 4
+  min_score: 0.15
+  state_updater: facts_backed
+  memory:
+    kind: memory
+  writer:
+    kind: rules
+ablation:
+  state_enabled: true
+  memory_enabled: true
+  habituation_enabled: true
+  association_enabled: true
+  writer_enabled: true
+run:
+  seeds: [0]
+embedder:
+  kind: hash
+  dim: 384

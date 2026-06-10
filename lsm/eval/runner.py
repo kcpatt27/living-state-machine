@@ -224,10 +224,14 @@ def _build_system(
     max_context_turns: int,
 ) -> System:
     kind = system_cfg["kind"]
+    adapter_raw = system_cfg.get("adapter_path")
     backend = build_backend(
         system_cfg.get("backend", "ollama"),
         model=system_cfg.get("model", get_settings().model),
         ollama_host=system_cfg.get("ollama_host", get_settings().ollama_host),
+        device=str(system_cfg.get("device", "cuda")),
+        adapter_path=str(adapter_raw) if adapter_raw else None,
+        load_in_4bit=bool(system_cfg.get("load_in_4bit", True)),
     )
     if kind == "raw_llm":
         return RawLLMBaseline(backend=backend, max_context_turns=max_context_turns)
@@ -436,7 +440,9 @@ async def run_from_config(
     metrics = {
         "task": task_cfg.get("name"),
         "system": system_cfg.get("kind"),
+        "backend": system_cfg.get("backend", "ollama"),
         "model": system_cfg.get("model"),
+        "adapter_path": system_cfg.get("adapter_path"),
         "state_updater": system_cfg.get("state_updater", "facts_backed"),
         "seeds": seeds,
         "accuracy_mean": mean,

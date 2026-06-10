@@ -15,7 +15,7 @@ from lsm.core.verifier import Verifier
 from lsm.core.verifier_log import VerifierLog
 from lsm.runtime.llm_backend import LLMBackend
 
-DEFAULT_HYBRID_CKPT = Path("runs/small/minimal/ckpts/step_002500.pt")
+DEFAULT_HYBRID_CKPT = Path("runs/runpod_l40s_burst/ssm/minimal/ckpts/step_010000.pt")
 
 
 def build_state_updater(

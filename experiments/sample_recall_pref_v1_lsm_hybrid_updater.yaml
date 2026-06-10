@@ -11,7 +11,7 @@ system:
   min_score: 0.15
   state_updater: hybrid
   hybrid:
-    ckpt_path: "runs/small/minimal/ckpts/step_002500.pt"
+    ckpt_path: "runs/runpod_l40s_burst/ssm/minimal/ckpts/step_010000.pt"
     mode: "topk_tokens"
     summary_tokens: 48
     device: "cuda"

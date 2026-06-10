@@ -242,11 +242,13 @@ class TransformersBackend:
         device: str = "cuda",
         load_in_4bit: bool = True,
         max_context: int = 8192,
+        adapter_path: str | None = None,
     ) -> None:
         self.model = model
         self._device = device
         self._load_in_4bit = load_in_4bit
         self._max_context = max_context
+        self._adapter_path = adapter_path
         self._tokenizer: Any = None
         self._model: Any = None
 
@@ -277,6 +279,11 @@ class TransformersBackend:
 
         self._tokenizer = AutoTokenizer.from_pretrained(self.model)
         self._model = AutoModelForCausalLM.from_pretrained(self.model, **kwargs)
+        if self._adapter_path:
+            from peft import PeftModel
+
+            log.info("loading LoRA adapter from %s", self._adapter_path)
+            self._model = PeftModel.from_pretrained(self._model, self._adapter_path)
 
     def _format(self, messages: Iterable[ChatMessage]) -> str:
         self._lazy_load()
@@ -326,10 +333,18 @@ def build_backend(
     model: str,
     *,
     ollama_host: str = "http://localhost:11434",
+    device: str = "cuda",
+    adapter_path: str | None = None,
+    load_in_4bit: bool = True,
 ) -> LLMBackend:
-    """Factory used by the server and CLI."""
+    """Factory used by the server, CLI, and eval runner."""
     if backend == "ollama":
         return OllamaBackend(model=model, host=ollama_host)
     if backend == "transformers":
-        return TransformersBackend(model=model)
+        return TransformersBackend(
+            model=model,
+            device=device,
+            load_in_4bit=load_in_4bit,
+            adapter_path=adapter_path,
+        )
     raise ValueError(f"unknown backend: {backend!r}")

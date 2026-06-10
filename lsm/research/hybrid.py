@@ -28,6 +28,8 @@ is scaffolding for future research.
 from __future__ import annotations
 
 import logging
+import os
+import pathlib
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -184,6 +186,23 @@ class HybridStateUpdater:
         return full
 
 
+def _load_trainer_checkpoint(ckpt_path: Path) -> dict[str, Any]:
+    """Load an SSM trainer checkpoint.
+
+    Checkpoints written on Linux may pickle ``pathlib.PosixPath`` objects into
+    ``config``; remap those to ``WindowsPath`` when loading on Windows.
+    """
+    torch = _require_torch()
+    if os.name == "nt":
+        orig_posix = pathlib.PosixPath
+        pathlib.PosixPath = pathlib.WindowsPath  # type: ignore[misc,assignment]
+        try:
+            return torch.load(str(ckpt_path), map_location="cpu", weights_only=False)
+        finally:
+            pathlib.PosixPath = orig_posix
+    return torch.load(str(ckpt_path), map_location="cpu", weights_only=False)
+
+
 def hybrid_from_checkpoint(
     ckpt_path: Path,
     *,
@@ -193,8 +212,7 @@ def hybrid_from_checkpoint(
     embedder: Embedder | None = None,
 ) -> HybridStateUpdater:
     """Load a trained custom core from ``ckpt_path`` and return a ready updater."""
-    torch = _require_torch()
-    payload = torch.load(str(ckpt_path), map_location="cpu", weights_only=False)
+    payload = _load_trainer_checkpoint(ckpt_path)
     cfg = payload.get("config", {})
     kind = cfg.get("model_kind", "minimal")
     if kind == "minimal":

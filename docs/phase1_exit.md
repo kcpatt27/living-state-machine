@@ -72,11 +72,10 @@ uv run pytest -q
 uv run lsm eval run --config experiments/verifier_calibration_v1.yaml
 ```
 
-## What comes next (Phase 2 — not part of this exit)
+## What comes next (product / improvements — not research exit)
 
-- L11 `small` train: **done** — `runs/small/summary.json`, `scripts/run_phase2_small_train.py`.
-- Post-train checklist: **done** — `docs/phase2_post_train_tasks.md` (go/no-go all [x]).
-- L14 hybrid `s_t` updater: **opt-in shipped** — `LSM_STATE_UPDATER=hybrid` in `lsm chat`
-  (default remains `facts_backed`). See `docs/manual_chat_protocol.md`.
-- L15 QLoRA / joint fine-tune: **next** — `docs/phase2_l15_gate.md`.
-- See `docs/north_star_science_in_simulation.md` for the long-term discovery goal (separate track).
+Phase 2 research exit is **closed** — see `docs/phase2_exit.md` and
+`docs/paper_abstract.md`. Remaining work (home-agent, daily chat polish, LoRA
+in Ollama, L13 scale) is improvement backlog, not unfinished Phase 1 criteria.
+Discovery-OS north star stays parked:
+`docs/north_star_science_in_simulation.md`.

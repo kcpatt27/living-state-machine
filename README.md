@@ -2,13 +2,34 @@
 
 A local, useful personal AI agent with a Stentor-inspired cognitive wrapper
 around a pretrained LLM. Designed for a 16GB-VRAM / 32GB-RAM machine. Phase 1
-is a complete product; Phase 2 is an ML research track that trains a small
-custom recurrent core whose state update is the Stentor mechanism.
+is a complete product; Phase 2 trained a small recurrent core and bridged it
+into the wrapper. **Research exit is closed** (2026-07-15); further work is
+product / improvement, not unfinished paper criteria.
 
 > "Intelligence from compact dynamical rules, not just deeper feedforward
 > stacks." — the mental model behind this project.
 
-See `.cursor/plans/plan_8491f6ee.plan.md` for the full build ladder (L0–L15).
+See `.cursor/plans/plan_8491f6ee.plan.md` for the build ladder (L0–L15).
+Headline write-up: [`docs/paper_abstract.md`](docs/paper_abstract.md).
+
+---
+
+## Research status (closed)
+
+| Phase | Exit | One-line result |
+| --- | --- | --- |
+| **1** Wrapper L0–L10 | [`docs/phase1_exit.md`](docs/phase1_exit.md) | Matched-budget `recall_pref_v1`: LSM **1.000** vs naive RAG **0.100** |
+| **2** SSM + hybrid + QLoRA | [`docs/phase2_exit.md`](docs/phase2_exit.md) | Hybrid & adapter preserve **1.000** on v1; Stentor SSM **did not** beat minimal on TinyStories LM loss |
+
+Negatives and stress findings: [`docs/negative_results.md`](docs/negative_results.md),
+[`docs/recall_pref_v2_findings.md`](docs/recall_pref_v2_findings.md).
+
+**Where to publish (optional):** treat this as a **systems / reproducibility
+artifact**. Reasonable next steps: GitHub README + abstract as portfolio,
+optional [arXiv](https://arxiv.org) cs.AI / cs.CL preprint, or a workshop /
+blog. Formal conference peer review is optional and a higher bar — parked
+checklist in [`docs/higher_bar_plan.md`](docs/higher_bar_plan.md). Not required
+to call the research track done.
 
 ---
 

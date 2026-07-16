@@ -72,7 +72,7 @@ hybrid smoke still optional per entry criteria.
 ## North star link
 
 L15 nudges the **LLM brain** on domain text. L14's hybrid core nudges **state dynamics**.
-The discovery-OS track (`docs/north_star_science_in_simulation.md`) still waits on the
+The discovery-OS track (local-only north-star notes; gitignored) still waits on the
 **robotics sim episode API** — L15 does not block that parallel work.
 
 When both L15 smoke and robotics sim API exist, draft the 90-day discovery-OS plan in a

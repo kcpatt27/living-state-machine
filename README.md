@@ -1,146 +1,113 @@
 # Living State Machine (LSM)
 
-A local, useful personal AI agent with a Stentor-inspired cognitive wrapper
-around a pretrained LLM. Designed for a 16GB-VRAM / 32GB-RAM machine. Phase 1
-is a complete product; Phase 2 trained a small recurrent core and bridged it
-into the wrapper. **Research exit is closed** (2026-07-15); further work is
-product / improvement, not unfinished paper criteria.
+A local personal AI that wraps an Ollama model with memory dynamics inspired
+by *Stentor coeruleus*: habituation, association, gated writes, multi-timescale
+storage, and a running hidden state `s_t`. Built for a 16GB VRAM / 32GB RAM
+Windows box.
 
-> "Intelligence from compact dynamical rules, not just deeper feedforward
-> stacks." — the mental model behind this project.
-
-See `.cursor/plans/plan_8491f6ee.plan.md` for the build ladder (L0–L15).
-Headline write-up: [`docs/paper_abstract.md`](docs/paper_abstract.md).
+The research track is closed (2026-07-15). What remains is daily use and
+optional polish. Headline write-up: [`docs/paper_abstract.md`](docs/paper_abstract.md).
+Build ladder (L0–L15): `.cursor/plans/plan_8491f6ee.plan.md`.
 
 ---
 
-## Research status (closed)
+## Research status
 
-| Phase | Exit | One-line result |
+| Phase | Exit doc | Result |
 | --- | --- | --- |
-| **1** Wrapper L0–L10 | [`docs/phase1_exit.md`](docs/phase1_exit.md) | Matched-budget `recall_pref_v1`: LSM **1.000** vs naive RAG **0.100** |
-| **2** SSM + hybrid + QLoRA | [`docs/phase2_exit.md`](docs/phase2_exit.md) | Hybrid & adapter preserve **1.000** on v1; Stentor SSM **did not** beat minimal on TinyStories LM loss |
+| 1. Wrapper (L0–L10) | [`docs/phase1_exit.md`](docs/phase1_exit.md) | On matched-budget `recall_pref_v1`, LSM scored 1.000 vs naive RAG 0.100 |
+| 2. Small SSM + hybrid + QLoRA | [`docs/phase2_exit.md`](docs/phase2_exit.md) | Hybrid and adapter arms kept 1.000 on v1. Stentor-in-SSM lost to a minimal SSM on TinyStories LM loss |
 
-Negatives and stress findings: [`docs/negative_results.md`](docs/negative_results.md),
+Negatives and stress benches: [`docs/negative_results.md`](docs/negative_results.md),
 [`docs/recall_pref_v2_findings.md`](docs/recall_pref_v2_findings.md).
 
-**Where to publish (optional):** treat this as a **systems / reproducibility
-artifact**. Reasonable next steps: GitHub README + abstract as portfolio,
-optional [arXiv](https://arxiv.org) cs.AI / cs.CL preprint, or a workshop /
-blog. Formal conference peer review is optional and a higher bar — parked
-checklist in [`docs/higher_bar_plan.md`](docs/higher_bar_plan.md). Not required
-to call the research track done.
+For a portfolio link, the repo plus the abstract is enough. If you ever want
+arXiv or a workshop, the parked checklist is
+[`docs/higher_bar_plan.md`](docs/higher_bar_plan.md). Peer review is optional,
+not a missing exit gate.
 
 ---
 
-## What this is
+## What runs
 
-- A local OpenAI-API-compatible server that wraps `qwen2.5:14b-instruct-q4_K_M`
-  (or any Ollama model) and adds:
-  - a persistent hidden state `s_t` that evolves across turns,
-  - episodic + durable memory with CPU-embedded vector search,
-  - **habituation** (repeated low-value inputs get damped),
-  - **association** (Hebbian co-hit boosts),
-  - a **gated memory writer** (store / merge / overwrite / decay / ignore),
-  - **multi-timescale memory** (fast, session, durable),
-  - an **outcome scoring loop** (self-critic + user feedback),
-  - **meta-memory** with plasticity scheduling (trusted entries become slow).
-- Ships with a CLI, a FastAPI server, and a ready-to-use Open WebUI front end.
-- Ships with its own benchmark suite so research claims are defensible.
+OpenAI-compatible FastAPI in front of Ollama (Transformers path for research).
+Each turn can:
+
+1. retrieve from LanceDB with habituation / association / trust scoring
+2. inject `s_t` and structured facts into the prompt
+3. stream a reply
+4. score the outcome and decide whether to write durable memory
+
+You get a CLI (`lsm chat`, `lsm serve`), the API on port 8765, and optional
+Open WebUI. Eval lives under `lsm/eval/` with YAML configs in `experiments/`.
+
+Default model tags live in `.env` (see `.env.example`). Daily chat often uses
+`qwen3.5:9b`; `-Fast` loads `qwen3.5:4b`.
+
+---
 
 ## Quick start (Windows)
 
-Toolchain bootstrap (installs Git, Python 3.11, and uv via Scoop; then verifies
-official installs of Ollama and Docker Desktop; pulls models; starts Open
-WebUI). Run in PowerShell:
+PowerShell:
 
 ```powershell
 .\scripts\setup.ps1
-```
-
-Start the LSM server (picks up the default model from `.env`):
-
-```powershell
 .\scripts\start_server.ps1
 ```
 
-Open the chat UI in your browser:
-
-```
-http://localhost:3000
-```
-
-That is Level 1: you already have a fully local personal AI. Everything in
-Phase 1 is opt-in additions on top of this baseline.
-
-Run the test suite:
+Chat UI (if Open WebUI is up): http://localhost:3000
+API health: http://127.0.0.1:8765/health
+REPL: `uv run lsm chat`
 
 ```powershell
 uv run pytest
-```
-
-Install pre-commit hooks:
-
-```powershell
 uv run pre-commit install
 ```
 
-## Switching models / freeing VRAM
+### Models and VRAM
 
 | Command | Effect |
-| :-- | :-- |
-| `.\scripts\start_server.ps1` | 14B primary model (~11GB VRAM) |
-| `.\scripts\start_server.ps1 -Fast` | 7B Q8 fast mode (~7GB VRAM) |
-| `uv run lsm serve --stop` | Unload the LSM wrapper |
-| `ollama stop qwen2.5:14b-instruct-q4_K_M` | Force Ollama to release the model |
+| --- | --- |
+| `.\scripts\start_server.ps1` | Default from `.env` (`LSM_MODEL`) |
+| `.\scripts\start_server.ps1 -Fast` | `qwen3.5:4b` |
+| `uv run lsm serve --stop` | Stop the LSM server |
+| `ollama stop <tag>` | Unload that Ollama model |
 
-See `memory-bank/techContext.md` for full VRAM accounting.
+VRAM notes: `memory-bank/techContext.md`.
 
-## Troubleshooting Ollama `HTTP 500`
+### Ollama HTTP 500
 
-If `lsm chat` fails with `500 Internal Server Error` from `localhost:11434/api/chat`,
-the Ollama daemon rejected the request (often a transient model-load failure on
-Windows). LSM retries `500/502/503/504` automatically (up to 3 times); if it
-still fails:
+`lsm chat` talking to `localhost:11434` sometimes gets a transient 500 on
+Windows while the model loads. LSM retries 500/502/503/504 up to three times.
+If it still fails: restart Ollama from the tray, check `ollama list`, free VRAM
+with `ollama stop <tag>`, or pull the fast model again.
 
-1. Restart Ollama (quit from the tray, relaunch).
-2. Run `ollama list` to confirm models are present.
-3. Free VRAM: `ollama stop <model-tag>` then try the 7B fast model.
-4. Re-pull if needed: `ollama pull qwen2.5:7b-instruct-q8_0`.
+---
 
-Full notes: `memory-bank/techContext.md` (Ollama troubleshooting).
+## Daily CLI
 
-## Daily-use CLI
+`s_t` is a compressed summary. LanceDB holds longer-lived rows. For ground
+truth, prefer `lsm memory query` or `lsm state show --memories N`.
 
-> **Mental model:** `s_t` is a compressed running summary; durable LanceDB
-> holds verbatim-ish atoms. For ground truth, use `lsm memory query` (or
-> `lsm state show --memories N`).
+| Command | Purpose |
+| --- | --- |
+| `lsm version` | Version |
+| `lsm serve [--model X] [--fast] [--stop]` | API server |
+| `lsm chat` | Interactive REPL |
+| `lsm ingest <path>` | Ingest files into durable memory |
+| `lsm state show` | Inspect `s_t` |
+| `lsm identity show` / `set` | Pinned assistant identity |
+| `lsm fact list` / `show` / `prune` / `set` | Structured facts |
+| `lsm verify "<text>" [--explain]` | Score a candidate against live facts |
+| `lsm memory query "<text>"` | Query durable memory |
+| `lsm memory purge --older-than 90d` | Age out old durable rows |
+| `lsm snapshot create\|restore --tag <name>` | Checkpoint / roll back state |
+| `lsm eval run --config <yaml>` | Benchmark run |
+| `lsm train small --config <yaml>` | Phase 2 training |
 
-(Subcommands are introduced as the ladder advances. L0 ships only
-`lsm version` and `lsm --help`.)
+---
 
-| Command | Level | Purpose |
-| :-- | :-- | :-- |
-| `lsm version` | L0 | Version and help |
-| `lsm serve [--model X] [--fast] [--stop]` | L2 | Start/stop the API server |
-| `lsm chat` | L2 | Interactive REPL against the local server |
-| `lsm ingest <path>` | L4 | Ingest files into durable memory |
-| `lsm state show` | L3 | Inspect current `s_t` and top memory entries |
-| `lsm identity show` / `lsm identity set` | A.6 | View or edit the pinned assistant identity (`identity/role` in `s_t`) |
-| `lsm fact list` / `lsm fact show` / `lsm fact prune` | F.1 | Inspect or clean structured facts in `facts.json` |
-| `lsm verify "<text>" [--explain]` | V.1 | Score a candidate against live facts + corrections |
-| `lsm verify --history N` | V.1 | Show recent verifier gate decisions from `verifier_log.sqlite` |
-| `lsm fact category add\|list\|remove` | F.3 | Register dynamic `user.*` categories |
-| `lsm fact set --category … --value …` | F.3 | Manually upsert a fact (incl. custom categories) |
-| `lsm note add` / `list` / `clear` | F.2 | Manage `assistant.notes` facts |
-| `lsm memory query "<text>"` | L4 | Manually query memory |
-| `lsm memory purge --older-than 90d` | L8 | Clean up durable memory |
-| `lsm snapshot create --tag <name>` | L3 | Snapshot state to a safe point |
-| `lsm snapshot restore --tag <name>` | L3 | Roll back |
-| `lsm eval run --config <yaml>` | L4+ | Run a benchmark with configured ablations |
-| `lsm train small --config <yaml>` | L11+ | Phase 2 training runs |
-
-## Architecture at a glance
+## Pipeline sketch
 
 ```mermaid
 flowchart TD
@@ -160,46 +127,53 @@ flowchart TD
     Meta --> StateUpdate
 ```
 
-Full design: `memory-bank/systemPatterns.md` and `docs/architecture.md`.
+Design notes: `memory-bank/systemPatterns.md`, `docs/architecture.md`.
 
-## Repository layout
+---
+
+## Repo layout
 
 ```
 living-state-machine/
-  memory-bank/              # project memory (project brief, patterns, etc.)
-  docs/                     # hypotheses, architecture, privacy, negative results
+  memory-bank/     project brief, patterns, progress
+  docs/            exits, reports, hypotheses, negatives, privacy
   lsm/
-    core/                   # state, memory, habituation, association, writer, scorer, meta
-    runtime/                # LLM backends (ollama, transformers), prompt compose
-    serve/                  # FastAPI OpenAI-compatible server
-    cli/                    # typer CLI
-    eval/                   # runner, tasks/, baselines/, metrics
-    research/               # phase 2: small_core/, training/
-  experiments/              # per-run configs + results (gitignored bodies)
-  scripts/                  # setup.ps1, start_server.ps1, reproduce_*.ps1
+    core/          state, memory, habituation, association, writer, verifier
+    runtime/       backends, prompt compose, pipeline factory
+    serve/         FastAPI
+    cli/           typer CLI
+    eval/          tasks, baselines, runner
+    research/      small_core, training, hybrid
+  experiments/     YAML configs; run bodies mostly gitignored
+  scripts/         setup, server, suite drivers
   tests/
-  models/                   # downloaded weights (gitignored)
-  data/                     # corpora (gitignored)
+  models/          downloaded weights (gitignored)
+  data/            corpora (gitignored)
 ```
 
-## Research track
+---
 
-This project produces **measured** results, not vibes. Every new mechanism
-lands with:
+## How claims were checked
 
-- a hypothesis in `docs/hypotheses.md`,
-- a matched baseline,
-- an ablation flag that disables the mechanism,
-- at least 3 seeds,
-- a YAML config copied into the run directory.
+New mechanisms were supposed to land with a hypothesis in
+`docs/hypotheses.md`, a baseline, an ablation flag, multi-seed runs where we
+claimed them, and a YAML copied into the run dir. We did not always hit three
+seeds on Phase 2 (seed 0 only there). That limit is written into the exit docs
+instead of papered over.
 
-See `memory-bank/systemPatterns.md` and `docs/architecture.md`. The full
-rigor protocol is section 6 of the plan.
+---
 
 ## Privacy
 
-All data stays local. Durable memory is encrypted at rest with Fernet by
-default. No telemetry. See `docs/privacy.md`.
+Everything stays on the machine. No product telemetry. Outbound traffic is the
+local Ollama daemon, Hugging Face downloads when you pull models, and optional
+Weights & Biases if you turn it on for training.
+
+Durable memory can use Fernet at rest when `LSM_ENCRYPT=true` (see
+`docs/privacy.md`). That path exists; it is not a full security audit. Treat
+`$LSM_HOME` like any other local personal data.
+
+---
 
 ## License
 
@@ -208,9 +182,5 @@ MIT. See `LICENSE`.
 ## Credits
 
 - Stentor paper: *Associative learning in the protozoan Stentor coeruleus*
-  (bioRxiv, 2026).
-- Qwen2.5, Llama 3.1, Ollama, Open WebUI, LanceDB, fastembed, FastAPI.
-
----
-
-Built by reishi, with Gee.
+  (bioRxiv, 2026)
+- Qwen, Ollama, Open WebUI, LanceDB, fastembed, FastAPI

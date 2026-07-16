@@ -55,6 +55,8 @@ runs/**/ckpts/
 *.pt
 *.safetensors
 research-docs/*.pdf
+research-docs/
+docs/north_star_science_in_simulation.md
 
 # Encrypted user memory (never check in)
 memory_store/

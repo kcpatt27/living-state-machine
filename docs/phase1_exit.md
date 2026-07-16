@@ -77,5 +77,4 @@ uv run lsm eval run --config experiments/verifier_calibration_v1.yaml
 Phase 2 research exit is **closed** — see `docs/phase2_exit.md` and
 `docs/paper_abstract.md`. Remaining work (home-agent, daily chat polish, LoRA
 in Ollama, L13 scale) is improvement backlog, not unfinished Phase 1 criteria.
-Discovery-OS north star stays parked:
-`docs/north_star_science_in_simulation.md`.
+Discovery-OS north star stays parked (local-only notes; not in the public tree).

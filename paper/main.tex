@@ -162,7 +162,7 @@ After QLoRA training, the adapter path appeared broken: base 0.100 and +LoRA 0.2
   \item \textbf{Matched-budget scope.} The headline claim is about naive RAG at a matched budget. Full-context raw LLMs remain stronger on the harder stress bench.
   \item \textbf{Hardware and cost.} Results come from one consumer GPU and one approximately \$8 cloud burst; no multi-hardware replication.
   \item \textbf{Privacy boundary.} The system is local by default and supports optional encryption at rest, but the encryption path has not been independently audited.
-  \item \textbf{Run artifacts.} The phase-report tables were reconciled with the repository on 2026-10-20. Raw run directories were not fully present in the review checkout, so the final artifact release should include them.
+  \item \textbf{Run artifacts.} The evaluation artifacts behind Tables~1 and~2 are committed under \texttt{experiments/} and were re-checked against the manuscript on 2026-10-27; \texttt{paper/REPRODUCE.md} maps every row to its run directory. An earlier review checkout contained only \texttt{runs/} (training), which is why a previous draft reported missing run directories.
 \end{itemize}
 
 \section{Conclusion}
@@ -172,7 +172,7 @@ LSM shows that a compact, inspectable memory wrapper can produce a large gain ov
 Text-to-text AI tools assisted with drafting, structuring, and editorial review. The author verified the measurements, tables, and citations and takes full responsibility for the content.
 
 \section*{Code and Artifacts}
-The implementation and run scripts are available from the author; a public artifact release is pending. The report's tables were reconciled against the Phase 1 and Phase 2 reports in the author's repository on 2026-10-20.
+The implementation, run scripts, and evaluation artifacts are in the author's repository, which will be released with the paper; \texttt{paper/REPRODUCE.md} maps each table row to its run directory. The tables were reconciled against the Phase 1 and Phase 2 reports on 2026-10-20 and against the raw experiment artifacts on 2026-10-27.
 
 \begin{thebibliography}{9}
 \bibitem{lewis2020rag}

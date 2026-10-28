@@ -22,7 +22,8 @@ The source uses `thebibliography`, so no BibTeX pass is required. Keep `figure1.
   `REPRODUCE.md`). Re-check if any run is added.
 - Expand the related-work section; the current seven references are a starting point.
 - Add the public repository/artifact link once the LSM repo is public.
-- Decide the license (CC BY 4.0 matches the site) and category (`cs.LG`, with `cs.CL`/`cs.AI` only if appropriate).
+- License decided: CC BY 4.0 for the paper (see `LICENSE`), MIT for the code.
+  Category: `cs.LG`, with `cs.CL`/`cs.AI` only if appropriate.
 - Complete the AI-assistance statement and author review.
 - Get an endorsement before the first submission.
 

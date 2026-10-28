@@ -17,8 +17,9 @@ The source uses `thebibliography`, so no BibTeX pass is required. Keep `figure1.
 
 ## Before arXiv
 
-- Reconcile every table with the run IDs and raw artifacts. Tables 1-2 are done
-  (`REPRODUCE.md`); table 3 still needs the component-bench pass.
+- Reconcile every table with the run IDs and raw artifacts. Done 2026-10-27:
+  Tables 1-2 map to `experiments/`, Table 3 to `docs/phase1_report.md` (see
+  `REPRODUCE.md`). Re-check if any run is added.
 - Expand the related-work section; the current seven references are a starting point.
 - Add the public repository/artifact link once the LSM repo is public.
 - Decide the license (CC BY 4.0 matches the site) and category (`cs.LG`, with `cs.CL`/`cs.AI` only if appropriate).

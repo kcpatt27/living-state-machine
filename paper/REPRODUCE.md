@@ -27,10 +27,14 @@ values quoted below.
 
 ## Table 3 — component evidence
 
-The writer-precision and verifier-calibration figures come from the component
-benches (`recall_pref_v2` no-writer run above shows the collapse to zero) and
-the phase reports under `docs/`. Check those against `docs/phase2_report.md`
-before the submission pass; the table was not re-derived in this check.
+All rows reconcile with `docs/phase1_report.md`:
+
+| Row | Source | Values |
+| --- | --- | --- |
+| Writer --- always / rules / learned | §5.4, synthetic 60 signal / 60 filler, seed 0 | `always` P 0.50 / R 1.00 / F1 0.67 / FPR 1.00; `rules` 1.00 / 0.97 / 0.98 / 0.00; `learned` 1.00 / 1.00 / 1.00 / 0.00 |
+| Habituation signal | §5.2 | MRR 0.314 → 0.382 (+0.068) |
+| Association signal | §5.3 | MRR 0.454 → 0.772 (+0.317) |
+| Verifier --- rule / linear / encoder | §5.6, dataset `20260522-075336-verifier_calibration_v1`, n=13 | rule 0.556 macro-F1; linear + hybrid 0.771; encoder 0.211 (reject-all collapse) |
 
 ## Note on `runs/`
 

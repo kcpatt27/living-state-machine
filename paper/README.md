@@ -20,7 +20,7 @@ The source uses `thebibliography`, so no BibTeX pass is required. Keep `figure1.
 - Reconcile every table with the run IDs and raw artifacts. Done 2026-10-27:
   Tables 1-2 map to `experiments/`, Table 3 to `docs/phase1_report.md` (see
   `REPRODUCE.md`). Re-check if any run is added.
-- Expand the related-work section; the current seven references are a starting point.
+- Related work expanded to eleven references (LongMemEval, HippoRAG, Mem0, lost-in-the-middle added).
 - Add the public repository/artifact link once the LSM repo is public.
 - License decided: CC BY 4.0 for the paper (see `LICENSE`), MIT for the code.
   Category: `cs.LG`, with `cs.CL`/`cs.AI` only if appropriate.

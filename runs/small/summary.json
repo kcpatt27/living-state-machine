@@ -3,15 +3,15 @@
   "device": "cuda",
   "steps": null,
   "synthetic": false,
-  "data_path": "C:\\Users\\kcpat\\projects\\personal-projects\\living-state-machine\\data\\tokens_small_tinystories.bin",
+  "data_path": "<repo>\\data\\tokens_small_tinystories.bin",
   "variants": {
     "minimal": {
       "steps": 2500,
       "param_count": 30566144,
       "ckpts": [
-        "C:\\Users\\kcpat\\projects\\personal-projects\\living-state-machine\\runs\\small\\minimal\\ckpts\\step_001500.pt",
-        "C:\\Users\\kcpat\\projects\\personal-projects\\living-state-machine\\runs\\small\\minimal\\ckpts\\step_002000.pt",
-        "C:\\Users\\kcpat\\projects\\personal-projects\\living-state-machine\\runs\\small\\minimal\\ckpts\\step_002500.pt"
+        "<repo>\\runs\\small\\minimal\\ckpts\\step_001500.pt",
+        "<repo>\\runs\\small\\minimal\\ckpts\\step_002000.pt",
+        "<repo>\\runs\\small\\minimal\\ckpts\\step_002500.pt"
       ],
       "final_loss": 2.9515336322784425,
       "seq_len": 512,
@@ -19,16 +19,16 @@
       "grad_accum": 2,
       "model_kind": "minimal",
       "device": "cuda",
-      "data_path": "C:\\Users\\kcpat\\projects\\personal-projects\\living-state-machine\\data\\tokens_small_tinystories.bin",
+      "data_path": "<repo>\\data\\tokens_small_tinystories.bin",
       "synthetic": false
     },
     "stentor": {
       "steps": 1200,
       "param_count": 43370252,
       "ckpts": [
-        "C:\\Users\\kcpat\\projects\\personal-projects\\living-state-machine\\runs\\small\\stentor\\ckpts\\step_000500.pt",
-        "C:\\Users\\kcpat\\projects\\personal-projects\\living-state-machine\\runs\\small\\stentor\\ckpts\\step_001000.pt",
-        "C:\\Users\\kcpat\\projects\\personal-projects\\living-state-machine\\runs\\small\\stentor\\ckpts\\step_001200.pt"
+        "<repo>\\runs\\small\\stentor\\ckpts\\step_000500.pt",
+        "<repo>\\runs\\small\\stentor\\ckpts\\step_001000.pt",
+        "<repo>\\runs\\small\\stentor\\ckpts\\step_001200.pt"
       ],
       "final_loss": 5.206793785095215,
       "seq_len": 256,
@@ -36,7 +36,7 @@
       "grad_accum": 2,
       "model_kind": "stentor",
       "device": "cuda",
-      "data_path": "C:\\Users\\kcpat\\projects\\personal-projects\\living-state-machine\\data\\tokens_small_tinystories.bin",
+      "data_path": "<repo>\\data\\tokens_small_tinystories.bin",
       "synthetic": false
     }
   }

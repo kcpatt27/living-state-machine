@@ -127,7 +127,7 @@ def test_restaurants_without_word_restaurants(tmp_path: Path) -> None:
 
 def test_identity_quiz_does_not_extract_traits(tmp_path: Path) -> None:
     store = FactStore(tmp_path)
-    apply_extracted_facts(store, "how do you know i am reishi?")
+    apply_extracted_facts(store, "how do you know i am Kalen?")
     traits = store.query(owner="user", category=CAT_USER_TRAITS)
     assert traits == []
 
@@ -218,8 +218,8 @@ def test_extracted_facts_carry_source_segment() -> None:
 
 def test_delete_where_filters(tmp_path: Path) -> None:
     store = FactStore(tmp_path)
-    store.upsert(Fact(owner="user", category=CAT_USER_TRAITS, value="reishi"))
-    store.upsert(Fact(owner="user", category=CAT_USER_TRAITS, value="ctually reishi"))
+    store.upsert(Fact(owner="user", category=CAT_USER_TRAITS, value="Kalen"))
+    store.upsert(Fact(owner="user", category=CAT_USER_TRAITS, value="ctually Kalen"))
     store.upsert(
         Fact(
             owner="user",
@@ -238,7 +238,7 @@ def test_delete_where_filters(tmp_path: Path) -> None:
 def test_clear_all_preserves_assistant_identity(tmp_path: Path) -> None:
     store = FactStore(tmp_path)
     store.sync_assistant_identity(IdentityProfile(name="Elsum", description="Helper."))
-    store.upsert(Fact(owner="user", category=CAT_USER_PEOPLE, value="reishi"))
+    store.upsert(Fact(owner="user", category=CAT_USER_PEOPLE, value="Kalen"))
     store.upsert(Fact(owner="user", category=CAT_USER_DISLIKES, value="spam"))
     n = store.clear_all(preserve_assistant_identity=True)
     assert n == 2
@@ -248,8 +248,8 @@ def test_clear_all_preserves_assistant_identity(tmp_path: Path) -> None:
 
 
 def test_low_quality_trait_filtered() -> None:
-    """Bare 'reishi' and 'ctually reishi' do not become traits on a plain message."""
-    facts = extract_facts_from_user_turn("i am reishi")
+    """Bare 'Kalen' and 'ctually Kalen' do not become traits on a plain message."""
+    facts = extract_facts_from_user_turn("i am Kalen")
     traits = [f for f in facts if f.category == CAT_USER_TRAITS]
     assert traits == [], traits
 
@@ -268,7 +268,7 @@ def test_plain_question_is_not_open_question() -> None:
 
 def test_identity_quiz_is_not_open_question() -> None:
     """Identity-quiz turns must not emit open_questions facts."""
-    facts = extract_facts_from_user_turn("how do you know i am reishi?")
+    facts = extract_facts_from_user_turn("how do you know i am Kalen?")
     open_qs = [f for f in facts if f.category == CAT_USER_OPEN_QUESTIONS]
     assert open_qs == [], open_qs
 

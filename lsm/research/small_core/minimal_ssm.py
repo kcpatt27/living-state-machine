@@ -1,6 +1,6 @@
 """Minimal SSM core — L11.
 
-A hand-rolled, dependency-light state-space block written so reishi can
+A hand-rolled, dependency-light state-space block written so Kalen can
 train a ~30-50M-parameter language model on the 5060 Ti without
 depending on ``mamba-ssm`` (which has finicky Windows wheels). The block
 is intentionally simple; correctness and legibility matter more than

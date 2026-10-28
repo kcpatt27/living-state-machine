@@ -1,7 +1,7 @@
 {
   "model_kind": "minimal",
   "model": "{'vocab_size': 32000, 'd_model': 512, 'n_layers': 12, 'd_state': 64, 'd_inner': 1024, 'dropout': 0.0, 'tie_embeddings': True}",
-  "data_path": "C:\\Users\\kcpat\\projects\\personal-projects\\living-state-machine\\data\\tokens_small_tinystories.bin",
+  "data_path": "<repo>\\data\\tokens_small_tinystories.bin",
   "vocab_size": "32000",
   "seq_len": "512",
   "batch_size": "8",
@@ -17,7 +17,7 @@
   "precision": "bf16",
   "device": "cuda",
   "seed": "0",
-  "ckpt_dir": "C:\\Users\\kcpat\\projects\\personal-projects\\living-state-machine\\runs\\small\\minimal\\ckpts",
+  "ckpt_dir": "<repo>\\runs\\small\\minimal\\ckpts",
   "log_every": "25",
   "eval_every": "2501",
   "save_every": "500",

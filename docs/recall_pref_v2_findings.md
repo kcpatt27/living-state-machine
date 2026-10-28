@@ -110,7 +110,7 @@ openings still yield few facts.
 
 ---
 
-## Architectural direction (reishi’s intent)
+## Architectural direction (Kalen Patterson’s intent)
 
 **Goal:** patterns and systems **inside** LSM so it learns to associate
 surface forms with the right **ideas** (preferences, goals, nouns, roles) —

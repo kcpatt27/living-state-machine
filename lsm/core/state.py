@@ -294,7 +294,7 @@ SUMMARIZER_SYSTEM = (
     "- ongoing tasks: actionable help requests or open loops only (help me, "
     "remind me). Not personality, not the assistant's mission.\n"
     "- open questions\n\n"
-    "Example: identity/role: Elsum (assistant) | people/names: Reishi (user) | "
+    "Example: identity/role: Elsum (assistant) | people/names: Kalen (user) | "
     "traits/personality: creator\n\n"
     "Additive facts: when the user says both X and Y, or X and Y, or as well as, "
     "preserve separate items; never parenthesize one as the other.\n\n"

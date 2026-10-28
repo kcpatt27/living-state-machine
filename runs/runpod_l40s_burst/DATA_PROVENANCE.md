@@ -100,7 +100,7 @@ Download:
 
 ```powershell
 scp -r -P PORT root@POD_IP:/workspace/lsm/runs/runpod_l40s_burst runs/
-# or tarball as reishi used: runs/lsm_results.tgz
+# or tarball as Kalen Patterson used: runs/lsm_results.tgz
 ```
 
 ---

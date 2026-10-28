@@ -23,21 +23,21 @@ def _cand(text: str, role: str = "user", novelty: float | None = None) -> WriteC
 
 def test_always_writer_keeps_non_empty_and_drops_empty() -> None:
     w = AlwaysWriter()
-    assert w.decide(_cand("my name is reishi")).write is True
+    assert w.decide(_cand("my name is Kalen")).write is True
     assert w.decide(_cand("")).write is False
     assert w.decide(_cand("   ")).write is False
 
 
 def test_never_writer_never_writes() -> None:
     w = NeverWriter()
-    assert w.decide(_cand("my name is reishi")).write is False
+    assert w.decide(_cand("my name is Kalen")).write is False
     assert w.decide(_cand("ok")).write is False
 
 
 def test_rules_writer_accepts_durable_facts() -> None:
     w = RuleBasedWriter()
     for text in [
-        "my name is reishi",
+        "my name is Kalen",
         "i prefer green tea over coffee",
         "remember that the deploy target is lunar",
         "i work at archive as a software engineer",
@@ -73,10 +73,10 @@ def test_rules_writer_rejects_pure_questions() -> None:
 def test_rules_writer_novelty_threshold() -> None:
     cfg = RuleBasedWriterConfig(min_novelty=0.4)
     w = RuleBasedWriter(cfg)
-    low = w.decide(_cand("my name is reishi", novelty=0.1))
+    low = w.decide(_cand("my name is Kalen", novelty=0.1))
     assert low.write is False
     assert low.reason == "low_novelty"
-    high = w.decide(_cand("my name is reishi", novelty=0.9))
+    high = w.decide(_cand("my name is Kalen", novelty=0.9))
     assert high.write is True
 
 
@@ -98,7 +98,7 @@ def test_learned_writer_falls_back_when_untrained() -> None:
 def test_learned_writer_can_learn_mixture() -> None:
     examples: list[LabeledCandidate] = []
     signal = [
-        "my name is reishi",
+        "my name is Kalen",
         "i prefer green tea",
         "our family car is a blue wagon",
         "i live in lumen",
@@ -131,7 +131,7 @@ def test_learned_writer_can_learn_mixture() -> None:
 
 def test_learned_writer_save_load_roundtrip(tmp_path: Path) -> None:
     examples = [
-        LabeledCandidate(_cand("my name is reishi"), 1),
+        LabeledCandidate(_cand("my name is Kalen"), 1),
         LabeledCandidate(_cand("ok"), 0),
         LabeledCandidate(_cand("i prefer tea"), 1),
         LabeledCandidate(_cand("thanks"), 0),
@@ -145,7 +145,7 @@ def test_learned_writer_save_load_roundtrip(tmp_path: Path) -> None:
     w2.load(p)
     assert w2.model is not None
     assert set(w2.model.weights.keys()) == set(model.weights.keys())
-    assert w2.decide(_cand("my name is reishi")).write is True
+    assert w2.decide(_cand("my name is Kalen")).write is True
 
 
 def test_memory_write_precision_v1_rules_and_learned_beat_always() -> None:

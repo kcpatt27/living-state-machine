@@ -10,7 +10,7 @@ independently.
 Hardware: single RTX 5060 Ti (16 GB VRAM; ~12 GB for the AI), 32 GB RAM,
 Windows 11. No cloud resources were used.
 
-> **Run log (reishi's machine).** **2026-05-22 ~06:06 local** — CPU
+> **Run log (Kalen Patterson's machine).** **2026-05-22 ~06:06 local** — CPU
 > retrieval/writer benchmarks (`.\scripts\run_phase1_suite.ps1
 > -SkipEndToEnd`, `HashEmbedder`, seed 0). **~06:32** — full suite including
 > end-to-end `recall_pref_v1` (`.\scripts\run_phase1_suite.ps1 -KeepGoing`,

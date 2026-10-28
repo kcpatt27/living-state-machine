@@ -30,7 +30,7 @@ Scaffold lives in `lsm/research/training/qlora.py`. Runners + RunPod playbook:
 ## Entry criteria (all must pass before a real L15 train)
 
 - [x] L14 go/no-go closed (minimal core, hybrid eval 1.000 on v1, chat protocol test).
-- [ ] **Daily-drive hybrid smoke:** reishi runs `LSM_STATE_UPDATER=hybrid` + `lsm chat`
+- [ ] **Daily-drive hybrid smoke:** Kalen Patterson runs `LSM_STATE_UPDATER=hybrid` + `lsm chat`
   for one real session; notes in `docs/manual_chat_protocol.md` or a dated log.
 - [x] **SFT dataset v0:** 500 bootstrap rows on-pod (`recall_pref` mirror, seed 0).
   Provenance: `runs/runpod_l40s_burst/DATA_PROVENANCE.md` §1.

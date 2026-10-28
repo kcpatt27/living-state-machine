@@ -257,13 +257,11 @@ def test_correction_regex_rejects_normal_phrases(text: str) -> None:
 @pytest.mark.asyncio
 async def test_summarizer_pins_identity_slot() -> None:
     profile = IdentityProfile(name="Elsum", description="Pinned assistant.")
-    backend = _CapturingBackend(
-        "identity/role: Reishi\npeople/names: Elsum\npreferences/likes: tea"
-    )
+    backend = _CapturingBackend("identity/role: Kalen\npeople/names: Elsum\npreferences/likes: tea")
     upd = LLMSummarizerUpdater(backend=backend, embedder=HashEmbedder(dim=8), identity=profile)
     out = await upd.update(State(), "hi", "hello")
     assert out.text.startswith("identity/role: Elsum - Pinned assistant.")
-    assert "identity/role: Reishi" not in out.text
+    assert "identity/role: Kalen" not in out.text
 
 
 @pytest.mark.asyncio
@@ -326,14 +324,14 @@ async def test_summarizer_omits_corrections_block_when_none() -> None:
 
 def test_pin_identity_line_replaces_wrong_slot() -> None:
     profile = IdentityProfile(name="Elsum", description="AI.")
-    text = "identity/role: Reishi\npeople/names: Elsum"
+    text = "identity/role: Kalen\npeople/names: Elsum"
     fixed = _pin_identity_line(text, profile)
     assert fixed.startswith("identity/role: Elsum - AI.")
-    assert "identity/role: Reishi" not in fixed
+    assert "identity/role: Kalen" not in fixed
 
 
 def test_sanitize_people_names_removes_assistant() -> None:
-    text = "people/names: Reishi (the user), Elsum"
+    text = "people/names: Kalen (the user), Elsum"
     fixed = _sanitize_people_names(text, "Elsum")
     assert "Elsum" not in fixed.split("people/names:")[1]
 

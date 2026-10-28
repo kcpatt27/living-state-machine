@@ -1,6 +1,6 @@
 # Cloud burst — L15 QLoRA on RunPod (L40S)
 
-RunPod so reishi's **5060 Ti stays idle**. Default target: **L40S 48GB**, 94GB RAM,
+RunPod so Kalen Patterson's **5060 Ti stays idle**. Default target: **L40S 48GB**, 94GB RAM,
 16 vCPU, **~$0.86/hr**.
 
 One command on the pod runs smoke → QLoRA (2k steps, batch 4) → minimal SSM (10k steps).

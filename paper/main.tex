@@ -43,7 +43,9 @@ Retrieval-augmented generation (RAG) conditions a model on retrieved passages ra
 
 Memory-augmented agents such as MemGPT treat the context window as a managed resource and move information between working and external memory \cite{packer2023memgpt}. Generative Agents maintain a memory stream with reflection and retrieval \cite{park2023generative}. LSM shares the tiered-memory premise but differs in two ways: the language model is frozen and local, and the persistent state is rendered deterministically from structured facts rather than authored by the model.
 
-Long-context transformers reduce the need for retrieval by extending attention \cite{beltagy2020longformer}, while state-space models offer linear-time sequence mixing \cite{gu2023mamba}. LSM's Phase 2 explored a small state-space core, but the production path remained a wrapper; the trained core had to clear a no-regression gate rather than replace the baseline.
+Long-context transformers reduce the need for retrieval by extending attention \cite{beltagy2020longformer}, while state-space models offer linear-time sequence mixing \cite{gu2023mamba}. LSM's Phase 2 explored a small state-space core, but the production path remained a wrapper; the trained core had to clear a no-regression gate rather than replace the baseline. Long context is not free: accuracy degrades when the relevant passage sits in the middle of a long prompt \cite{liu2024lost}, which is the practical argument for retrieving a small, scored set rather than forwarding a transcript.
+
+Recent work evaluates assistant memory more broadly than this report does. LongMemEval measures information extraction, multi-session reasoning, temporal reasoning, knowledge updates, and abstention over long interactive histories \cite{wu2025longmemeval}; LSM's suite is narrower and matched-budget, but it names the same failure modes and includes a decoy-heavy stress task rather than hiding behind the headline. HippoRAG builds a knowledge graph over memories and retrieves with personalised PageRank \cite{gutierrez2024hipporag}; LSM instead keeps a compact dual state plus an episodic log and deliberately does not build a graph. Managed memory layers such as Mem0 extract and consolidate facts behind a hosted API \cite{chhikara2025mem0}; LSM is local-first and renders its state deterministically from structured facts, trading breadth for inspectability.
 
 Habituation and associative learning are classic biological mechanisms \cite{thompson1966habituation}, and regularization methods for sequential learning address a related stability problem \cite{kirkpatrick2017ewc}. LSM borrows the vocabulary---habituation, association, surprise, plasticity---but evaluates each mechanism as an engineering component, not as a biological claim.
 
@@ -189,6 +191,18 @@ I. Beltagy, M. E. Peters, and A. Cohan, ``Longformer: The Long-Document Transfor
 
 \bibitem{gu2023mamba}
 A. Gu and T. Dao, ``Mamba: Linear-Time Sequence Modeling with Selective State Spaces,'' 2023. arXiv:2312.00752.
+
+\bibitem{liu2024lost}
+N. F. Liu, K. Lin, J. Hewitt, A. Paranjape, M. Bevilacqua, F. Petroni, and P. Liang, ``Lost in the Middle: How Language Models Use Long Contexts,'' \emph{TACL}, 12:157--173, 2024. arXiv:2307.03172.
+
+\bibitem{wu2025longmemeval}
+D. Wu, H. Wang, W. Yu, Y. Zhang, K.-W. Chang, and D. Yu, ``LongMemEval: Benchmarking Chat Assistants on Long-Term Interactive Memory,'' \emph{ICLR}, 2025. arXiv:2410.10813.
+
+\bibitem{gutierrez2024hipporag}
+B. J. Guti\'errez, Y. Shu, Y. Gu, M. Yasunaga, and Y. Su, ``HippoRAG: Neurobiologically Inspired Long-Term Memory for Large Language Models,'' \emph{NeurIPS}, 2024. arXiv:2405.14831.
+
+\bibitem{chhikara2025mem0}
+P. Chhikara, D. Khant, S. Aryan, T. Singh, and D. Yadav, ``Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory,'' 2025. arXiv:2504.19413.
 
 \bibitem{thompson1966habituation}
 R. F. Thompson and W. A. Spencer, ``Habituation: A Model Phenomenon for the Study of Neuronal Substrates of Behavior,'' \emph{Psychological Review}, 73(1):16--43, 1966.

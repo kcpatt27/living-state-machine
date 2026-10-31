@@ -28,8 +28,8 @@ def home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 def _seed(home: Path) -> FactStore:
     store = FactStore(home)
     store.sync_assistant_identity(IdentityProfile(name="Elsum", description="Helper."))
-    store.upsert(Fact(owner="user", category=CAT_USER_TRAITS, value="reishi"))
-    store.upsert(Fact(owner="user", category=CAT_USER_TRAITS, value="ctually reishi"))
+    store.upsert(Fact(owner="user", category=CAT_USER_TRAITS, value="Kalen"))
+    store.upsert(Fact(owner="user", category=CAT_USER_TRAITS, value="ctually Kalen"))
     store.upsert(
         Fact(
             owner="user",

@@ -1,7 +1,7 @@
 # Higher bar — optional peer-review / conference track
 
 **Status:** parked plan (2026-07-15). Research exit is already closed
-(`docs/phase2_exit.md`). This doc is for if reishi wants a citable preprint or
+(`docs/phase2_exit.md`). This doc is for if Kalen Patterson wants a citable preprint or
 workshop/conference submission later. It is **not** unfinished exit work.
 
 Companion: `docs/paper_abstract.md` (current claims + QC checklist).

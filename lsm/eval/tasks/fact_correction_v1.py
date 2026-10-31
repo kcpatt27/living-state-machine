@@ -78,7 +78,7 @@ SCENARIOS: list[FactScenario] = [
         summarizer_reply=(
             "identity/role: Elsum - assistant\n"
             "preferences/likes: korean bbq restaurants\n"
-            "people/names: Reishi\n"
+            "people/names: Kalen\n"
         ),
     ),
     FactScenario(
@@ -100,14 +100,14 @@ SCENARIOS: list[FactScenario] = [
     FactScenario(
         scenario_id="identity_slots",
         turns=[
-            ScenarioTurn("your name is Elsum. my name is reishi."),
+            ScenarioTurn("your name is Elsum. my name is Kalen."),
         ],
         expect=ScenarioExpect(
             st_contains=["identity/role: Elsum"],
             st_excludes=["people/names: Elsum"],
-            st_equals="identity/role: Elsum - Test assistant.\npeople/names: *reishi",
+            st_equals="identity/role: Elsum - Test assistant.\npeople/names: *Kalen",
         ),
-        summarizer_reply=("identity/role: Reishi\npeople/names: Elsum, Reishi\n"),
+        summarizer_reply=("identity/role: Kalen\npeople/names: Elsum, Kalen\n"),
     ),
     FactScenario(
         scenario_id="trait_not_task",
@@ -129,7 +129,7 @@ SCENARIOS: list[FactScenario] = [
         scenario_id="identity_quiz_clarification",
         turns=[
             ScenarioTurn(
-                "how do you know i am reishi? i am actually reishi.",
+                "how do you know i am Kalen? i am actually Kalen.",
                 assistant="i can ask a memorable question to confirm.",
             ),
             ScenarioTurn(
@@ -150,7 +150,7 @@ SCENARIOS: list[FactScenario] = [
         ),
         summarizer_reply=(
             "identity/role: Elsum - assistant\n"
-            "people/names: Reishi\n"
+            "people/names: Kalen\n"
             "games/media: Crimson Desert (action RPG)\n"
             "preferences/likes: yakiniku, korean bbq\n"
         ),

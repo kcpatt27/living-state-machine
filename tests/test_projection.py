@@ -57,7 +57,7 @@ async def test_projection_renders_core_slots() -> None:
     p = DeterministicProjection()
     ident = IdentityProfile(name="Elsum", description="Assistant.")
     facts = [
-        _fact(CAT_USER_PEOPLE, "reishi"),
+        _fact(CAT_USER_PEOPLE, "Kalen"),
         _fact(CAT_USER_PREFERENCES, "yakiniku", subject="restaurants"),
         _fact(CAT_USER_PREFERENCES, "korean bbq", subject="restaurants"),
         _fact(CAT_USER_DISLIKES, "crowded places"),
@@ -166,7 +166,7 @@ class _StubPolishBackend:
 async def test_polish_guard_accepts_when_only_asterisks_stripped() -> None:
     """A polish that drops `*` recency markers should be accepted."""
     facts = [
-        _fact(CAT_USER_PEOPLE, "reishi", age_s=1.0),
+        _fact(CAT_USER_PEOPLE, "Kalen", age_s=1.0),
         _fact(CAT_USER_PREFERENCES, "tea", subject="drinks", age_s=1.0),
     ]
     base = DeterministicProjection()
@@ -182,10 +182,10 @@ async def test_polish_guard_accepts_when_only_asterisks_stripped() -> None:
 @pytest.mark.asyncio
 async def test_polish_guard_rejects_content_change() -> None:
     """A polish that changes an actual value should be rejected (fallback)."""
-    facts = [_fact(CAT_USER_PEOPLE, "reishi", age_s=1.0)]
+    facts = [_fact(CAT_USER_PEOPLE, "Kalen", age_s=1.0)]
     base = DeterministicProjection()
     body = await base.render(ProjectionContext(facts=facts))
-    bad = body.replace("reishi", "someone else")
+    bad = body.replace("Kalen", "someone else")
     backend = _StubPolishBackend(bad)
     polish = LLMPolishedProjection(base=base, backend=backend, enabled=True)
     out = await polish.render(ProjectionContext(facts=facts))
@@ -196,7 +196,7 @@ async def test_polish_guard_rejects_content_change() -> None:
 async def test_projection_budget_trims_from_bottom() -> None:
     p = DeterministicProjection()
     facts = [
-        _fact(CAT_USER_PEOPLE, "reishi"),
+        _fact(CAT_USER_PEOPLE, "Kalen"),
         _fact(CAT_USER_MEDIA, "action RPG", subject="Crimson Desert"),
         _fact(CAT_USER_PREFERENCES, "yakiniku", subject="restaurants"),
         _fact(CAT_ASSISTANT_NOTES, "note-" + ("x" * 120)),

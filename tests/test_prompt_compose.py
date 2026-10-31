@@ -30,14 +30,14 @@ def test_compose_preserves_user_messages_order() -> None:
 
 def test_compose_injects_state_and_memories() -> None:
     ctx = PromptContext(
-        state_projection="reishi likes dark mode",
+        state_projection="Kalen likes dark mode",
         retrieved=["IDE theme: Abyss", "favourite game: Crimson Desert"],
     )
     out = compose(ctx, [ChatMessage(role="user", content="hi")])
 
     sys = out[0].content
     assert "Current internal state" in sys
-    assert "reishi likes dark mode" in sys
+    assert "Kalen likes dark mode" in sys
     assert "Relevant memories" in sys
     assert "IDE theme: Abyss" in sys
     assert "favourite game: Crimson Desert" in sys

@@ -553,16 +553,16 @@ def _new_fact(
 
 
 def _is_low_quality_trait(s: str) -> bool:
-    """Reject obviously-broken trait captures like 'ctually reishi'."""
+    """Reject obviously-broken trait captures like 'ctually Kalen'."""
     if not s:
         return True
     s = s.strip()
     if len(s) <= 2:
         return True
-    if re.match(r"^(actually|ctually|ust|nd|or|so|reishi)\b", s, re.IGNORECASE):
+    if re.match(r"^(actually|ctually|ust|nd|or|so|Kalen)\b", s, re.IGNORECASE):
         return True
     # Single-token traits of bare length are almost always false positives
-    # ("reishi", "tired", "cool"). Real traits tend to be multi-word.
+    # ("Kalen", "tired", "cool"). Real traits tend to be multi-word.
     return " " not in s and len(s) <= 12
 
 
@@ -797,7 +797,7 @@ def extract_facts_from_user_turn(
     # about", "can you remind me to think about") or the literal "(open
     # question)" tag. We deliberately do NOT treat every '?' as an open
     # question -- routine user questions ("what's the weather like?") and
-    # identity quizzes ("how do you know i am reishi?") would otherwise
+    # identity quizzes ("how do you know i am Kalen?") would otherwise
     # pollute the store. Note: "remind me to think about ..." is also
     # captured as a user.task above; that dual capture is intentional --
     # tasks track action, open questions track reflection.

@@ -5,7 +5,7 @@ description = "Living State Machine: a Stentor-inspired cognitive wrapper around
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 license = { text = "MIT" }
-authors = [{ name = "reishi" }]
+authors = [{ name = "Kalen Patterson" }]
 keywords = [
     "llm",
     "recurrent",

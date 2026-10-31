@@ -21,10 +21,10 @@ Build ladder (L0–L15): `.cursor/plans/plan_8491f6ee.plan.md`.
 Negatives and stress benches: [`docs/negative_results.md`](docs/negative_results.md),
 [`docs/recall_pref_v2_findings.md`](docs/recall_pref_v2_findings.md).
 
-For a portfolio link, the repo plus the abstract is enough. If you ever want
-arXiv or a workshop, the parked checklist is
-[`docs/higher_bar_plan.md`](docs/higher_bar_plan.md). Peer review is optional,
-not a missing exit gate.
+Preprint: [`paper/main.pdf`](paper/main.pdf) — arXiv `cs.LG`, pending
+endorsement. The submission and public-flip checklist is
+[`PUBLICATION.md`](PUBLICATION.md). Peer review remains optional, not a missing
+exit gate.
 
 ---
 
@@ -42,7 +42,7 @@ You get a CLI (`lsm chat`, `lsm serve`), the API on port 8765, and optional
 Open WebUI. Eval lives under `lsm/eval/` with YAML configs in `experiments/`.
 
 Default model tags live in `.env` (see `.env.example`). Daily chat often uses
-`qwen3.5:9b`; `-Fast` loads `qwen3.5:4b`.
+`qwen3.5:9b`; `-Fast` loads `qwen3.5:4b`. The paper's experiments used `qwen2.5:7b-instruct-q8_0`.
 
 ---
 
@@ -181,6 +181,5 @@ MIT. See `LICENSE`.
 
 ## Credits
 
-- Stentor paper: *Associative learning in the protozoan Stentor coeruleus*
-  (bioRxiv, 2026)
+- Stentor coeruleus: biological inspiration for the memory mechanisms
 - Qwen, Ollama, Open WebUI, LanceDB, fastembed, FastAPI

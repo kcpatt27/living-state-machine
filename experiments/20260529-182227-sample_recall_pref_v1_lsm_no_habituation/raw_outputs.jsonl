@@ -1,0 +1,30 @@
+{"seed": 0, "item_id": "recall_pref_v1-0-000", "topic": "favourite city", "correct_value": "medell\u00edn", "answer": "Medell\u00edn", "passed": true}
+{"seed": 0, "item_id": "recall_pref_v1-0-001", "topic": "home town", "correct_value": "knoxville", "answer": "Knoxville", "passed": true}
+{"seed": 0, "item_id": "recall_pref_v1-0-002", "topic": "home town", "correct_value": "tampa", "answer": "Tampa", "passed": true}
+{"seed": 0, "item_id": "recall_pref_v1-0-003", "topic": "favourite colour", "correct_value": "cerulean", "answer": "Cerulean", "passed": true}
+{"seed": 0, "item_id": "recall_pref_v1-0-004", "topic": "favourite programming language", "correct_value": "haskell", "answer": "Haskell\n\nThe Fourier transform is a mathematical operation that decomposes a function (often a signal) into its constituent frequencies. Informally, it's like taking a complex wave and breaking it down into simpler sine waves that add up to the original wave. This can help in analyzing patterns or filtering out noise from signals.", "passed": true}
+{"seed": 0, "item_id": "recall_pref_v1-0-005", "topic": "home town", "correct_value": "boise", "answer": "Boise", "passed": true}
+{"seed": 0, "item_id": "recall_pref_v1-0-006", "topic": "favourite city", "correct_value": "lisbon", "answer": "Lisbon", "passed": true}
+{"seed": 0, "item_id": "recall_pref_v1-0-007", "topic": "favourite city", "correct_value": "tbilisi", "answer": "Tbilisi", "passed": true}
+{"seed": 0, "item_id": "recall_pref_v1-0-008", "topic": "favourite drink", "correct_value": "matcha", "answer": "I don't have information about your favorite drink in my current knowledge. Could you tell me what it is?", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v1-0-009", "topic": "favourite city", "correct_value": "lisbon", "answer": "Lisbon", "passed": true}
+{"seed": 1, "item_id": "recall_pref_v1-1-000", "topic": "favourite drink", "correct_value": "ginger kombucha", "answer": "Ginger kombucha", "passed": true}
+{"seed": 1, "item_id": "recall_pref_v1-1-001", "topic": "favourite city", "correct_value": "lisbon", "answer": "Lisbon", "passed": true}
+{"seed": 1, "item_id": "recall_pref_v1-1-002", "topic": "dog's name", "correct_value": "kombu", "answer": "Kombu", "passed": true}
+{"seed": 1, "item_id": "recall_pref_v1-1-003", "topic": "favourite city", "correct_value": "kyoto", "answer": "Kyoto", "passed": true}
+{"seed": 1, "item_id": "recall_pref_v1-1-004", "topic": "favourite drink", "correct_value": "ginger kombucha", "answer": "Ginger kombucha", "passed": true}
+{"seed": 1, "item_id": "recall_pref_v1-1-005", "topic": "favourite programming language", "correct_value": "rust", "answer": "Rust", "passed": true}
+{"seed": 1, "item_id": "recall_pref_v1-1-006", "topic": "favourite city", "correct_value": "lisbon", "answer": "Lisbon", "passed": true}
+{"seed": 1, "item_id": "recall_pref_v1-1-007", "topic": "dog's name", "correct_value": "tamari", "answer": "Tamari", "passed": true}
+{"seed": 1, "item_id": "recall_pref_v1-1-008", "topic": "favourite programming language", "correct_value": "rust", "answer": "Rust\n\nBased on your preference listed earlier, it seems Rust is your favorite programming language. Is there anything specific about Rust that you particularly enjoy or find useful?", "passed": true}
+{"seed": 1, "item_id": "recall_pref_v1-1-009", "topic": "dog's name", "correct_value": "furikake", "answer": "Furikake", "passed": true}
+{"seed": 2, "item_id": "recall_pref_v1-2-000", "topic": "favourite colour", "correct_value": "cerulean", "answer": "Cerulean", "passed": true}
+{"seed": 2, "item_id": "recall_pref_v1-2-001", "topic": "favourite city", "correct_value": "tallinn", "answer": "Tallinn.", "passed": true}
+{"seed": 2, "item_id": "recall_pref_v1-2-002", "topic": "favourite city", "correct_value": "tbilisi", "answer": "Tbilisi", "passed": true}
+{"seed": 2, "item_id": "recall_pref_v1-2-003", "topic": "home town", "correct_value": "pueblo", "answer": "Pueblo", "passed": true}
+{"seed": 2, "item_id": "recall_pref_v1-2-004", "topic": "favourite city", "correct_value": "kyoto", "answer": "Kyoto", "passed": true}
+{"seed": 2, "item_id": "recall_pref_v1-2-005", "topic": "favourite programming language", "correct_value": "elixir", "answer": "Elixir", "passed": true}
+{"seed": 2, "item_id": "recall_pref_v1-2-006", "topic": "favourite programming language", "correct_value": "haskell", "answer": "Haskell", "passed": true}
+{"seed": 2, "item_id": "recall_pref_v1-2-007", "topic": "favourite programming language", "correct_value": "haskell", "answer": "Haskell", "passed": true}
+{"seed": 2, "item_id": "recall_pref_v1-2-008", "topic": "home town", "correct_value": "boise", "answer": "Boise.", "passed": true}
+{"seed": 2, "item_id": "recall_pref_v1-2-009", "topic": "dog's name", "correct_value": "tamari", "answer": "Tamari", "passed": true}

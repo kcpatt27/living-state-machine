@@ -1,0 +1,459 @@
+{
+  "task": "recall_pref_v1",
+  "system": "raw_llm",
+  "model": "qwen2.5:7b-instruct-q8_0",
+  "state_updater": "facts_backed",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "accuracy_mean": 0.0,
+  "accuracy_std": 0.0,
+  "per_seed": [
+    {
+      "seed": 0,
+      "accuracy": 0.0,
+      "n": 20,
+      "elapsed_s": 14.784112930297852,
+      "per_item": [
+        {
+          "item_id": "recall_pref_v1-0-000",
+          "topic": "favourite city",
+          "correct_value": "medell\u00edn",
+          "answer": "Paris",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-001",
+          "topic": "dog's name",
+          "correct_value": "basil",
+          "answer": "Buddy",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-002",
+          "topic": "favourite programming language",
+          "correct_value": "elixir",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-003",
+          "topic": "favourite drink",
+          "correct_value": "hibiscus tea",
+          "answer": "Coffee.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-004",
+          "topic": "home town",
+          "correct_value": "tampa",
+          "answer": "Unknown. Could you provide more information about your hometown?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-005",
+          "topic": "home town",
+          "correct_value": "albany",
+          "answer": "Unknown.\n\nCould you provide more information or specify which hometown you're referring to?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-006",
+          "topic": "home town",
+          "correct_value": "boise",
+          "answer": "Unknown. Could you provide the name of your hometown or more details to help me identify it?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-007",
+          "topic": "favourite programming language",
+          "correct_value": "ocaml",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-008",
+          "topic": "home town",
+          "correct_value": "albany",
+          "answer": "Unknown.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-009",
+          "topic": "favourite colour",
+          "correct_value": "cerulean",
+          "answer": "Blue. (Assuming it's your favorite based on common preferences, but this might vary.)",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-010",
+          "topic": "dog's name",
+          "correct_value": "tamari",
+          "answer": "Buddy",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-011",
+          "topic": "dog's name",
+          "correct_value": "tamari",
+          "answer": "Buddy",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-012",
+          "topic": "favourite drink",
+          "correct_value": "hibiscus tea",
+          "answer": "Coffee.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-013",
+          "topic": "home town",
+          "correct_value": "albany",
+          "answer": "New York City",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-014",
+          "topic": "favourite colour",
+          "correct_value": "amber",
+          "answer": "Blue.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-015",
+          "topic": "favourite city",
+          "correct_value": "tbilisi",
+          "answer": "New York City",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-016",
+          "topic": "favourite drink",
+          "correct_value": "negroni",
+          "answer": "Coffee.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-017",
+          "topic": "favourite programming language",
+          "correct_value": "rust",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-018",
+          "topic": "favourite programming language",
+          "correct_value": "zig",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-0-019",
+          "topic": "favourite city",
+          "correct_value": "kyoto",
+          "answer": "New York City",
+          "passed": false
+        }
+      ]
+    },
+    {
+      "seed": 1,
+      "accuracy": 0.0,
+      "n": 20,
+      "elapsed_s": 4.34471321105957,
+      "per_item": [
+        {
+          "item_id": "recall_pref_v1-1-000",
+          "topic": "favourite drink",
+          "correct_value": "ginger kombucha",
+          "answer": "Coffee.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-001",
+          "topic": "favourite programming language",
+          "correct_value": "rust",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-002",
+          "topic": "favourite city",
+          "correct_value": "tbilisi",
+          "answer": "New York",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-003",
+          "topic": "favourite programming language",
+          "correct_value": "elixir",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-004",
+          "topic": "favourite city",
+          "correct_value": "medell\u00edn",
+          "answer": "New York",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-005",
+          "topic": "favourite programming language",
+          "correct_value": "zig",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-006",
+          "topic": "favourite city",
+          "correct_value": "lisbon",
+          "answer": "Paris",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-007",
+          "topic": "home town",
+          "correct_value": "tampa",
+          "answer": "Unknown.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-008",
+          "topic": "dog's name",
+          "correct_value": "miso",
+          "answer": "Buddy",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-009",
+          "topic": "favourite programming language",
+          "correct_value": "ocaml",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-010",
+          "topic": "favourite drink",
+          "correct_value": "ginger kombucha",
+          "answer": "Coffee.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-011",
+          "topic": "favourite drink",
+          "correct_value": "matcha",
+          "answer": "Coffee.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-012",
+          "topic": "home town",
+          "correct_value": "albany",
+          "answer": "Unknown. Could you please tell me your hometown or provide more context?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-013",
+          "topic": "favourite city",
+          "correct_value": "medell\u00edn",
+          "answer": "New York City",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-014",
+          "topic": "home town",
+          "correct_value": "tampa",
+          "answer": "New York",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-015",
+          "topic": "dog's name",
+          "correct_value": "furikake",
+          "answer": "Buddy",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-016",
+          "topic": "dog's name",
+          "correct_value": "tamari",
+          "answer": "Buddy",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-017",
+          "topic": "home town",
+          "correct_value": "albany",
+          "answer": "Unknown",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-018",
+          "topic": "favourite city",
+          "correct_value": "lisbon",
+          "answer": "Paris",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-1-019",
+          "topic": "dog's name",
+          "correct_value": "miso",
+          "answer": "Buddy",
+          "passed": false
+        }
+      ]
+    },
+    {
+      "seed": 2,
+      "accuracy": 0.0,
+      "n": 20,
+      "elapsed_s": 4.272345066070557,
+      "per_item": [
+        {
+          "item_id": "recall_pref_v1-2-000",
+          "topic": "favourite colour",
+          "correct_value": "cerulean",
+          "answer": "Blue",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-001",
+          "topic": "favourite city",
+          "correct_value": "tallinn",
+          "answer": "New York City",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-002",
+          "topic": "home town",
+          "correct_value": "pueblo",
+          "answer": "Unknown. Could you provide more information about your hometown?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-003",
+          "topic": "favourite drink",
+          "correct_value": "matcha",
+          "answer": "Coffee.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-004",
+          "topic": "favourite programming language",
+          "correct_value": "zig",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-005",
+          "topic": "favourite drink",
+          "correct_value": "oatmilk latte",
+          "answer": "Coffee.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-006",
+          "topic": "favourite city",
+          "correct_value": "kyoto",
+          "answer": "Paris",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-007",
+          "topic": "favourite city",
+          "correct_value": "medell\u00edn",
+          "answer": "New York City",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-008",
+          "topic": "dog's name",
+          "correct_value": "furikake",
+          "answer": "Buddy",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-009",
+          "topic": "favourite colour",
+          "correct_value": "oxblood",
+          "answer": "Blue.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-010",
+          "topic": "dog's name",
+          "correct_value": "miso",
+          "answer": "Fido",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-011",
+          "topic": "favourite programming language",
+          "correct_value": "zig",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-012",
+          "topic": "favourite programming language",
+          "correct_value": "ocaml",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-013",
+          "topic": "favourite programming language",
+          "correct_value": "elixir",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-014",
+          "topic": "favourite programming language",
+          "correct_value": "ocaml",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-015",
+          "topic": "favourite programming language",
+          "correct_value": "ocaml",
+          "answer": "Python",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-016",
+          "topic": "dog's name",
+          "correct_value": "furikake",
+          "answer": "Fido",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-017",
+          "topic": "dog's name",
+          "correct_value": "tamari",
+          "answer": "Buddy",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-018",
+          "topic": "favourite city",
+          "correct_value": "tallinn",
+          "answer": "New York City",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v1-2-019",
+          "topic": "favourite programming language",
+          "correct_value": "rust",
+          "answer": "Python",
+          "passed": false
+        }
+      ]
+    }
+  ]
+}

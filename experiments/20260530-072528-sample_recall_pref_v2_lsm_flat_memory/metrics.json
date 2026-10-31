@@ -1,0 +1,354 @@
+{
+  "task": "recall_pref_v2",
+  "system": "lsm",
+  "model": "qwen2.5:7b-instruct-q8_0",
+  "state_updater": "facts_backed",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "accuracy_mean": 0.08888888888888889,
+  "accuracy_std": 0.03849001794597505,
+  "per_seed": [
+    {
+      "seed": 0,
+      "accuracy": 0.06666666666666667,
+      "n": 15,
+      "elapsed_s": 6.02208685874939,
+      "per_item": [
+        {
+          "item_id": "recall_pref_v2-0-000",
+          "topic": "favourite city",
+          "correct_value": "medell\u00edn",
+          "answer": "I don't have information about your favorite city. Could you tell me which city is your favorite?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-001",
+          "topic": "home town",
+          "correct_value": "albany",
+          "answer": "Pueblo",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-002",
+          "topic": "favourite drink",
+          "correct_value": "negroni",
+          "answer": "Hibiscus tea",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-003",
+          "topic": "favourite programming language",
+          "correct_value": "zig",
+          "answer": "Based on the information provided, your favorite programming language is Haskell.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-004",
+          "topic": "favourite programming language",
+          "correct_value": "haskell",
+          "answer": "I don't have information about your favorite programming language. Could you tell me what it is?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-005",
+          "topic": "favourite drink",
+          "correct_value": "oatmilk latte",
+          "answer": "Negroni",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-006",
+          "topic": "favourite colour",
+          "correct_value": "indigo",
+          "answer": "I don't have information about your favorite color. Could you tell me what it is?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-007",
+          "topic": "favourite city",
+          "correct_value": "tallinn",
+          "answer": "Tallinn",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-008",
+          "topic": "dog's name",
+          "correct_value": "kombu",
+          "answer": "Can you tell me your dog's name? I don't have that information yet.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-009",
+          "topic": "home town",
+          "correct_value": "knoxville",
+          "answer": "Albany",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-010",
+          "topic": "home town",
+          "correct_value": "knoxville",
+          "answer": "Albany",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-011",
+          "topic": "favourite colour",
+          "correct_value": "indigo",
+          "answer": "I don't have information about your favorite color. Could you tell me what it is?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-012",
+          "topic": "home town",
+          "correct_value": "knoxville",
+          "answer": "Can you provide more information about your home town or confirm if you have mentioned it before?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-013",
+          "topic": "home town",
+          "correct_value": "boise",
+          "answer": "Albany",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-014",
+          "topic": "favourite drink",
+          "correct_value": "matcha",
+          "answer": "Based on your preferences, I don't have enough information to determine your favorite drink yet. Could you tell me what drinks you enjoy?",
+          "passed": false
+        }
+      ]
+    },
+    {
+      "seed": 1,
+      "accuracy": 0.06666666666666667,
+      "n": 15,
+      "elapsed_s": 5.068877696990967,
+      "per_item": [
+        {
+          "item_id": "recall_pref_v2-1-000",
+          "topic": "favourite drink",
+          "correct_value": "ginger kombucha",
+          "answer": "Based on the information provided, your favorite drink is hibiscus tea.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-001",
+          "topic": "favourite programming language",
+          "correct_value": "elixir",
+          "answer": "Elixir",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-002",
+          "topic": "home town",
+          "correct_value": "tampa",
+          "answer": "Albany",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-003",
+          "topic": "favourite programming language",
+          "correct_value": "ocaml",
+          "answer": "Based on the information provided, your favorite programming language is Rust.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-004",
+          "topic": "home town",
+          "correct_value": "pueblo",
+          "answer": "Albany",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-005",
+          "topic": "home town",
+          "correct_value": "pueblo",
+          "answer": "I don't have information about your hometown. Could you tell me where it is?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-006",
+          "topic": "dog's name",
+          "correct_value": "miso",
+          "answer": "Furikake",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-007",
+          "topic": "dog's name",
+          "correct_value": "furikake",
+          "answer": "Miso",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-008",
+          "topic": "favourite colour",
+          "correct_value": "indigo",
+          "answer": "I don't have information about your favorite color. Could you tell me what it is?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-009",
+          "topic": "favourite drink",
+          "correct_value": "ginger kombucha",
+          "answer": "Negroni",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-010",
+          "topic": "home town",
+          "correct_value": "tampa",
+          "answer": "Pueblo",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-011",
+          "topic": "favourite city",
+          "correct_value": "tbilisi",
+          "answer": "I don't have information about your favorite city. Could you tell me which city is your favorite?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-012",
+          "topic": "home town",
+          "correct_value": "tampa",
+          "answer": "Can you provide more information about your home town or confirm if it's Knox ville based on the previous mention?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-013",
+          "topic": "home town",
+          "correct_value": "boise",
+          "answer": "Albany",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-014",
+          "topic": "favourite drink",
+          "correct_value": "matcha",
+          "answer": "Negroni",
+          "passed": false
+        }
+      ]
+    },
+    {
+      "seed": 2,
+      "accuracy": 0.13333333333333333,
+      "n": 15,
+      "elapsed_s": 6.949603796005249,
+      "per_item": [
+        {
+          "item_id": "recall_pref_v2-2-000",
+          "topic": "favourite colour",
+          "correct_value": "cerulean",
+          "answer": "Cerulean",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-001",
+          "topic": "favourite drink",
+          "correct_value": "oatmilk latte",
+          "answer": "Negroni",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-002",
+          "topic": "favourite colour",
+          "correct_value": "oxblood",
+          "answer": "I don't have information about your favorite color. Could you tell me what it is?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-003",
+          "topic": "home town",
+          "correct_value": "boise",
+          "answer": "Based on the information provided, I'm not sure what your hometown is. Could you please tell me your hometown?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-004",
+          "topic": "dog's name",
+          "correct_value": "kombu",
+          "answer": "Miso",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-005",
+          "topic": "favourite programming language",
+          "correct_value": "elixir",
+          "answer": "Elixir",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-006",
+          "topic": "home town",
+          "correct_value": "boise",
+          "answer": "Can you provide more details about your hometown or confirm if there's only one specific hometown you're referring to?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-007",
+          "topic": "favourite colour",
+          "correct_value": "amber",
+          "answer": "Chartreuse",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-008",
+          "topic": "home town",
+          "correct_value": "knoxville",
+          "answer": "Pueblo",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-009",
+          "topic": "favourite city",
+          "correct_value": "tbilisi",
+          "answer": "I don't have information about your favorite city. Could you tell me which city is your favorite?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-010",
+          "topic": "favourite colour",
+          "correct_value": "indigo",
+          "answer": "I don't have information about your favorite color. Could you tell me what it is?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-011",
+          "topic": "favourite drink",
+          "correct_value": "ginger kombucha",
+          "answer": "Negroni\n\nBased on the information provided, your favorite drink is a Negroni. Is there any other detail you'd like to add about it or share related to drinks?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-012",
+          "topic": "favourite colour",
+          "correct_value": "indigo",
+          "answer": "I don't have information about your favorite color. Could you tell me what it is?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-013",
+          "topic": "favourite drink",
+          "correct_value": "ginger kombucha",
+          "answer": "Based on the information provided, your favorite drink is not explicitly stated. However, your sister's favorite drink is hibiscus tea. Can you provide more details about your own preferences?",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-014",
+          "topic": "dog's name",
+          "correct_value": "kombu",
+          "answer": "Can you tell me your dog's name? I don't have that information yet.",
+          "passed": false
+        }
+      ]
+    }
+  ]
+}

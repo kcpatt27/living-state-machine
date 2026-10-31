@@ -1,0 +1,30 @@
+{"seed": 0, "item_id": "recall_pref_v1-0-000", "topic": "favourite city", "correct_value": "medell\u00edn", "answer": "Medell\u00edn", "passed": true}
+{"seed": 0, "item_id": "recall_pref_v1-0-001", "topic": "home town", "correct_value": "knoxville", "answer": "I don't know your home town as it was not provided in the context. Could you please specify it?", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v1-0-002", "topic": "home town", "correct_value": "tampa", "answer": "I don't know your home town as it was not provided in the context. Could you please specify it?", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v1-0-003", "topic": "favourite colour", "correct_value": "cerulean", "answer": "cerulean", "passed": true}
+{"seed": 0, "item_id": "recall_pref_v1-0-004", "topic": "favourite programming language", "correct_value": "haskell", "answer": "I don't know. The snippets provided do not contain information about your favorite programming language.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v1-0-005", "topic": "home town", "correct_value": "boise", "answer": "I don't know.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v1-0-006", "topic": "favourite city", "correct_value": "lisbon", "answer": "I don't know. The snippets provided do not contain information about your favorite city.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v1-0-007", "topic": "favourite city", "correct_value": "tbilisi", "answer": "I don't know.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v1-0-008", "topic": "favourite drink", "correct_value": "matcha", "answer": "I don't know your favorite drink as I don't have that information available to me.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v1-0-009", "topic": "favourite city", "correct_value": "lisbon", "answer": "I don't know your favorite city as that information wasn't provided.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v1-1-000", "topic": "favourite drink", "correct_value": "ginger kombucha", "answer": "I don't know your favorite drink, so I can't answer with just one word.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v1-1-001", "topic": "favourite city", "correct_value": "lisbon", "answer": "I don't know. The provided snippets do not contain information about your favorite city.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v1-1-002", "topic": "dog's name", "correct_value": "kombu", "answer": "I don't know.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v1-1-003", "topic": "favourite city", "correct_value": "kyoto", "answer": "I don't know. The snippets provided do not contain information about your favorite city.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v1-1-004", "topic": "favourite drink", "correct_value": "ginger kombucha", "answer": "I don't know your favorite drink as I don't have that information.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v1-1-005", "topic": "favourite programming language", "correct_value": "rust", "answer": "I don't know. The snippets provided do not contain information about your favorite programming language.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v1-1-006", "topic": "favourite city", "correct_value": "lisbon", "answer": "I don't know. The provided snippets do not contain information about your favorite city.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v1-1-007", "topic": "dog's name", "correct_value": "tamari", "answer": "I don't know.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v1-1-008", "topic": "favourite programming language", "correct_value": "rust", "answer": "I don't know your favorite programming language as I don't have that information.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v1-1-009", "topic": "dog's name", "correct_value": "furikake", "answer": "I don't know.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v1-2-000", "topic": "favourite colour", "correct_value": "cerulean", "answer": "cerulean", "passed": true}
+{"seed": 2, "item_id": "recall_pref_v1-2-001", "topic": "favourite city", "correct_value": "tallinn", "answer": "I don't know your favorite city as I don't have that information available to me.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v1-2-002", "topic": "favourite city", "correct_value": "tbilisi", "answer": "I don't know your favorite city as that information wasn't provided.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v1-2-003", "topic": "home town", "correct_value": "pueblo", "answer": "I don't know your home town as it was not provided in the given snippets.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v1-2-004", "topic": "favourite city", "correct_value": "kyoto", "answer": "I don't know your favorite city as that information wasn't provided.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v1-2-005", "topic": "favourite programming language", "correct_value": "elixir", "answer": "I don't know your favorite programming language as I don't have that information.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v1-2-006", "topic": "favourite programming language", "correct_value": "haskell", "answer": "I don't know. The snippets provided do not contain information about your favorite programming language.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v1-2-007", "topic": "favourite programming language", "correct_value": "haskell", "answer": "I don't know. The snippets provided do not contain information about your favorite programming language.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v1-2-008", "topic": "home town", "correct_value": "boise", "answer": "I don't know your home town as it was not provided in the given snippets.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v1-2-009", "topic": "dog's name", "correct_value": "tamari", "answer": "I don't know.", "passed": false}

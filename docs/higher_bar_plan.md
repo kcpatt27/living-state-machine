@@ -13,7 +13,7 @@ Companion: `docs/paper_abstract.md` (current claims + QC checklist).
 | Tier | Output | Peer reviewed? | Effort (rough) |
 | --- | --- | --- | --- |
 | **A — Portfolio (done)** | GitHub + abstract + exit docs | No | — |
-| **B — Preprint** | 6–10 page PDF on arXiv (cs.AI / cs.CL) | Moderated only | 1–2 weekends |
+| **B — Preprint** | 6–10 page PDF on arXiv (cs.LG) | Moderated only | 1–2 weekends |
 | **C — Workshop** | Short paper + poster/talk | Light | +1–2 weeks on B |
 | **D — Main conference** | Full paper, strong related work, multi-seed Phase 2 | Hard | months; may need new results |
 
@@ -90,7 +90,7 @@ Do **not** lead with “beats full-context LLM” or “Stentor learns like biol
 
 ## Venue notes (practical)
 
-- **arXiv:** needs endorsement if new; use cs.AI or cs.CL; upload PDF +
+- **arXiv:** needs endorsement if new; use cs.LG; upload PDF +
   optionally ancillary code link to this repo.
 - **Workshops:** look for “agents,” “memory,” “reproducibility,” “negative
   results,” “systems for ML.” Deadlines matter more than prestige here.

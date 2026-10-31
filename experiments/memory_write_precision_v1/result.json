@@ -1,0 +1,2950 @@
+{
+  "task": "memory_write_precision_v1",
+  "config": {
+    "n_signal": 60,
+    "n_filler": 60,
+    "seed": 0
+  },
+  "results": [
+    {
+      "writer": "always",
+      "precision": 0.5,
+      "recall": 1.0,
+      "f1": 0.6666666666666666,
+      "false_positive_rate": 1.0,
+      "counts": {
+        "tp": 60,
+        "fp": 60,
+        "tn": 0,
+        "fn": 0
+      },
+      "per_item": [
+        {
+          "text": "hello",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "interesting",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "bye",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "call me ember",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "understood",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "my partner's birthday is the 47th of march",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "makes sense",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "nope",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "my locker combo ends in 48",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "kk",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "my therapist's office is on pileus street",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i hate commuting by willow",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.33",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "ok",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.5",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "ok",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "our family car is a willow wagon",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "nice",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "my name is pileus",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "our family car is a lavender wagon",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "nice",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i am allergic to silk",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "hi there",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "my locker combo ends in 84",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "my dog's name is archive",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "oh really",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i hate commuting by green",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "our family car is a lavender wagon",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "thank you",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "call me myko",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i hate commuting by obsidian",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "ty",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "yeah sure",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i am allergic to willow",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "ok",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.89",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "okay cool",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i live in pileus",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.40",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i work at lumen as a software engineer",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "okay cool",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "note that the api key rotates every 81 days",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i love hiking in the lavender mountains",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "nice",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i live in archive",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "my favourite colour is green",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.67",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "my name is koto",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.50",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "nope",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "my favourite colour is blue",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i work at myko as a software engineer",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "note that the api key rotates every 18 days",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "hmm",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "bye",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "understood",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i keep my keys in the silk drawer",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "remember that our deployment target is glade",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "interesting",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "the office wifi password is green68",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "makes sense",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i love hiking in the peppermint mountains",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "?",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "the office wifi password is cedar43",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i live in koto",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i hate commuting by lavender",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i love hiking in the peppermint mountains",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i work at azuki as a software engineer",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "interesting",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "?",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "why?",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "thanks",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "our family car is a green wagon",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "awesome",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "remember that our deployment target is koto",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i prefer green tea over coffee",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "the office wifi password is cedar71",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "thanks",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i prefer cedar tea over coffee",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i prefer silk tea over coffee",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.43",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "thanks",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "my name is pileus",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i keep my keys in the willow drawer",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i hate commuting by iron",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "nope",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.17",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "my name is lumen",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "the office wifi password is lavender28",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i hate commuting by green",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i keep my keys in the blue drawer",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "hello",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "my backup lives on the obsidian drive",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "kk",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "ty",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i work at pileus as a software engineer",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "i live in quarto",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        },
+        {
+          "text": "remember that our deployment target is archive",
+          "label": 1,
+          "wrote": true,
+          "reason": "always"
+        }
+      ]
+    },
+    {
+      "writer": "never",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "false_positive_rate": 0.0,
+      "counts": {
+        "tp": 0,
+        "fp": 0,
+        "tn": 60,
+        "fn": 60
+      },
+      "per_item": [
+        {
+          "text": "hello",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "interesting",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "bye",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "call me ember",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "understood",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "my partner's birthday is the 47th of march",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "makes sense",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "nope",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "my locker combo ends in 48",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "kk",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "my therapist's office is on pileus street",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i hate commuting by willow",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.33",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.5",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "our family car is a willow wagon",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "nice",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "my name is pileus",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "our family car is a lavender wagon",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "nice",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i am allergic to silk",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "hi there",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "my locker combo ends in 84",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "my dog's name is archive",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "oh really",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i hate commuting by green",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "our family car is a lavender wagon",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "thank you",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "call me myko",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i hate commuting by obsidian",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "ty",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "yeah sure",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i am allergic to willow",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.89",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "okay cool",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i live in pileus",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.40",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i work at lumen as a software engineer",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "okay cool",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "note that the api key rotates every 81 days",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i love hiking in the lavender mountains",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "nice",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i live in archive",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "my favourite colour is green",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.67",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "my name is koto",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.50",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "nope",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "my favourite colour is blue",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i work at myko as a software engineer",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "note that the api key rotates every 18 days",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "hmm",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "bye",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "understood",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i keep my keys in the silk drawer",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "remember that our deployment target is glade",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "interesting",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "the office wifi password is green68",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "makes sense",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i love hiking in the peppermint mountains",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "?",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "the office wifi password is cedar43",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i live in koto",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i hate commuting by lavender",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i love hiking in the peppermint mountains",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i work at azuki as a software engineer",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "interesting",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "?",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "why?",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "thanks",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "our family car is a green wagon",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "awesome",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "remember that our deployment target is koto",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i prefer green tea over coffee",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "the office wifi password is cedar71",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "thanks",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i prefer cedar tea over coffee",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i prefer silk tea over coffee",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.43",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "thanks",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "my name is pileus",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i keep my keys in the willow drawer",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i hate commuting by iron",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "nope",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.17",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "my name is lumen",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "the office wifi password is lavender28",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i hate commuting by green",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i keep my keys in the blue drawer",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "hello",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "my backup lives on the obsidian drive",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "kk",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "ty",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i work at pileus as a software engineer",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "i live in quarto",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        },
+        {
+          "text": "remember that our deployment target is archive",
+          "label": 1,
+          "wrote": false,
+          "reason": "never"
+        }
+      ]
+    },
+    {
+      "writer": "rules",
+      "precision": 1.0,
+      "recall": 0.9666666666666667,
+      "f1": 0.983050847457627,
+      "false_positive_rate": 0.0,
+      "counts": {
+        "tp": 58,
+        "fp": 0,
+        "tn": 60,
+        "fn": 2
+      },
+      "per_item": [
+        {
+          "text": "hello",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "interesting",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "bye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "call me ember",
+          "label": 1,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "understood",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "my partner's birthday is the 47th of march",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "makes sense",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "nope",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "my locker combo ends in 48",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "kk",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "my therapist's office is on pileus street",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "i hate commuting by willow",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.33",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.5",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "our family car is a willow wagon",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "nice",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "my name is pileus",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "our family car is a lavender wagon",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "nice",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i am allergic to silk",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "hi there",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "my locker combo ends in 84",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "my dog's name is archive",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "oh really",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "i hate commuting by green",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "our family car is a lavender wagon",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "thank you",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "call me myko",
+          "label": 1,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "i hate commuting by obsidian",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "ty",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "yeah sure",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "i am allergic to willow",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.89",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "okay cool",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "i live in pileus",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.40",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "i work at lumen as a software engineer",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "okay cool",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "note that the api key rotates every 81 days",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "i love hiking in the lavender mountains",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "nice",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i live in archive",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "my favourite colour is green",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.67",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "my name is koto",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.50",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "nope",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "my favourite colour is blue",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "i work at myko as a software engineer",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "note that the api key rotates every 18 days",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "hmm",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "bye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "understood",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i keep my keys in the silk drawer",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "remember that our deployment target is glade",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "interesting",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "the office wifi password is green68",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "makes sense",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i love hiking in the peppermint mountains",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "?",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "the office wifi password is cedar43",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "i live in koto",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i hate commuting by lavender",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "i love hiking in the peppermint mountains",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "i work at azuki as a software engineer",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "interesting",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "?",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "why?",
+          "label": 0,
+          "wrote": false,
+          "reason": "too_short"
+        },
+        {
+          "text": "thanks",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "our family car is a green wagon",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "awesome",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "remember that our deployment target is koto",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i prefer green tea over coffee",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "the office wifi password is cedar71",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "thanks",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i prefer cedar tea over coffee",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "i prefer silk tea over coffee",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.43",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "thanks",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "my name is pileus",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i keep my keys in the willow drawer",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "i hate commuting by iron",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "nope",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.17",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "my name is lumen",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "the office wifi password is lavender28",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "i hate commuting by green",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "i keep my keys in the blue drawer",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "hello",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "my backup lives on the obsidian drive",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "kk",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "ty",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i work at pileus as a software engineer",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i live in quarto",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        },
+        {
+          "text": "remember that our deployment target is archive",
+          "label": 1,
+          "wrote": true,
+          "reason": "kept_by_rules"
+        }
+      ]
+    },
+    {
+      "writer": "learned",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "false_positive_rate": 0.0,
+      "counts": {
+        "tp": 60,
+        "fp": 0,
+        "tn": 60,
+        "fn": 0
+      },
+      "per_item": [
+        {
+          "text": "hello",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "interesting",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.021"
+        },
+        {
+          "text": "bye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "call me ember",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.923"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.160"
+        },
+        {
+          "text": "understood",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "my partner's birthday is the 47th of march",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.998"
+        },
+        {
+          "text": "makes sense",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "nope",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "my locker combo ends in 48",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.900"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.160"
+        },
+        {
+          "text": "kk",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "my therapist's office is on pileus street",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.996"
+        },
+        {
+          "text": "i hate commuting by willow",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.986"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.007"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.33",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.999"
+        },
+        {
+          "text": "ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.5",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.999"
+        },
+        {
+          "text": "ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "our family car is a willow wagon",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.932"
+        },
+        {
+          "text": "nice",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "my name is pileus",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.971"
+        },
+        {
+          "text": "our family car is a lavender wagon",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.930"
+        },
+        {
+          "text": "nice",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i am allergic to silk",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.987"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "hi there",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.140"
+        },
+        {
+          "text": "my locker combo ends in 84",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.900"
+        },
+        {
+          "text": "my dog's name is archive",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.988"
+        },
+        {
+          "text": "oh really",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.137"
+        },
+        {
+          "text": "i hate commuting by green",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.986"
+        },
+        {
+          "text": "our family car is a lavender wagon",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.930"
+        },
+        {
+          "text": "thank you",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "call me myko",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.925"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.160"
+        },
+        {
+          "text": "oh ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.160"
+        },
+        {
+          "text": "i hate commuting by obsidian",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.986"
+        },
+        {
+          "text": "ty",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "yeah sure",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.137"
+        },
+        {
+          "text": "i am allergic to willow",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.987"
+        },
+        {
+          "text": "ok",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.007"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.89",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.999"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "okay cool",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.137"
+        },
+        {
+          "text": "i live in pileus",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.971"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.40",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.999"
+        },
+        {
+          "text": "i work at lumen as a software engineer",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.998"
+        },
+        {
+          "text": "okay cool",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.137"
+        },
+        {
+          "text": "note that the api key rotates every 81 days",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.999"
+        },
+        {
+          "text": "i love hiking in the lavender mountains",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.996"
+        },
+        {
+          "text": "nice",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i live in archive",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.971"
+        },
+        {
+          "text": "my favourite colour is green",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.986"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.67",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.999"
+        },
+        {
+          "text": "my name is koto",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.972"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.50",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.999"
+        },
+        {
+          "text": "nope",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.007"
+        },
+        {
+          "text": "my favourite colour is blue",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.986"
+        },
+        {
+          "text": "i work at myko as a software engineer",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.998"
+        },
+        {
+          "text": "note that the api key rotates every 18 days",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.999"
+        },
+        {
+          "text": "hmm",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "bye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "understood",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i keep my keys in the silk drawer",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.960"
+        },
+        {
+          "text": "remember that our deployment target is glade",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.996"
+        },
+        {
+          "text": "interesting",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.021"
+        },
+        {
+          "text": "the office wifi password is green68",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.887"
+        },
+        {
+          "text": "makes sense",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i love hiking in the peppermint mountains",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.996"
+        },
+        {
+          "text": "?",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.030"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "the office wifi password is cedar43",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.887"
+        },
+        {
+          "text": "i live in koto",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.973"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i hate commuting by lavender",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.986"
+        },
+        {
+          "text": "i love hiking in the peppermint mountains",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.996"
+        },
+        {
+          "text": "i work at azuki as a software engineer",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.998"
+        },
+        {
+          "text": "really?",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.007"
+        },
+        {
+          "text": "interesting",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.021"
+        },
+        {
+          "text": "?",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.030"
+        },
+        {
+          "text": "why?",
+          "label": 0,
+          "wrote": false,
+          "reason": "learned:p=0.009"
+        },
+        {
+          "text": "thanks",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "our family car is a green wagon",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.933"
+        },
+        {
+          "text": "awesome",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "remember that our deployment target is koto",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.996"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i prefer green tea over coffee",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.993"
+        },
+        {
+          "text": "the office wifi password is cedar71",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.887"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "thanks",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i prefer cedar tea over coffee",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.993"
+        },
+        {
+          "text": "i prefer silk tea over coffee",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.993"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.43",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.999"
+        },
+        {
+          "text": "thanks",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "my name is pileus",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.971"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i keep my keys in the willow drawer",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.959"
+        },
+        {
+          "text": "i hate commuting by iron",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.986"
+        },
+        {
+          "text": "nope",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "remember the server ip is 10.0.0.17",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.999"
+        },
+        {
+          "text": "my name is lumen",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.971"
+        },
+        {
+          "text": "the office wifi password is lavender28",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.883"
+        },
+        {
+          "text": "i hate commuting by green",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.986"
+        },
+        {
+          "text": "i keep my keys in the blue drawer",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.960"
+        },
+        {
+          "text": "hello",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "goodbye",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "my backup lives on the obsidian drive",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.929"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "lol",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "kk",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "ty",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i work at pileus as a software engineer",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.998"
+        },
+        {
+          "text": "yep",
+          "label": 0,
+          "wrote": false,
+          "reason": "filler"
+        },
+        {
+          "text": "i live in quarto",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.971"
+        },
+        {
+          "text": "remember that our deployment target is archive",
+          "label": 1,
+          "wrote": true,
+          "reason": "learned:p=0.996"
+        }
+      ]
+    }
+  ]
+}

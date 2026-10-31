@@ -1,0 +1,354 @@
+{
+  "task": "recall_pref_v2",
+  "system": "raw_llm",
+  "model": "qwen2.5:7b-instruct-q8_0",
+  "state_updater": "facts_backed",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "accuracy_mean": 0.9111111111111111,
+  "accuracy_std": 0.03849001794597504,
+  "per_seed": [
+    {
+      "seed": 0,
+      "accuracy": 0.8666666666666667,
+      "n": 15,
+      "elapsed_s": 23.476942539215088,
+      "per_item": [
+        {
+          "item_id": "recall_pref_v2-0-000",
+          "topic": "favourite city",
+          "correct_value": "medell\u00edn",
+          "answer": "Medell\u00edn.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-001",
+          "topic": "home town",
+          "correct_value": "albany",
+          "answer": "Albany.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-002",
+          "topic": "favourite drink",
+          "correct_value": "negroni",
+          "answer": "Oatmilk latte.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-003",
+          "topic": "favourite programming language",
+          "correct_value": "zig",
+          "answer": "Zig.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-004",
+          "topic": "favourite programming language",
+          "correct_value": "haskell",
+          "answer": "Haskell.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-005",
+          "topic": "favourite drink",
+          "correct_value": "oatmilk latte",
+          "answer": "Oatmilk latte.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-006",
+          "topic": "favourite colour",
+          "correct_value": "indigo",
+          "answer": "Indigo.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-007",
+          "topic": "favourite city",
+          "correct_value": "tallinn",
+          "answer": "Tallinn.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-008",
+          "topic": "dog's name",
+          "correct_value": "kombu",
+          "answer": "Miso.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-0-009",
+          "topic": "home town",
+          "correct_value": "knoxville",
+          "answer": "Knoxville.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-010",
+          "topic": "home town",
+          "correct_value": "knoxville",
+          "answer": "Knoxville.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-011",
+          "topic": "favourite colour",
+          "correct_value": "indigo",
+          "answer": "Indigo.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-012",
+          "topic": "home town",
+          "correct_value": "knoxville",
+          "answer": "Knoxville.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-013",
+          "topic": "home town",
+          "correct_value": "boise",
+          "answer": "Boise.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-0-014",
+          "topic": "favourite drink",
+          "correct_value": "matcha",
+          "answer": "Matcha.",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "seed": 1,
+      "accuracy": 0.9333333333333333,
+      "n": 15,
+      "elapsed_s": 9.385184049606323,
+      "per_item": [
+        {
+          "item_id": "recall_pref_v2-1-000",
+          "topic": "favourite drink",
+          "correct_value": "ginger kombucha",
+          "answer": "Ginger kombucha.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-001",
+          "topic": "favourite programming language",
+          "correct_value": "elixir",
+          "answer": "Elixir.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-002",
+          "topic": "home town",
+          "correct_value": "tampa",
+          "answer": "Tampa.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-003",
+          "topic": "favourite programming language",
+          "correct_value": "ocaml",
+          "answer": "OCaml.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-004",
+          "topic": "home town",
+          "correct_value": "pueblo",
+          "answer": "Pueblo.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-005",
+          "topic": "home town",
+          "correct_value": "pueblo",
+          "answer": "Tampa.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-1-006",
+          "topic": "dog's name",
+          "correct_value": "miso",
+          "answer": "Miso.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-007",
+          "topic": "dog's name",
+          "correct_value": "furikake",
+          "answer": "Furikake.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-008",
+          "topic": "favourite colour",
+          "correct_value": "indigo",
+          "answer": "Indigo.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-009",
+          "topic": "favourite drink",
+          "correct_value": "ginger kombucha",
+          "answer": "Ginger Kombucha.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-010",
+          "topic": "home town",
+          "correct_value": "tampa",
+          "answer": "Tampa.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-011",
+          "topic": "favourite city",
+          "correct_value": "tbilisi",
+          "answer": "Tbilisi.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-012",
+          "topic": "home town",
+          "correct_value": "tampa",
+          "answer": "Tampa.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-013",
+          "topic": "home town",
+          "correct_value": "boise",
+          "answer": "Boise.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-1-014",
+          "topic": "favourite drink",
+          "correct_value": "matcha",
+          "answer": "Matcha.",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "seed": 2,
+      "accuracy": 0.9333333333333333,
+      "n": 15,
+      "elapsed_s": 9.533185005187988,
+      "per_item": [
+        {
+          "item_id": "recall_pref_v2-2-000",
+          "topic": "favourite colour",
+          "correct_value": "cerulean",
+          "answer": "Cerulean.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-001",
+          "topic": "favourite drink",
+          "correct_value": "oatmilk latte",
+          "answer": "Oatmilk latte.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-002",
+          "topic": "favourite colour",
+          "correct_value": "oxblood",
+          "answer": "Oxblood.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-003",
+          "topic": "home town",
+          "correct_value": "boise",
+          "answer": "Boise.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-004",
+          "topic": "dog's name",
+          "correct_value": "kombu",
+          "answer": "Kombu.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-005",
+          "topic": "favourite programming language",
+          "correct_value": "elixir",
+          "answer": "Elixir.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-006",
+          "topic": "home town",
+          "correct_value": "boise",
+          "answer": "Boise.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-007",
+          "topic": "favourite colour",
+          "correct_value": "amber",
+          "answer": "Amber.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-008",
+          "topic": "home town",
+          "correct_value": "knoxville",
+          "answer": "Knoxville.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-009",
+          "topic": "favourite city",
+          "correct_value": "tbilisi",
+          "answer": "Tbilisi.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-010",
+          "topic": "favourite colour",
+          "correct_value": "indigo",
+          "answer": "Indigo.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-011",
+          "topic": "favourite drink",
+          "correct_value": "ginger kombucha",
+          "answer": "Ginger kombucha.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-012",
+          "topic": "favourite colour",
+          "correct_value": "indigo",
+          "answer": "Cerulean.",
+          "passed": false
+        },
+        {
+          "item_id": "recall_pref_v2-2-013",
+          "topic": "favourite drink",
+          "correct_value": "ginger kombucha",
+          "answer": "Ginger kombucha.",
+          "passed": true
+        },
+        {
+          "item_id": "recall_pref_v2-2-014",
+          "topic": "dog's name",
+          "correct_value": "kombu",
+          "answer": "Kombu.",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

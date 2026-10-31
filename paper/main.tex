@@ -76,7 +76,9 @@ Every mechanism sits behind a small Protocol with a \texttt{Null*} implementatio
 \section{Experimental Setup}
 The evaluation suite contains eight tasks: matched-budget preference recall (\texttt{recall\_pref\_v1}), a harder decoy/long-gap stress task (\texttt{recall\_pref\_v2}), habituation and association signal benches, memory-write precision, multi-session consistency, fact correction, and verifier calibration. Headline claims use seeds 0, 1, and 2; Phase 2 integration checks are seed 0 only and are labelled as such.
 
-The primary baselines are naive RAG and a raw LLM with a matched context budget. A full-transcript raw LLM is reported separately because it is not matched: it sees the entire history and therefore answers a different resource question. Hardware was a single RTX 5060 Ti (16\,GB VRAM, 32\,GB RAM) running a frozen local model through Ollama. A one-time cloud burst on a RunPod L40S cost approximately \textbf{\$8.04} and consumed about 9.3 hours for QLoRA and small-core training. The local test suite finished at 241 passed and 3 skipped.
+The primary baselines are naive RAG and a raw LLM with a matched context budget. A full-transcript raw LLM is reported separately because it is not matched: it sees the entire history and therefore answers a different resource question. Hardware was a single RTX 5060 Ti (16\,GB VRAM, 32\,GB RAM) running a frozen local model through Ollama. A one-time cloud burst on a RunPod L40S cost approximately \textbf{\$8.04} and consumed about 9.3 hours for QLoRA and small-core training. The local test suite passes 273 tests at submission.
+
+Two implementation details matter when reading the tables. Every end-to-end run uses the local hash embedder (384 dimensions) and the legacy \texttt{LLMSummarizerUpdater}, not the production \texttt{FactsBackedUpdater}; the tables therefore measure retrieval, state, and writer ablations rather than daily-chat defaults. \texttt{recall\_pref\_v1} uses 10 items and 20 distractor turns per seed; \texttt{recall\_pref\_v2} uses 15 items and 45 distractor turns. Unless a row says otherwise, Tables~1 and~2 report seeds 0--2; the Phase~2 integration checks and the component benches in Table~3 are single-seed or single-dataset and are labelled where used.
 
 \section{Results}
 
@@ -102,7 +104,7 @@ On the matched-budget headline task, LSM reached the ceiling while naive RAG rem
 \begin{table}[t]
 \centering
 \small
-\caption{Ablations on \texttt{recall\_pref\_v1} (seed 0--2 means). $\Delta$ is relative to LSM full.}
+\caption{Ablations on \texttt{recall\_pref\_v1} (seeds 0--2 means). $\Delta$ is relative to LSM full.}
 \label{tab:ablations}
 \begin{tabular}{lccc}
 \toprule
@@ -139,7 +141,7 @@ Verifier --- encoder & 0.211 macro-F1 & Reject-all collapse; negative \\
 \end{tabular}
 \end{table}
 
-The Phase 2 integration gate held the headline benchmark at 1.000 when the trained hybrid SSM updater was projected into $s_t$, and both the Transformers base and the QLoRA adapter reached 1.000 after the harness fix described below. The trained core was therefore accepted as an optional state updater, not as a replacement for the wrapper.
+The Phase 2 integration gate held the headline benchmark at 1.000 when the trained hybrid SSM updater was projected into $s_t$, and both the Transformers base and the QLoRA adapter reached 1.000 after the harness fix described below. The trained core was therefore accepted as an optional state updater, not as a replacement for the wrapper. On the decoy-heavy v2 bench the always-store arm scored 0.000 against 0.089 for the rules writer (run \texttt{20260530-072506}); the v1 ceiling alone would not show that gating matters.
 
 \section{Negative Results and Failure Analysis}
 

@@ -1,0 +1,45 @@
+{"seed": 0, "item_id": "recall_pref_v2-0-000", "topic": "favourite city", "correct_value": "medell\u00edn", "answer": "Lisbon.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-001", "topic": "home town", "correct_value": "albany", "answer": "Unknown. Could you provide more information or specify your home town?", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-002", "topic": "favourite drink", "correct_value": "negroni", "answer": "Oatmilk latte.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-003", "topic": "favourite programming language", "correct_value": "zig", "answer": "Python", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-004", "topic": "favourite programming language", "correct_value": "haskell", "answer": "Python", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-005", "topic": "favourite drink", "correct_value": "oatmilk latte", "answer": "Coffee.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-006", "topic": "favourite colour", "correct_value": "indigo", "answer": "Blue.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-007", "topic": "favourite city", "correct_value": "tallinn", "answer": "Tbilisi.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-008", "topic": "dog's name", "correct_value": "kombu", "answer": "Miso", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-009", "topic": "home town", "correct_value": "knoxville", "answer": "Albany.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-010", "topic": "home town", "correct_value": "knoxville", "answer": "Pueblo.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-011", "topic": "favourite colour", "correct_value": "indigo", "answer": "Oxblood.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-012", "topic": "home town", "correct_value": "knoxville", "answer": "Boise.", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-013", "topic": "home town", "correct_value": "boise", "answer": "Unknown. Could you provide more information or specify which hometown you're referring to?", "passed": false}
+{"seed": 0, "item_id": "recall_pref_v2-0-014", "topic": "favourite drink", "correct_value": "matcha", "answer": "Ginger Kombucha", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-000", "topic": "favourite drink", "correct_value": "ginger kombucha", "answer": "Coffee.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-001", "topic": "favourite programming language", "correct_value": "elixir", "answer": "Python", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-002", "topic": "home town", "correct_value": "tampa", "answer": "Beijing", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-003", "topic": "favourite programming language", "correct_value": "ocaml", "answer": "Python", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-004", "topic": "home town", "correct_value": "pueblo", "answer": "Unknown. Could you provide more information about your hometown?", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-005", "topic": "home town", "correct_value": "pueblo", "answer": "Tampa", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-006", "topic": "dog's name", "correct_value": "miso", "answer": "Buddy", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-007", "topic": "dog's name", "correct_value": "furikake", "answer": "Buddy", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-008", "topic": "favourite colour", "correct_value": "indigo", "answer": "Unknown. I don't have information about your favorite color.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-009", "topic": "favourite drink", "correct_value": "ginger kombucha", "answer": "Coffee.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-010", "topic": "home town", "correct_value": "tampa", "answer": "Unknown.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-011", "topic": "favourite city", "correct_value": "tbilisi", "answer": "New York City", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-012", "topic": "home town", "correct_value": "tampa", "answer": "Unknown. Could you provide the name of your hometown?", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-013", "topic": "home town", "correct_value": "boise", "answer": "Knoxville.", "passed": false}
+{"seed": 1, "item_id": "recall_pref_v2-1-014", "topic": "favourite drink", "correct_value": "matcha", "answer": "Coffee.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-000", "topic": "favourite colour", "correct_value": "cerulean", "answer": "Chartreuse.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-001", "topic": "favourite drink", "correct_value": "oatmilk latte", "answer": "Ginger kombucha.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-002", "topic": "favourite colour", "correct_value": "oxblood", "answer": "Indigo.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-003", "topic": "home town", "correct_value": "boise", "answer": "Knoxville.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-004", "topic": "dog's name", "correct_value": "kombu", "answer": "Miso.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-005", "topic": "favourite programming language", "correct_value": "elixir", "answer": "Python", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-006", "topic": "home town", "correct_value": "boise", "answer": "Tampa.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-007", "topic": "favourite colour", "correct_value": "amber", "answer": "Cerulean.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-008", "topic": "home town", "correct_value": "knoxville", "answer": "Beijing", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-009", "topic": "favourite city", "correct_value": "tbilisi", "answer": "New York City", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-010", "topic": "favourite colour", "correct_value": "indigo", "answer": "Blue. (Note: This is a random response since you didn't provide any information about your favorite color.)", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-011", "topic": "favourite drink", "correct_value": "ginger kombucha", "answer": "Coffee.", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-012", "topic": "favourite colour", "correct_value": "indigo", "answer": "Blue. (Note: This is a hypothetical answer as I don't have access to your preferences.)", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-013", "topic": "favourite drink", "correct_value": "ginger kombucha", "answer": "Coffee", "passed": false}
+{"seed": 2, "item_id": "recall_pref_v2-2-014", "topic": "dog's name", "correct_value": "kombu", "answer": "Miso.", "passed": false}

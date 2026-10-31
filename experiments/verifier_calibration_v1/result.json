@@ -1,0 +1,117 @@
+{
+  "task": "verifier_calibration_v1",
+  "config": {
+    "dataset_path": "data\\verifier_dataset_v1.jsonl",
+    "linear_model_path": "models\\verifier_linear_v1.joblib",
+    "encoder_model_path": null,
+    "encoder_tokenizer_path": null,
+    "reject_floor": 2.5
+  },
+  "n_rows": 13,
+  "variants": {
+    "null": {
+      "accuracy": 0.46153846153846156,
+      "macro_f1": 0.21052631578947367,
+      "brier_accept": 0.5384615384615384,
+      "roc_auc_accept_vs_not": 0.5,
+      "per_decision": {
+        "accept": {
+          "precision": 0.46153846153846156,
+          "recall": 1.0,
+          "f1": 0.631578947368421,
+          "support": 6.0
+        },
+        "reprompt": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 1.0
+        },
+        "reject": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 6.0
+        }
+      }
+    },
+    "rule": {
+      "accuracy": 0.5384615384615384,
+      "macro_f1": 0.5555555555555555,
+      "brier_accept": 0.489186408604632,
+      "roc_auc_accept_vs_not": 0.42857142857142855,
+      "per_decision": {
+        "accept": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666,
+          "support": 6.0
+        },
+        "reprompt": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1.0
+        },
+        "reject": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 6.0
+        }
+      }
+    },
+    "linear": {
+      "accuracy": 0.6923076923076923,
+      "macro_f1": 0.7714285714285715,
+      "brier_accept": 0.18739593534832538,
+      "roc_auc_accept_vs_not": 0.8095238095238095,
+      "per_decision": {
+        "accept": {
+          "precision": 0.75,
+          "recall": 0.5,
+          "f1": 0.6,
+          "support": 6.0
+        },
+        "reprompt": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1.0
+        },
+        "reject": {
+          "precision": 0.625,
+          "recall": 0.8333333333333334,
+          "f1": 0.7142857142857143,
+          "support": 6.0
+        }
+      }
+    },
+    "hybrid": {
+      "accuracy": 0.6923076923076923,
+      "macro_f1": 0.7714285714285715,
+      "brier_accept": 0.18739593534832538,
+      "roc_auc_accept_vs_not": 0.8095238095238095,
+      "per_decision": {
+        "accept": {
+          "precision": 0.75,
+          "recall": 0.5,
+          "f1": 0.6,
+          "support": 6.0
+        },
+        "reprompt": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1.0
+        },
+        "reject": {
+          "precision": 0.625,
+          "recall": 0.8333333333333334,
+          "f1": 0.7142857142857143,
+          "support": 6.0
+        }
+      }
+    }
+  }
+}

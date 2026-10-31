@@ -1,9 +1,9 @@
-# Living State Machine — research abstract
+# Living State Machine: Gated, Ablatable Memory for Long-Horizon Preference Recall Around a Frozen Language Model
 
-**Status:** research closed (Phase 1 exit 2026-05-29; Phase 2 exit 2026-07-15).
-**Repo:** local systems + small-model research on a 16GB GPU workstation.
-**Author:** reishi · **Assist:** AI pair-programming (Cursor); claims backed by
-committed configs, scripts, and logged negatives.
+**Repo:** https://github.com/kcpatt27/living-state-machine
+**Author:** Kalen Patterson
+**Status:** research closed (Phase 1 exit 2026-05-29; Phase 2 exit 2026-07-15). Manuscript: `paper/main.pdf` on branch `paper/arxiv` (CC BY 4.0); code MIT.
+**Assist:** AI pair-programming (Cursor); every claim is backed by committed configs, scripts, and logged negatives.
 
 ---
 
@@ -20,21 +20,23 @@ later be baked into a tiny recurrent core.
 persistent hidden state `s_t`, LanceDB memory, ablatable Stentor components, and
 a rule/linear verifier path. On a matched-budget preference-recall bench
 (`recall_pref_v1`, seeds `[0,1,2]`), LSM accuracy is **1.000** versus naive RAG
-**0.100**. Component-level retrieval/writer ablations and a harder stress bench
-(`recall_pref_v2`) are documented; we do **not** claim beating a full-context
-raw LLM on long scripts. Encoder verifier failed on a tiny label set; linear +
-hybrid shipped instead.
+**0.100**. Component-level ablations and a harder stress bench
+(`recall_pref_v2`) are documented; the gated writer reached **F1 0.98** and was
+necessary under decoy load, where always-store collapsed to zero. We do **not**
+claim beating a full-context raw LLM on long scripts.
 
 **Phase 2 (integration + negative inductive-bias test).** We trained a minimal
 diagonal SSM and a Stentor-augmented variant on TinyStories, then bridged the
 minimal checkpoint into the wrapper as an optional hybrid state updater. We also
 ran a cheap QLoRA pass on Qwen2.5-7B (~$8 RunPod). Hybrid and adapter arms both
 preserve **1.000** on `recall_pref_v1` under a corrected fastembed harness. The
-ambitious claim — Stentor recurrence beats matched minimal SSM on LM loss —
-**failed** and is logged.
+ambitious claim - Stentor recurrence beats matched minimal SSM on LM loss -
+**failed** and is logged. Three negatives are recorded: multi-timescale memory,
+the encoder verifier (linear + hybrid shipped instead), and the Stentor-style
+core. A fourth finding is an evaluation-harness fault that initially looked like
+a model regression.
 
-The research track is closed. Remaining work is product polish (daily chat,
-home-agent), not unfinished exit criteria.
+The research track is closed. Remaining work is polish, not unfinished exit criteria.
 
 ---
 
@@ -57,6 +59,7 @@ TinyStories LM loss.
 | `docs/negative_results.md` | Failed hypotheses |
 | `docs/recall_pref_v2_findings.md` | Stress-test honesty |
 | `docs/hypotheses.md` | Pre-registered claims |
+| `paper/main.pdf` / `paper/REPRODUCE.md` (branch `paper/arxiv`) | Manuscript; table-to-run mapping |
 
 ---
 
@@ -77,8 +80,8 @@ Use this when claiming the work is “done,” not when iterating product.
 | Types / tests | pyright + pytest as level “done” gates |
 | Separate product from paper | home-agent / LoRA-in-Ollama marked out of scope |
 
-**Peer review:** optional. Prefer GitHub + abstract for portfolio; arXiv or a
-workshop if you want a citable preprint. Conference peer review is a separate
-goal — see the parked checklist in [`docs/higher_bar_plan.md`](higher_bar_plan.md)
-(multi-seed Phase 2, related work, manuscript, venue ladder). Not required to
-call this research track done.
+**Preprint:** arXiv `cs.LG`, pending endorsement; the steps are in
+[`PUBLICATION.md`](../PUBLICATION.md). The manuscript compiles to 7 pages with
+Tectonic. A workshop or conference is the next step for peer review - see the
+parked checklist in [`docs/higher_bar_plan.md`](higher_bar_plan.md). Neither is
+required to call this research track done.

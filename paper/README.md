@@ -17,6 +17,9 @@ The source uses `thebibliography`, so no BibTeX pass is required. Keep `figure1.
 
 ## Before arXiv
 
+Work through [`REVIEW-CHECKLIST.md`](REVIEW-CHECKLIST.md); the per-row work is in
+[`CITATIONS.md`](CITATIONS.md) and [`CLAIM-LEDGER.md`](CLAIM-LEDGER.md).
+
 - Reconcile every table with the run IDs and raw artifacts. Done 2026-10-27:
   Tables 1-2 map to `experiments/`, Table 3 to `docs/phase1_report.md` (see
   `REPRODUCE.md`). Re-check if any run is added.

@@ -62,3 +62,13 @@ docs/north_star_science_in_simulation.md
 memory_store/
 fact_categories.json
 facts.json
+
+# Agent/personal working artifacts (kept locally, never published)
+.cursor/
+.cursorrules
+memory-bank/
+PUBLICATION.md
+paper/REVIEW-CHECKLIST.md
+paper/CITATIONS.md
+paper/CLAIM-LEDGER.md
+paper/ARXIV-METADATA.md

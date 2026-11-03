@@ -21,10 +21,8 @@ Build ladder (L0–L15): `.cursor/plans/plan_8491f6ee.plan.md`.
 Negatives and stress benches: [`docs/negative_results.md`](docs/negative_results.md),
 [`docs/recall_pref_v2_findings.md`](docs/recall_pref_v2_findings.md).
 
-Preprint: [`paper/main.pdf`](paper/main.pdf) — arXiv `cs.LG`, pending
-endorsement. The submission and public-flip checklist is
-[`PUBLICATION.md`](PUBLICATION.md). Peer review remains optional, not a missing
-exit gate.
+Preprint: [`paper/main.pdf`](paper/main.pdf) - arXiv `cs.LG`, pending
+endorsement. Peer review remains optional, not a missing exit gate.
 
 ---
 

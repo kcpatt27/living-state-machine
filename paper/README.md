@@ -2,7 +2,7 @@
 
 - `main.tex` — arXiv-style article source
 - `figure1.png` — control-loop figure
-- `main.pdf` — compiled review copy (Tectonic 0.17.0, 7 pages)
+- `main.pdf` — compiled review copy (Tectonic 0.17.0, 8 pages)
 
 ## Compile
 

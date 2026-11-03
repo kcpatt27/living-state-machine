@@ -80,6 +80,15 @@ The primary baselines are naive RAG and a raw LLM with a matched context budget.
 
 Two implementation details matter when reading the tables. Every end-to-end run uses the local hash embedder (384 dimensions) and the legacy \texttt{LLMSummarizerUpdater}, not the production \texttt{FactsBackedUpdater}; the tables therefore measure retrieval, state, and writer ablations rather than daily-chat defaults. \texttt{recall\_pref\_v1} uses 10 items and 20 distractor turns per seed; \texttt{recall\_pref\_v2} uses 15 items and 45 distractor turns. Unless a row says otherwise, Tables~1 and~2 report seeds 0--2; the Phase~2 integration checks and the component benches in Table~3 are single-seed or single-dataset and are labelled where used.
 
+\paragraph{Reporting.}
+Each end-to-end cell is the mean and standard deviation across seeds 0--2, with 10 prompts per seed on v1 and 15 on v2; the dispersion is across seeds, not across prompts. No confidence intervals are reported and no multiple-comparison correction is applied. The component benches in Table~3 are single-seed (writer, 60 signal / 60 filler turns) or single-dataset (verifier, $n=13$) and are directional.
+
+\paragraph{Leakage controls.}
+Prompts are generated per seed from a fixed template; the preference value is inserted at run time and is absent from the distractor pool. No preprocessing is fitted on the evaluation split, and every system in a table sees the same prompt set. The v2 decoys are drawn from the same topic as the target preference, so topic matching alone cannot solve the task.
+
+\paragraph{Baseline fairness.}
+All systems share the frozen model, prompt template, and scoring script; the matched-budget baselines receive the same context budget as LSM. Baselines are not tuned per task beyond the shared top-$k$ and score threshold.
+
 \section{Results}
 
 \begin{table}[t]
@@ -174,8 +183,13 @@ The implementation, configs, and the evaluation artifacts behind Tables~1--3 are
 \section{Conclusion}
 LSM shows that a compact, inspectable memory wrapper can produce a large gain over naive RAG at a matched context budget, and that the writer gate is the component most likely to matter when memory is under decoy pressure. The result is deliberately bounded: it does not claim to beat full-context models, and its negative results are part of the contribution. The next steps are matched-compute recurrence experiments, a larger verifier corpus, multi-seed Phase 2 integration, and a public, reproducible release of the code and run artifacts.
 
+\section*{Appendix: Red-Team Questions}
+\paragraph{The benchmark is synthetic and easy.} True, and the paper says so. The v1 ceiling is a sanity check, not a general capability claim; the v2 stress bench and the negative results are where the evidence is bounded.
+\paragraph{The hash embedder is not the production path.} Correct. The tables measure the wrapper's retrieval, state, and writer ablations under a fixed embedder; the fastembed correction is reported separately, and the production path is not claimed to be identical.
+\paragraph{The writer gate is just a filter.} The gate is a filter, and the ablation shows what happens without it: 0.933 on v1 and 0.000 on the decoy-heavy v2 bench. The claim is about the gate's effect, not its novelty.
+
 \section*{AI Assistance}
-Text-to-text AI tools assisted with drafting, structuring, and editorial review. The author verified the measurements, tables, and citations and takes full responsibility for the content.
+AI tools assisted with code generation, drafting, and editorial review. The author designed the experiments, ran every evaluation, reviewed and tested all generated code (273 tests), re-derived every table from the committed run artifacts, and verified every citation against the published source. The author takes full responsibility for the content.
 
 \section*{Code and Artifacts}
 The implementation, run scripts, and evaluation artifacts are in the author's repository, which will be released with the paper; \texttt{paper/REPRODUCE.md} maps each table row to its run directory. The tables were reconciled against the Phase 1 and Phase 2 reports on 2026-10-20 and against the raw experiment artifacts on 2026-10-27.

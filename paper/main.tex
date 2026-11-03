@@ -166,8 +166,10 @@ After QLoRA training, the adapter path appeared broken: base 0.100 and +LoRA 0.2
   \item \textbf{Matched-budget scope.} The headline claim is about naive RAG at a matched budget. Full-context raw LLMs remain stronger on the harder stress bench.
   \item \textbf{Hardware and cost.} Results come from one consumer GPU and one approximately \$8 cloud burst; no multi-hardware replication.
   \item \textbf{Privacy boundary.} The system is local by default and supports optional encryption at rest, but the encryption path has not been independently audited.
-  \item \textbf{Run artifacts.} The evaluation artifacts behind Tables~1 and~2 are committed under \texttt{experiments/} and were re-checked against the manuscript on 2026-10-27; \texttt{paper/REPRODUCE.md} maps every row to its run directory. An earlier review checkout contained only \texttt{runs/} (training), which is why a previous draft reported missing run directories.
 \end{itemize}
+
+\paragraph{Data and code availability.}
+The implementation, configs, and the evaluation artifacts behind Tables~1--3 are in the repository; \texttt{paper/REPRODUCE.md} maps every row to its run directory.
 
 \section{Conclusion}
 LSM shows that a compact, inspectable memory wrapper can produce a large gain over naive RAG at a matched context budget, and that the writer gate is the component most likely to matter when memory is under decoy pressure. The result is deliberately bounded: it does not claim to beat full-context models, and its negative results are part of the contribution. The next steps are matched-compute recurrence experiments, a larger verifier corpus, multi-seed Phase 2 integration, and a public, reproducible release of the code and run artifacts.

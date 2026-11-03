@@ -89,6 +89,9 @@ Prompts are generated per seed from a fixed template; the preference value is in
 \paragraph{Baseline fairness.}
 All systems share the frozen model, prompt template, and scoring script; the matched-budget baselines receive the same context budget as LSM. Baselines are not tuned per task beyond the shared top-$k$ and score threshold.
 
+\paragraph{Negative control.}
+Re-scoring the committed outputs with the correct labels shuffled across items drops v1 accuracy from 1.000 to 0.000 and v2 from 0.089 to 0.022. The scorer is therefore sensitive to the stated preference rather than passing answers for an unrelated reason.
+
 \section{Results}
 
 \begin{table}[t]
@@ -171,6 +174,7 @@ After QLoRA training, the adapter path appeared broken: base 0.100 and +LoRA 0.2
   \item \textbf{Small, synthetic benchmarks.} The preference tasks are controlled and synthetic. They test a narrow memory behavior, not general assistant quality.
   \item \textbf{No external users.} Daily utility is a qualitative single-user observation; there is no retention or satisfaction study.
   \item \textbf{Seed asymmetry.} Headline results use three seeds; Phase 2 integration checks are seed 0 only. Treat those as directional.
+  \item \textbf{Decoding variance.} The harness does not pin sampling temperature. Seed variation changes prompts, not decoding, so the reported dispersion mixes prompt and sampling variance.
   \item \textbf{Small verifier labels.} The learned/hybrid verifier result is $n=13$ and is not paper-grade. The encoder negative is similarly small.
   \item \textbf{Matched-budget scope.} The headline claim is about naive RAG at a matched budget. Full-context raw LLMs remain stronger on the harder stress bench.
   \item \textbf{Hardware and cost.} Results come from one consumer GPU and one approximately \$8 cloud burst; no multi-hardware replication.

@@ -92,6 +92,9 @@ All systems share the frozen model, prompt template, and scoring script; the mat
 \paragraph{Negative control.}
 Re-scoring the committed outputs with the correct labels shuffled across items drops v1 accuracy from 1.000 to 0.000 and v2 from 0.089 to 0.022. The scorer is therefore sensitive to the stated preference rather than passing answers for an unrelated reason.
 
+\paragraph{Validity check.}
+Running the same 10-item configuration with memory disabled scores 0.000 (seed 0, $n=10$), against 1.000 with memory enabled. The benchmark therefore depends on the memory path rather than on the model's prior alone.
+
 \section{Results}
 
 \begin{table}[t]

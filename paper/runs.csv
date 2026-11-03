@@ -22,3 +22,4 @@
 "20260530-072606-sample_recall_pref_v2_lsm_hybrid_verifier","recall_pref_v2","lsm","0;1;2","30280E9EB56996DC","77A69EB027D7A4DF","c40a6ff","scripts/run_recall_pref_v2_suite.ps1 (documented; exact invocation not recorded)","not recorded"
 "20260530-081245-sample_recall_pref_v1_raw_llm_matched","recall_pref_v1","raw_llm","0;1;2","F9194FB7E0B85AC1","4F6BB8C0590FCF66","c40a6ff","scripts/run_phase1_suite.ps1 (documented; exact invocation not recorded)","not recorded"
 "20260530-081310-sample_recall_pref_v2_raw_llm_matched","recall_pref_v2","raw_llm","0;1;2","A4AF86EB0FE0F6E5","00F30334707EC2BD","c40a6ff","scripts/run_recall_pref_v2_suite.ps1 (documented; exact invocation not recorded)","not recorded"
+validity-memory-off-full,recall_pref_v1,lsm,0,53A81C957B3D86D1,A86D8DBF1DEFE0D6,6dd9087,scripts/run_phase1_suite.ps1 (documented; exact invocation not recorded),not recorded
